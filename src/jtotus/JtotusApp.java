@@ -5,20 +5,24 @@
 package jtotus;
 
 
+
+import jtotus.engine.Engine;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
-import jtotus.threads.*;
+
 
 /**
  * The main class of the application.
  */
 public class JtotusApp extends SingleFrameApplication {
-
+    public static JtotusView mainWindow = null;
     /**
      * At startup create and show the main frame of the application.
      */
     @Override protected void startup() {
-        show(new JtotusView(this));
+
+        mainWindow = new JtotusView(this);
+        show(mainWindow);
     }
 
     /**
@@ -39,10 +43,14 @@ public class JtotusApp extends SingleFrameApplication {
 
     /**
      * Main method launching the application.
+     * @param args 
      */
     public static void main(String[] args) {
         launch(JtotusApp.class, args);
-        Dispatcher dispatch = new Dispatcher();
-        dispatch.run();
+        
+        Engine engine = new Engine();
+
+
+        engine.run();
     }
 }

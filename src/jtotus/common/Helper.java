@@ -31,7 +31,7 @@ public class Helper {
     }
 
 
-    public synchronized  void debug(int lvl, String pattern, Object... arguments) {
+    public synchronized void debug(int lvl, String pattern, Object... arguments) {
 
         if(lvl >= debugLvl) {
             System.out.printf(pattern, arguments);
