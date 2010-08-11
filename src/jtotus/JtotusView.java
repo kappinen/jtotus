@@ -278,14 +278,47 @@ public class JtotusView extends FrameView {
          
         if (SelectedList.isSelectionEmpty()){
             dlm2.add(0, "SelectedList test");
+            dlm2.add(0, "SelectedList test");
+            dlm2.add(0, "SelectedList test");
+            dlm2.add(0, "SelectedList test");
+            dlm2.add(0, "SelectedList test");
+            dlm2.add(0, "SelectedList test");
+            return;
+        }
+        else if (SelectedList.getModel().getSize() == 0){
+            dlm2.add(0, "(All)");
             return;
         }
         else
         {
-           String name = (String) dlm2.getElementAt(SelectedList.getSelectedIndex());
-           dlm.add(0, name);
-           dlm2.remove(SelectedList.getSelectedIndex());
-           SelectedList.clearSelection();
+            int element = SelectedList.getSelectedIndex();
+
+            if (element == 0)
+            {
+                while(dlm2.size() == 0)
+                {
+                    for(int i=dlm.size(); i>=0;i--)
+                    {
+                        String tmp = (String)dlm.get(i);
+                        if(tmp.compareTo((String)dlm2.get(dlm2.size())) == 0)
+                        {
+                            break;
+                        }
+                        if (i == 1)
+                        {
+                            dlm.add(dlm.size(), tmp);
+                            dlm2.remove(dlm2.size());
+                        }
+                    }
+                }
+
+            }
+            else {
+                String name = (String) dlm2.getElementAt(element);
+                dlm.add(dlm.size(), name);
+                dlm2.remove(SelectedList.getSelectedIndex());
+                SelectedList.clearSelection();
+            }
 
 
         }
@@ -296,15 +329,31 @@ public class JtotusView extends FrameView {
         
         if (AvailableList.isSelectionEmpty()){
             dlm.add(0, "AvailableList test");
+             dlm.add(0, "AvailableList test");
+              dlm.add(0, "AvailableList test");
+               dlm.add(0, "AvailableList test");
+                dlm.add(0, "AvailableList test");
+                
+            return;
+        }
+        else if (AvailableList.getModel().getSize() == 0){
+            dlm.add(0, "(All)");
             return;
         }
         else
         {
+            int element = AvailableList.getSelectedIndex();
+            if (element == 0)
+            {
 
-           String name = (String) dlm.getElementAt(AvailableList.getSelectedIndex());
-           dlm.remove(AvailableList.getSelectedIndex());
-           dlm2.add(0, name);
-           AvailableList.clearSelection();          
+            }
+            else {
+                String name = (String) dlm.getElementAt(element);
+                dlm.remove(AvailableList.getSelectedIndex());
+                dlm2.add(dlm2.size(), name);
+                AvailableList.clearSelection();
+            }
+         
 
         }
 
