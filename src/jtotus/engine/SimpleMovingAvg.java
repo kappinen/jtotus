@@ -54,6 +54,7 @@ public class SimpleMovingAvg implements VoterThread{
     private void analyzeFromNowToFrequency()
     {
         Float avr = new Float(0.0f);
+        Float tmp = null;
         int count=0;
 
 
@@ -64,9 +65,13 @@ public class SimpleMovingAvg implements VoterThread{
 
            for(int y=0;y<=config.day_frequncy-1;y++){
 
-               avr += dispatch.fetchPrice(stocks[i], 
+               tmp = dispatch.fetchPrice(stocks[i],
                         help.dateReduction(help.getTimeNow(), y));
-               count++;
+               if (tmp != 0.0f)
+               {
+                   avr +=tmp;
+                    count++;
+               }
            }
            avr /= count;
        }
