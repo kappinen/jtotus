@@ -19,6 +19,8 @@ package jtotus.threads;
 import java.util.Iterator;
 import java.util.LinkedList;
 import jtotus.common.Helper;
+import jtotus.common.MethodConfig;
+import jtotus.database.DataFetcher;
 import jtotus.engine.DummyMethod;
 /**
  *
@@ -28,7 +30,7 @@ public class Dispatcher {
 
     private Helper help = null;
     private LinkedList <Thread>threadList;
-
+    private DataFetcher fetcher = null;
 
     public Dispatcher() {
         help = Helper.getInstance();
@@ -68,13 +70,14 @@ public class Dispatcher {
         
         if(!threadList.isEmpty())
         {
-            return true;
+            threadList.clear();
         }
         
         Iterator iterator = threads.iterator();
         while (iterator.hasNext()) {
             threadList.add(new Thread((VoterThread)iterator.next()));
          }
+        
         return false;
     }
 
@@ -85,6 +88,7 @@ public class Dispatcher {
 
         //Start threads
 
+        
         Iterator iterator = threadList.iterator();
         while (iterator.hasNext()) {
             Thread tmp = (Thread) iterator.next();
@@ -106,9 +110,33 @@ public class Dispatcher {
 
 
 
+    public MethodConfig fetchConfig(String method)
+    {
+        //TODO: add which configuration to run by user
+
+        MethodConfig config = new MethodConfig();
+
+        return config;
+    }
 
 
 
+
+
+
+    public Float fetchPrice(String stockName, String time){
+
+        help.debug(3, "Fetching:%s: Time:%s\n", stockName, time);
+
+        return fetcher.fetchPrice(stockName, time);
+    }
+
+
+
+    
+    public void setFetcher(DataFetcher temp) {
+        fetcher = temp;
+    }
     
 
 }
