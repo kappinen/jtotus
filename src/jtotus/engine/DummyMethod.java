@@ -21,11 +21,16 @@ public class DummyMethod implements Runnable,VoterThread {
     private Helper help = Helper.getInstance();
     private static Random genNum = new Random();
     private Dispatcher control = null;
+    private String methodName = "DummyMethod";
 
     public DummyMethod(Dispatcher tmp) {
         control = tmp;
     }
 
+    public DummyMethod(Dispatcher tmp, String name) {
+        methodName = name;
+        control = tmp;
+    }
 
     public void run() {
         try {
@@ -37,7 +42,7 @@ public class DummyMethod implements Runnable,VoterThread {
     }
 
     public String getMethName() {
-        return "DummyMethod";
+        return methodName;
     }
 
 }

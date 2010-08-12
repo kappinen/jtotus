@@ -22,12 +22,14 @@ public class Engine {
     private Dispatcher dispatcher = null;
     private LinkedList <VoterThread>methodList;
     private Helper help = null;
+    private JtotusView mainWindow = null;
 
 
     private void prepareMethodsList(){
         // Available methods
         methodList.add(new DummyMethod(dispatcher));
-        methodList.add(new DummyMethod(dispatcher));
+        methodList.add(new DummyMethod(dispatcher,"Dummy2"));
+        methodList.add(new DummyMethod(dispatcher,"Dummy3"));
 
     }
 
@@ -58,10 +60,11 @@ public class Engine {
         dispatcher.run();
     }
 
-    public void addGUI(JtotusApp mainApp) {
+    public void setGUI(JtotusView tempView) {
         System.out.printf("The mainWindow woop!\n");
-       // JtotusView mainWindow = mainApp.getView();
-        //mainWindow.prepareMethodList(methodList);
+        mainWindow = tempView;
+
+        mainWindow.prepareMethodList(methodList);
     }
 
 }

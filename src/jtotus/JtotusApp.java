@@ -6,6 +6,7 @@ package jtotus;
 
 
 
+
 import jtotus.engine.Engine;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
@@ -15,15 +16,23 @@ import org.jdesktop.application.SingleFrameApplication;
  * The main class of the application.
  */
 public class JtotusApp extends SingleFrameApplication {
-    public static JtotusView mainWindow = null;
+
     /**
      * At startup create and show the main frame of the application.
      */
     @Override protected void startup() {
+        JtotusView mainWindow=new JtotusView(this);;
+        Engine mainEngine=new Engine();
+        
 
-        mainWindow = new JtotusView(this);
+
+        mainWindow.setListener(mainEngine);
+        mainEngine.setGUI(mainWindow);
+
+        mainEngine.run();
         show(mainWindow);
     }
+
 
     /**
      * This method is to initialize the specified window by injecting resources.
@@ -43,14 +52,13 @@ public class JtotusApp extends SingleFrameApplication {
 
     /**
      * Main method launching the application.
-     * @param args 
+     * @param args
+     * @param engine 
      */
     public static void main(String[] args) {
+
         launch(JtotusApp.class, args);
         
-        Engine engine = new Engine();
-
-
-        engine.run();
     }
+
 }
