@@ -5,10 +5,6 @@
 
 package jtotus.engine;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import jtotus.common.Helper;
 import jtotus.common.MethodConfig;
 import jtotus.threads.Dispatcher;
@@ -24,7 +20,7 @@ import jtotus.threads.VoterThread;
 public class SimpleMovingAvg implements VoterThread{
     private Dispatcher dispatch = null;
     private MethodConfig config = null;
-    private String methodName = "Simple Moving Avg";
+    private String methodName = "SimpleMovinAvg";
     private Helper help = null;
     
     public SimpleMovingAvg(Dispatcher tmp){
@@ -57,26 +53,26 @@ public class SimpleMovingAvg implements VoterThread{
         Float tmp = null;
         int count=0;
 
-
-        help.debug(4, "%s:%s\n", methodName, help.getTimeNow());
-
+        //FIXME:ensure that period was fetched 
         String []stocks = config.StockNames;
-       for (int i=stocks.length-1;i>=0;i--){
+        for (int i=stocks.length-1;i>=0;i--){
+            avr = 0.0f; count = 0;
+            int tries=0;
 
-           for(int y=0;y<=config.day_frequncy-1;y++){
-
-               tmp = dispatch.fetchPrice(stocks[i],
+            for(int y=0;y<=(config.day_period-1);y++){
+               tmp = dispatch.fetchClosingPrice(stocks[i],
                         help.dateReduction(help.getTimeNow(), y));
-               if (tmp != 0.0f)
-               {
+               if (tmp != 0.0f){
                    avr +=tmp;
                     count++;
                }
+
            }
            avr /= count;
+           help.debug(methodName, "%s:%.2f\n", methodName, avr.floatValue());
        }
 
-        help.debug(4, "%s:%.2f\n", methodName, avr.floatValue());
+        
         
     }
 

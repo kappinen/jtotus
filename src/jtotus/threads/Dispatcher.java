@@ -16,12 +16,13 @@
  */
 
 package jtotus.threads;
+import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 import jtotus.common.Helper;
 import jtotus.common.MethodConfig;
 import jtotus.database.DataFetcher;
-import jtotus.engine.DummyMethod;
+
 /**
  *
  * @author kappiev
@@ -73,29 +74,29 @@ public class Dispatcher {
             threadList.clear();
         }
         
-        Iterator iterator = threads.iterator();
+        Iterator<VoterThread> iterator = threads.iterator();
         while (iterator.hasNext()) {
-            threadList.add(new Thread((VoterThread)iterator.next()));
+            threadList.add(new Thread(iterator.next()));
          }
         
         return false;
     }
 
     public void run() {
-        help.debug(3,"Dispatcher started..\n");
+        help.debug(this.getClass().getName(),"Dispatcher started..\n");
 
 
 
         //Start threads
 
         
-        Iterator iterator = threadList.iterator();
+        Iterator <Thread>iterator = threadList.iterator();
         while (iterator.hasNext()) {
-            Thread tmp = (Thread) iterator.next();
+            Thread tmp =  iterator.next();
             tmp.start();
         }
 
-        help.debug(3,"Dispatcher ended.. List:%d\n",threadList.size());
+        help.debug(this.getClass().getName(),"Dispatcher ended.. List:%d\n",threadList.size());
     }
 
 
@@ -124,11 +125,11 @@ public class Dispatcher {
 
 
 
-    public Float fetchPrice(String stockName, String time){
+    public Float fetchClosingPrice(String stockName, SimpleDateFormat time){
 
-        help.debug(3, "Fetching:%s: Time:%s\n", stockName, time);
+        help.debug(this.getClass().getName(), "Fetching:%s: Time:%s\n", stockName, help.dateToString(time));
 
-        return fetcher.fetchPrice(stockName, time);
+        return fetcher.fetchClosingPrice(stockName, time);
     }
 
 

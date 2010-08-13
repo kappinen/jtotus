@@ -14,7 +14,7 @@ package jtotus.common;
 public class MethodConfig {
 
     public String []StockNames = { "Fortum" };
-    public int day_frequncy = 5;
+    public int day_period = 5;
     
     
 

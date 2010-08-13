@@ -5,11 +5,13 @@
 
 package jtotus.database;
 
+import java.text.SimpleDateFormat;
+
 /**
  *
  * @author kappiev
  */
 public interface InterfaceDataBase {
 
-     public Float fetchPrice(String stockName, String time);
+     public Float fetchClosingPrice(String stockName, SimpleDateFormat time);
 }

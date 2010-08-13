@@ -8,6 +8,9 @@ package jtotus.common;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 /**
  *
@@ -16,6 +19,10 @@ import java.util.Calendar;
 public class Helper {
     private static Helper help = null;
     private int debugLvl = 1;
+    private String []debugFilter= { "SimpleMovinAvg",
+                                    "jtotus.database.FileSystemFromHex",
+                                    "jtotus.database.NetworkNordnet",
+                                    "jtotus.common.Helper" };
 
 
     protected Helper() {
@@ -35,6 +42,7 @@ public class Helper {
     }
 
 
+
     public synchronized void debug(int lvl, String pattern, Object... arguments) {
 
         if(lvl >= debugLvl) {
@@ -42,24 +50,70 @@ public class Helper {
         }
     }
 
-    public synchronized String getTimeNow(){
+   public synchronized void debug(String filter, String pattern, Object... arguments) {
+
+       if (debugFilter==null){
+           return;
+       }
+
+
+       for(int i=0; i < debugFilter.length-1;i++)
+       {
+            if (debugFilter[i].compareTo(filter) == 0)
+            {
+                System.out.printf("[%s] ",filter);
+                System.out.printf(pattern, arguments);
+            }
+
+//            Pattern stringPattern = Pattern.compile(filter);
+//            Matcher matcher = stringPattern.matcher(list[i]);
+//           if( matcher.find()) {
+//               System.out.printf("[%s] ",filter);
+//                System.out.printf(pattern, arguments);
+//            }
+
+       }
+
+
+//
+
+    }
+
+    public synchronized SimpleDateFormat getTimeNow(){
         Calendar cal = Calendar.getInstance();
-        SimpleDateFormat date = new SimpleDateFormat("dd:MM:yyyy");
-
-        return date.format(cal.getTime());
+        SimpleDateFormat date = new SimpleDateFormat("dd-MM-yyyy");
+        //return date.format(cal.getTime());
+        date.setCalendar(cal);
+        return date;
     }
 
-    public synchronized String dateReduction(String date, int count){
-        String newDate = null;
 
-        String[] parsedDate = date.split(":");
-        int intDate = Integer.parseInt(parsedDate[0]);
-        intDate -= count;
 
-        newDate = Integer.toString(intDate) + ":" + parsedDate[1] + ":" + parsedDate[2];
+    public synchronized SimpleDateFormat dateReduction(SimpleDateFormat date, int count){
 
-        return newDate;
+
+        Calendar cal = date.getCalendar();
+        cal.add(Calendar.DAY_OF_MONTH, count*-1);
+        date.setCalendar(cal);
+
+        debug(this.getClass().toString(),"TimeReduction:%s\n", date.format(cal.getTime()));
+
+        return date;
     }
+
+    public int stringToInt(String temp){
+        return Integer.parseInt(temp);
+
+    }
+
+
+    public String dateToString(SimpleDateFormat time){
+        Calendar cal = time.getCalendar();
+        
+        return time.format(cal.getTime());
+    }
+
+
 
     public synchronized void printCrtDir(){
 
