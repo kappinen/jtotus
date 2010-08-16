@@ -45,6 +45,7 @@ public class NetworkGoogle implements InterfaceDataBase {
         BasicConfigurator.configure();
     }
 
+
     public Float fetchClosingPrice(String stockName, SimpleDateFormat time) {
         Float result = 0.0f;
         URL url;
@@ -92,10 +93,11 @@ public class NetworkGoogle implements InterfaceDataBase {
             Logger.getLogger(NetworkGoogle.class.getName()).log(Level.SEVERE, null, ex);
         } 
         
-
-
-
         return result;
+    }
+
+    public Float fetchAveragePrice(String stockName, SimpleDateFormat time) {
+        return Float.valueOf("0.0");
     }
 
 

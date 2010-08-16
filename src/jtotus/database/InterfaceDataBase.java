@@ -14,4 +14,8 @@ import java.text.SimpleDateFormat;
 public interface InterfaceDataBase {
 
      public Float fetchClosingPrice(String stockName, SimpleDateFormat time);
+
+     public Float fetchAveragePrice(String stockName, SimpleDateFormat time);
+
+
 }

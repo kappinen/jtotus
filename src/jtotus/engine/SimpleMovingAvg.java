@@ -57,7 +57,6 @@ public class SimpleMovingAvg implements VoterThread{
         String []stocks = config.StockNames;
         for (int i=stocks.length-1;i>=0;i--){
             avr = 0.0f; count = 0;
-            int tries=0;
 
             for(int y=0;y<=(config.day_period-1);y++){
                tmp = dispatch.fetchClosingPrice(stocks[i],
@@ -69,7 +68,7 @@ public class SimpleMovingAvg implements VoterThread{
 
            }
            avr /= count;
-           help.debug(methodName, "%s:%.2f\n", methodName, avr.floatValue());
+           help.debug(methodName, "%s:%.2f\n", stocks[i], avr.floatValue());
        }
 
         
