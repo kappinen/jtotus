@@ -34,6 +34,8 @@ import org.jsoup.select.Elements;
  *
  * @author kappiev
  */
+
+
 public class NetworkGoogle implements InterfaceDataBase {
     Helper help = null;
     public String urlName="http://www.google.com/finance/historical?q=PINK:FOJCF";
