@@ -8,8 +8,7 @@ package jtotus.common;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 
 /**
@@ -128,7 +127,10 @@ public class Helper {
        }
      }
 
-
+     public synchronized Float stringToFloat(String tmp)
+    {
+        return Float.valueOf(tmp);
+     }
 
 
 

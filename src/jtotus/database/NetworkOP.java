@@ -34,13 +34,13 @@ import org.jsoup.select.Elements;
  *
  * @author kappiev
  */
-public class NetworkNordnet implements InterfaceDataBase {
+public class NetworkOP implements InterfaceDataBase {
     Helper help = null;
-    public String urlName="http://www.google.com/finance/historical?q=PINK:FOJCF";
-    public String patternString="MMM dd, yyyy";
+    public String urlName="https://www.op.fi/op?sym=FUM1V.HSE&id=32455&srcpl=8";
+    public String patternString="yyyy-MM-dd";
 
-    
-    public NetworkNordnet (){
+
+    public NetworkOP (){
         help = Helper.getInstance();
         BasicConfigurator.configure();
     }
@@ -51,7 +51,7 @@ public class NetworkNordnet implements InterfaceDataBase {
 
         help.debug(this.getClass().getName(), "fetchClosingPrice(%s,%s)\n",stockName, help.dateToString(time));
 
-        
+
         try {
             url = new URL(urlName);
             Document doc = Jsoup.parse(url, 3*1000);
@@ -66,20 +66,22 @@ public class NetworkNordnet implements InterfaceDataBase {
 
                     SimpleDateFormat trueDate = (SimpleDateFormat) time.clone();
                     trueDate.applyPattern(patternString);
-                    
-                    if(data.compareTo(help.dateToString(trueDate)) == 0)
+                   
+                    String formatHttp = "<div class=\"Ensimmainen\">\n"+help.dateToString(trueDate)+"\n</div>";
+                   // System.out.printf("Comparing:%s with true date:%s\n", data, formatHttp);
+                    if(data.indexOf(help.dateToString(trueDate)) != -1)
                     {
 
-                        for(int i=0;i<4;i++) {
+                        for(int i=0;i<1;i++) {
                             elem = iter.next();
                         }
-
-
-                        data = elem.html();
-                        System.out.printf("Closing Price:%s\n", data);
                         
+                        data = elem.text();
+                        String fdata = data.replace(',', '.');
+                        System.out.printf("Closing Price:%f for:%s\n", Float.valueOf(fdata).floatValue(), help.dateToString(trueDate));
+                        return Float.valueOf(fdata);
                     }
-                   
+
 
                 }
 
@@ -87,11 +89,11 @@ public class NetworkNordnet implements InterfaceDataBase {
 
 
 
-            
+
         } catch (IOException ex) {
-            Logger.getLogger(NetworkNordnet.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        
+            Logger.getLogger(NetworkGoogle.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
 
 
 

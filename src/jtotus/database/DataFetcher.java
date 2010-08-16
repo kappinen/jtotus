@@ -21,8 +21,9 @@ public class DataFetcher {
     public DataFetcher()
     {
         listOfResources = new LinkedList<InterfaceDataBase>();
-        listOfResources.add(new FileSystemFromHex());
-       // listOfResources.add(new NetworkNordnet());
+        //listOfResources.add(new FileSystemFromHex());
+        // listOfResources.add(new NetworkGoogle());
+        listOfResources.add(new NetworkOP());
 
     }
 
