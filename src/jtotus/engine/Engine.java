@@ -4,13 +4,19 @@
  */
 
 package jtotus.engine;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
-import jtotus.JtotusApp;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jtotus.JtotusView;
 import jtotus.common.Helper;
 import jtotus.database.DataFetcher;
 import jtotus.threads.*;
+
 
 
 /**
@@ -31,9 +37,22 @@ public class Engine {
     private void prepareMethodsList(){
         // Available methods
         methodList.add(new DummyMethod(dispatcher));
-        methodList.add(new DummyMethod(dispatcher,"Dummy2"));
-        methodList.add(new DummyMethod(dispatcher,"Dummy3"));
-        methodList.add(new SimpleMovingAvg(dispatcher));
+
+        File scriptDir = new File("./src/jtotus/rulebase/");
+        if(!scriptDir.isDirectory()) {
+            return;
+        }
+
+        FileFilter filter = fileIsGroovyScript();
+        File[] listOfFiles = scriptDir.listFiles(filter);
+
+        for ( File tmp : listOfFiles) {
+            try {
+                methodList.add(new DecisionScript(tmp.getCanonicalPath()));
+            } catch (IOException ex) {
+                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
 
     }
 
@@ -47,7 +66,6 @@ public class Engine {
         methodList = new LinkedList<VoterThread>();
 
         dispatcher.setFetcher(fetcher);
-
 
         prepareMethodsList();
         
@@ -104,7 +122,32 @@ public class Engine {
             return;
         }
         dispatcher.run();
+
+
     }
+
+
+
+    private FileFilter fileIsGroovyScript()
+    {
+       FileFilter fileFilter = new FileFilter() {
+           public boolean accept(File file)
+           {
+                if(!file.isFile() || !file.canRead()) {
+                    return false;
+                }
+
+                String name = file.getName();
+                if (!name.endsWith(".groovy"))
+                {
+                    return false;
+                }
+               return true;
+           }
+       };
+       return fileFilter;
+    }
+
  
 
 }

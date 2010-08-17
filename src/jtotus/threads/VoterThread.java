@@ -5,7 +5,6 @@
 
 package jtotus.threads;
 
-import java.util.Iterator;
 
 /**
  *
@@ -14,5 +13,6 @@ import java.util.Iterator;
 public interface VoterThread extends Runnable{
     
     public String getMethName();
-    
+
+
 }

@@ -16,12 +16,18 @@
  */
 
 package jtotus.threads;
+
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import jtotus.common.Helper;
 import jtotus.common.MethodConfig;
 import jtotus.database.DataFetcher;
+import jtotus.engine.DummyMethod;
+
 
 /**
  *
@@ -30,16 +36,26 @@ import jtotus.database.DataFetcher;
 public class Dispatcher {
 
     private Helper help = null;
-    private LinkedList <Thread>threadList;
+    private LinkedList <VoterThread>threadList;
     private DataFetcher fetcher = null;
+    ExecutorService threadExecutor = null;
+
+    
+    private void init() {
+        help = Helper.getInstance();
+        threadList = new LinkedList<VoterThread>();
+        threadExecutor = Executors.newCachedThreadPool();
+        
+    }
 
     public Dispatcher() {
-        help = Helper.getInstance();
-        threadList = new LinkedList<Thread>();
 
-         // Add methods to thread
 
-//        threadList.add(new Thread(new DummyMethod(this)));
+        init();
+
+
+        // Add methods to thread
+        threadList.add(new DummyMethod(this));
 //        threadList.add(new Thread(new DummyMethod(this)));
 //        threadList.add(new Thread(new DummyMethod(this)));
 //        threadList.add(new Thread(new DummyMethod(this)));
@@ -50,13 +66,12 @@ public class Dispatcher {
 
     public Dispatcher(LinkedList <VoterThread>threads) {
 
-        help = Helper.getInstance();
-        threadList = new LinkedList<Thread>();
+        init();
 
         
-        Iterator iterator = threadList.iterator();
+        Iterator <VoterThread>iterator = threadList.iterator();
         while (iterator.hasNext()) {
-            threadList.add(new Thread((VoterThread)iterator.next()));
+            threadList.add(iterator.next());
          }
  
     }
@@ -66,7 +81,7 @@ public class Dispatcher {
         help = Helper.getInstance();
 
         if (threadList == null) {
-            threadList = new LinkedList<Thread>();
+            threadList = new LinkedList<VoterThread>();
         }
         
         if(!threadList.isEmpty())
@@ -76,7 +91,7 @@ public class Dispatcher {
         
         Iterator<VoterThread> iterator = threads.iterator();
         while (iterator.hasNext()) {
-            threadList.add(new Thread(iterator.next()));
+            threadList.add(iterator.next());
          }
         
         return false;
@@ -90,10 +105,10 @@ public class Dispatcher {
         //Start threads
 
         
-        Iterator <Thread>iterator = threadList.iterator();
+        Iterator <VoterThread>iterator = threadList.iterator();
         while (iterator.hasNext()) {
-            Thread tmp =  iterator.next();
-            tmp.start();
+            VoterThread tmp =  iterator.next();
+            threadExecutor.execute(tmp);
         }
 
         help.debug(this.getClass().getName(),"Dispatcher ended.. List:%d\n",threadList.size());
@@ -123,8 +138,6 @@ public class Dispatcher {
 
 
 
-
-
     public Float fetchClosingPrice(String stockName, SimpleDateFormat time){
 
         help.debug(this.getClass().getName(), "Fetching:%s: Time:%s\n", stockName, help.dateToString(time));
@@ -138,6 +151,12 @@ public class Dispatcher {
     public void setFetcher(DataFetcher temp) {
         fetcher = temp;
     }
-    
+
+
+
+
+
+
+        
 
 }
