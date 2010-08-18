@@ -42,8 +42,6 @@ public class DataFetcher {
 
         }
 
-
-
         return result;
     }
 

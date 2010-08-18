@@ -81,6 +81,7 @@ public class Helper {
     public synchronized SimpleDateFormat getTimeNow(){
         Calendar cal = Calendar.getInstance();
         SimpleDateFormat date = new SimpleDateFormat("dd-MM-yyyy");
+        
         //return date.format(cal.getTime());
         date.setCalendar(cal);
         return date;
