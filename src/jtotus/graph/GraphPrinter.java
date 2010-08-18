@@ -3,15 +3,15 @@
  * and open the template in the editor.
  */
 
-package jtotus;
+package jtotus.graph;
 
 import java.awt.Color;
+import java.awt.Container;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import javax.swing.JInternalFrame;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -28,24 +28,21 @@ import org.jfree.data.xy.XYDataset;
  * @author kappiev
  */
 public class GraphPrinter {
-        // Frame, where the chart will be printed
-        JInternalFrame mainFrame = null;
 
         LinkedList<TimeSeries> listOfSeries = null;
         HashMap <String,TimeSeries>seriesMap = null;
 
         // Create a chart
-        private JFreeChart mainChart;
-        private ChartPanel mainPanel;
+        private JFreeChart mainChart = null;
+        private ChartPanel mainPanel = null;
+        private TimeSeriesCollection mainDataset = null;
 
-
-        public GraphPrinter(JInternalFrame tmp) {
-            mainFrame = tmp;
-
+        public GraphPrinter() {
 
             //Create Linked list for series
             listOfSeries = new LinkedList<TimeSeries>();
             seriesMap = new HashMap<String,TimeSeries>();
+            initialize();
 
         }
    
@@ -94,11 +91,11 @@ public class GraphPrinter {
     private XYDataset createDataset() {
 
 
-        TimeSeriesCollection dataset = new TimeSeriesCollection();
+        mainDataset = new TimeSeriesCollection();
 
         Iterator <TimeSeries>timeIter = listOfSeries.iterator();
         while (timeIter.hasNext()) {
-            dataset.addSeries(timeIter.next());
+            mainDataset.addSeries(timeIter.next());
         }
 
         Iterator <String>iterator = seriesMap.keySet().iterator();
@@ -106,13 +103,13 @@ public class GraphPrinter {
 
         }
         
-        dataset.setDomainIsPointsInTime(true);
+        mainDataset.setDomainIsPointsInTime(true);
 
-        return dataset;
+        return mainDataset;
 
     }
     
-    public void draw() {
+    private void initialize() {
 
 
         XYDataset dataset = createDataset();
@@ -124,11 +121,16 @@ public class GraphPrinter {
 
         mainPanel = new ChartPanel(mainChart, false);
         mainPanel.setMouseZoomable(true, false);
-        mainFrame.setContentPane(mainPanel);
+        mainPanel.setFillZoomRectangle(true);
+        mainPanel.setMouseWheelEnabled(true);
+        
+
 
     }
 
-
+    public Container getContainer() {
+        return mainPanel;
+    }
 
     public void testDraw(){
         TimeSeries s1 = new TimeSeries("L&G European Index Trust");
@@ -140,8 +142,7 @@ public class GraphPrinter {
 
         listOfSeries.add(s1);
 
-        draw();
-
+        mainDataset.addSeries(s1);
 
 
     }
@@ -172,7 +173,7 @@ public class GraphPrinter {
            
        }
 
-       draw();
+      
     }
 
 }

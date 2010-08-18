@@ -5,6 +5,7 @@
 package jtotus;
 
 
+import jtotus.graph.GraphPrinter;
 import java.awt.Color;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
@@ -21,16 +22,7 @@ import javax.swing.Icon;
 import javax.swing.JDialog;
 import jtotus.engine.Engine;
 import jtotus.threads.VoterThread;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
+
  
     
 /**
