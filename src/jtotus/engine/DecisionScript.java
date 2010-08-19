@@ -7,6 +7,8 @@
  */
 
 package jtotus.engine;
+
+
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
 import java.io.File;
@@ -32,15 +34,14 @@ public class DecisionScript implements VoterThread{
 
     public void run() {
 
-     File file = new File (path_to_script);
+       File file = new File (path_to_script);
      
      
-     if(!file.isFile() || !file.canRead()) {
-            return;
-        }
+       if(!file.isFile() || !file.canRead()) {
+              return;
+          }
 
-             
-     runGroovyScripts(file);
+       runGroovyScripts(file);
     }
 
 

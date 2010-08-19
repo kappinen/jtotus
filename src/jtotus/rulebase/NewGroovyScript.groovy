@@ -45,6 +45,11 @@ dispatcher = new Dispatcher()
 fetcher = new jtotus.database.DataFetcher()
 dispatcher.setFetcher(fetcher)
 
+logger = new jtotus.graph.GraphSender(engine);
+
+
+
+
 method = new jtotus.engine.SimpleMovingAvg(dispatcher)
 
 

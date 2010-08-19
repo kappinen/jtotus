@@ -21,6 +21,7 @@ import javax.swing.Timer;
 import javax.swing.Icon;
 import javax.swing.JDialog;
 import jtotus.engine.Engine;
+import jtotus.graph.JtotusGraph;
 import jtotus.threads.VoterThread;
 
  
@@ -33,7 +34,7 @@ public class JtotusView extends FrameView {
    private DefaultListModel dlm = new DefaultListModel(); //Available list
    private DefaultListModel dlm2 = new DefaultListModel(); //selectedList
    private Engine mainEngine = null;
-   private GraphPrinter printer = null;
+   private JtotusGraph totusGraph = null;
 
 
    public void prepareMethodList(LinkedList <VoterThread>methods)
@@ -123,12 +124,6 @@ public class JtotusView extends FrameView {
             }
         });
 
-
-
-
-
-        printer = new GraphPrinter(jInternalFrameGraph);
-        printer.draw();
         
         
     }
@@ -472,9 +467,19 @@ public class JtotusView extends FrameView {
 //        ChartPanel chartPanel = new ChartPanel(chart);
 //        jInternalFrameGraph.setContentPane(chartPanel);
 
+        totusGraph = new JtotusGraph(jInternalFrameGraph, "Fortum Oyj");
+        if(totusGraph.initialize()==false) { //Failed to bind to port
+             System.out.printf("[%s] Failed ot bind to port\n",this.getClass().getName());
+            return;
+        }
+        mainEngine.registerGraph("Fortum Oyj", totusGraph.getBindPort());
+        
+        System.out.printf("Binded to port:%d\n", totusGraph.getBindPort());
+        Thread painter = new Thread(totusGraph);
+        painter.start();
 
-        printer.testDraw();
-       
+
+        mainEngine.testGrapth();
 
 }//GEN-LAST:event_jButtonRunScriptsMousePressed
 

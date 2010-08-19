@@ -102,9 +102,7 @@ public class Dispatcher {
 
 
 
-        //Start threads
-
-        
+        //Start threads       
         Iterator <VoterThread>iterator = threadList.iterator();
         while (iterator.hasNext()) {
             VoterThread tmp =  iterator.next();
@@ -151,10 +149,6 @@ public class Dispatcher {
     public void setFetcher(DataFetcher temp) {
         fetcher = temp;
     }
-
-
-
-
 
 
         
