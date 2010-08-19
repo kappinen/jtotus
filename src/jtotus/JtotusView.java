@@ -5,8 +5,6 @@
 package jtotus;
 
 
-import jtotus.graph.GraphPrinter;
-import java.awt.Color;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.SingleFrameApplication;
@@ -218,11 +216,14 @@ public class JtotusView extends FrameView {
             }
         });
 
+        jInternalFrameGraph.setClosable(true);
+        jInternalFrameGraph.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
         jInternalFrameGraph.setIconifiable(true);
         jInternalFrameGraph.setMaximizable(true);
         jInternalFrameGraph.setResizable(true);
         jInternalFrameGraph.setToolTipText(resourceMap.getString("jInternalFrameGraph.toolTipText")); // NOI18N
         jInternalFrameGraph.setDoubleBuffered(true);
+        jInternalFrameGraph.setInheritsPopupMenu(true);
         jInternalFrameGraph.setName("jInternalFrameGraph"); // NOI18N
         jInternalFrameGraph.setVisible(true);
 
@@ -237,7 +238,7 @@ public class JtotusView extends FrameView {
         );
         jInternalFrameGraphLayout.setVerticalGroup(
             jInternalFrameGraphLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 444, Short.MAX_VALUE)
+            .addGap(0, 484, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
@@ -278,7 +279,7 @@ public class JtotusView extends FrameView {
                     .addGroup(mainPanelLayout.createSequentialGroup()
                         .addGap(35, 35, 35)
                         .addComponent(jInternalFrameGraph, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(97, Short.MAX_VALUE))
+                .addContainerGap(57, Short.MAX_VALUE))
         );
 
         menuBar.setName("menuBar"); // NOI18N

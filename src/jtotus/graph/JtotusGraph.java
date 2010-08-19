@@ -24,6 +24,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import jtotus.common.Helper;
 import org.jfree.data.time.Day;
@@ -62,7 +63,8 @@ public class JtotusGraph implements Runnable{
         //Initialize Graph
         lineChart = new GraphPrinter(reviewTarget);
         mainFrame.setContentPane(lineChart.getContainer());
-
+        mainFrame.setDefaultCloseOperation(JInternalFrame.EXIT_ON_CLOSE);
+        
         
     }
 
