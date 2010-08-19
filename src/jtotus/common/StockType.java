@@ -9,20 +9,28 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.text.SimpleDateFormat;
+import jtotus.database.DataFetcher;
+
+
+
 
 /**
  *
  * @author kappiev
  */
-public class StockName implements Iterator{
+public class StockType implements Iterator{
     private String stockName=null;
     private Map<String,String> stockMap = new HashMap<String,String>();
     Iterator mapIter = null;
+    private DataFetcher fetcher = null;
+    private Helper help=null;
 
 
-    public StockName(String name) {
+    public StockType(String name) {
         stockName = name;
-
+        help = Helper.getInstance();
+        fetcher = new DataFetcher();
         
         stockMap.put("Fortum Oyj", "FUM1V.HE");
         stockMap.put("Fortum Oyj", "FUM1V.HSE");
@@ -70,6 +78,16 @@ public class StockName implements Iterator{
         return stockMap.get(stockName);
     }
     
-    
+
+
+
+
+
+    public Float fetchClosingPrice(SimpleDateFormat time){
+
+        help.debug(this.getClass().getName(), "Fetching:%s: Time:%s\n", stockName, help.dateToString(time));
+
+        return fetcher.fetchClosingPrice(stockName, time);
+    }
     
 }

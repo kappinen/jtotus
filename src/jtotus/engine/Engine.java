@@ -67,12 +67,8 @@ public class Engine {
     public Engine(){
         help = Helper.getInstance();
         dispatcher = new Dispatcher();
-        fetcher = new DataFetcher();
         graphAccessPoints = new HashMap<String,Integer>();
-
         methodList = new LinkedList<VoterThread>();
-
-        dispatcher.setFetcher(fetcher);
 
         prepareMethodsList();
         
@@ -159,13 +155,11 @@ public class Engine {
     public void registerGraph(String reviewTarget, int acceccPoint){
 
         if(graphAccessPoints.containsKey(reviewTarget)) {
-            System.out.printf("Exists in accesspoints\n");
             //FIXME:what to do when..
             return;
         }
 
         //Register access port for messages
-        System.out.printf("NOT Exists in accesspoints:%s:%d \n",reviewTarget,acceccPoint);
         graphAccessPoints.put(reviewTarget, new Integer(acceccPoint));
 
     }

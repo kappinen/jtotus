@@ -7,6 +7,7 @@ package jtotus.engine;
 
 import jtotus.common.Helper;
 import jtotus.common.MethodConfig;
+import jtotus.common.StockType;
 import jtotus.threads.Dispatcher;
 import jtotus.threads.VoterThread;
 
@@ -57,10 +58,10 @@ public class SimpleMovingAvg implements VoterThread{
         String []stocks = config.StockNames;
         for (int i=stocks.length-1;i>=0;i--){
             avr = 0.0f; count = 0;
+            StockType stockType = new StockType(stocks[i]);
 
             for(int y=0;y<=(config.day_period-1);y++){
-               tmp = dispatch.fetchClosingPrice(stocks[i],
-                        help.dateReduction(help.getTimeNow(), y));
+               tmp = stockType.fetchClosingPrice(help.dateReduction(help.getTimeNow(), y));
                if (tmp != 0.0f){
                    avr +=tmp;
                     count++;

@@ -17,7 +17,6 @@
 
 package jtotus.threads;
 
-import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
@@ -25,7 +24,6 @@ import java.util.concurrent.Executors;
 
 import jtotus.common.Helper;
 import jtotus.common.MethodConfig;
-import jtotus.database.DataFetcher;
 import jtotus.engine.DummyMethod;
 
 
@@ -34,10 +32,8 @@ import jtotus.engine.DummyMethod;
  * @author kappiev
  */
 public class Dispatcher {
-
     private Helper help = null;
     private LinkedList <VoterThread>threadList;
-    private DataFetcher fetcher = null;
     ExecutorService threadExecutor = null;
 
     
@@ -113,17 +109,6 @@ public class Dispatcher {
     }
 
 
-
-    public synchronized Object dispatch() {
-
-        //TODO: general interface for voters
-
-        return null;
-    }
-
-
-
-
     public MethodConfig fetchConfig(String method)
     {
         //TODO: add which configuration to run by user
@@ -132,25 +117,5 @@ public class Dispatcher {
 
         return config;
     }
-
-
-
-
-    public Float fetchClosingPrice(String stockName, SimpleDateFormat time){
-
-        help.debug(this.getClass().getName(), "Fetching:%s: Time:%s\n", stockName, help.dateToString(time));
-
-        return fetcher.fetchClosingPrice(stockName, time);
-    }
-
-
-
-    
-    public void setFetcher(DataFetcher temp) {
-        fetcher = temp;
-    }
-
-
-        
 
 }

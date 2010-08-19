@@ -10,7 +10,7 @@
 
 package jtotus.rulebase
 
-import jtotus.common.StockName
+import jtotus.common.StockType
 import jtotus.engine.SimpleMovingAvg
 import jtotus.threads.Dispatcher
 
@@ -37,20 +37,16 @@ println "Hello $name!"
 //Class.forName("jtotus.engine.SimpleMovingAvg").newInstance()
 //Class.forName("jtotus.database.DataFetcher").newInstance()
 
-
-stockName = new jtotus.common.StockName("Fortum Oyj")
+//Example 4
+stockName = new jtotus.common.StockType("Fortum Oyj")
 println stockName.getHexName();
 
+
+
+
+
+//Example 5
 dispatcher = new Dispatcher()
-fetcher = new jtotus.database.DataFetcher()
-dispatcher.setFetcher(fetcher)
-
-logger = new jtotus.graph.GraphSender(engine);
-
-
-
-
+//logger = new jtotus.graph.GraphSender(engine);
 method = new jtotus.engine.SimpleMovingAvg(dispatcher)
-
-
 method.run()

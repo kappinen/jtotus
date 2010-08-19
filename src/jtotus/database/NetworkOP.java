@@ -20,7 +20,7 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jtotus.common.Helper;
-import jtotus.common.StockName;
+import jtotus.common.StockType;
 
 import org.apache.log4j.BasicConfigurator;
 import org.jsoup.Jsoup;
@@ -63,10 +63,10 @@ public class NetworkOP implements InterfaceDataBase {
         help.debug(this.getClass().getName(), "fetchClosingPrice(%s,%s)\n",stockName, help.dateToString(time));
         help.debug(this.getClass().getName(),
                 "The value for Stock: %s is :%s\n",stockName,
-                new StockName(stockName).getHexName());
+                new StockType(stockName).getHexName());
 
         try {
-            url = new URL(urlName + new StockName(stockName).getHexName() + urlParam);
+            url = new URL(urlName + new StockType(stockName).getHexName() + urlParam);
             Document doc = Jsoup.parse(url, 3*1000);
 
                 String title  = doc.title();
