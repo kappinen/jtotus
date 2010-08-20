@@ -49,7 +49,7 @@ public class NetworkGoogle implements InterfaceDataBase {
 
 
     public Float fetchClosingPrice(String stockName, SimpleDateFormat time) {
-        Float result = 0.0f;
+        Float result = null;
         URL url;
 
         help.debug(this.getClass().getName(), "fetchClosingPrice(%s,%s)\n",stockName, help.dateToString(time));

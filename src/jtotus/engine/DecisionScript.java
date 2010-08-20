@@ -61,12 +61,16 @@ public class DecisionScript implements VoterThread{
 
         } catch (InstantiationException ex) {
             Logger.getLogger(DecisionScript.class.getName()).log(Level.SEVERE, null, ex);
+            return;
         } catch (IllegalAccessException ex) {
             Logger.getLogger(DecisionScript.class.getName()).log(Level.SEVERE, null, ex);
+            return;
         } catch (CompilationFailedException ex) {
             Logger.getLogger(DecisionScript.class.getName()).log(Level.SEVERE, null, ex);
+            return;
         } catch (IOException ex) {
             Logger.getLogger(DecisionScript.class.getName()).log(Level.SEVERE, null, ex);
+            return;
         }
 
         Object[] args = {};

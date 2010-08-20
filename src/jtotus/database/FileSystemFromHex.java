@@ -87,7 +87,7 @@ public Float fetchTrades(String stockName, SimpleDateFormat time){
 
 public Float fetchValue(String stockName, SimpleDateFormat time, int row)
 {
-    Float result = 0.0f;
+    Float result = null;
 
     File dir = new File("./" + pathToDataBaseDir);
     FileFilter filter = filterForDir();
@@ -101,12 +101,11 @@ public Float fetchValue(String stockName, SimpleDateFormat time, int row)
         if (nameOfFile.indexOf(stockName) != -1) {
             help.debug(this.getClass().getName(),"Found File:%s\n", nameOfFile);
             result = omxNordicFile(nameOfFile, time, row);
-            if (result != 0.0f) {
+            if (result != null) {
                return result;
             }
         }
     }
-
     return result;
 }
 
@@ -115,7 +114,7 @@ public Float fetchValue(String stockName, SimpleDateFormat time, int row)
 
 
     public Float omxNordicFile(String fileName, SimpleDateFormat time,int row) {
-        Float result = 0.0f;
+        Float result = null;
 
         try {
 

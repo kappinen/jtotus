@@ -62,7 +62,7 @@ public class SimpleMovingAvg implements VoterThread{
 
             for(int y=0;y<=(config.day_period-1);y++){
                tmp = stockType.fetchClosingPrice(help.dateReduction(help.getTimeNow(), y));
-               if (tmp != 0.0f){
+               if (tmp != null){
                    avr +=tmp;
                     count++;
                }

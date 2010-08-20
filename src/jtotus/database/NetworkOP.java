@@ -57,7 +57,7 @@ public class NetworkOP implements InterfaceDataBase {
    }
 
     public Float fetchData(String stockName, SimpleDateFormat time, int col) {
-        Float result = 0.0f;
+        Float result = null;
         URL url;
 
         help.debug(this.getClass().getName(), "fetchClosingPrice(%s,%s)\n",stockName, help.dateToString(time));
