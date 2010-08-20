@@ -8,8 +8,6 @@ package jtotus.engine;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -21,7 +19,6 @@ import jtotus.database.DataFetcher;
 import jtotus.graph.GraphPacket;
 import jtotus.graph.GraphSender;
 import jtotus.threads.*;
-import org.jfree.data.time.Day;
 
 
 
@@ -32,13 +29,16 @@ import org.jfree.data.time.Day;
 
 
 public class Engine {
-
+    private static Engine singleton = null;
     private Dispatcher dispatcher = null;
     private LinkedList <VoterThread>methodList;
     private DataFetcher fetcher = null;
     private Helper help = null;
     private JtotusView mainWindow = null;
     private HashMap <String,Integer> graphAccessPoints = null;
+
+
+
 
     private void prepareMethodsList(){
         // Available methods
@@ -64,16 +64,24 @@ public class Engine {
 
 
 
-    public Engine(){
+    protected Engine(){
         help = Helper.getInstance();
         dispatcher = new Dispatcher();
         graphAccessPoints = new HashMap<String,Integer>();
         methodList = new LinkedList<VoterThread>();
 
         prepareMethodsList();
-        
-        
     }
+
+    public static Engine getInstance() {
+
+        if (singleton == null) {
+            singleton = new Engine();
+        }
+
+        return singleton;
+    }
+
 
    public void setGUI(JtotusView tempView) {
         mainWindow = tempView;
@@ -125,8 +133,7 @@ public class Engine {
             return;
         }
         dispatcher.run();
-
-
+        
     }
 
 
@@ -168,12 +175,6 @@ public class Engine {
         Integer tmp = graphAccessPoints.get(reviewTarget);
         return tmp.intValue();
     }
-
-
-
-
-
-    
 
 
     public void testGrapth(){

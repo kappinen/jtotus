@@ -6,7 +6,6 @@
 package jtotus.database;
 
 import java.sql.Connection;
-import java.util.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -145,7 +144,7 @@ public class LocalJavaDB implements InterfaceDataBase {
 
     //FIXME:add if failed store values to file in other database
     public void storeClosingPrice(String stockName, 
-                                  SimpleDateFormat date,
+                                  SimpleDateFormat time,
                                   Float value) {
 
         float closingPrice = value.floatValue();
@@ -158,35 +157,48 @@ public class LocalJavaDB implements InterfaceDataBase {
 
         try {
 
-            String query = "INSERT INTO "+mainTable+" (STOCKNAME,DATE,CLOSINGPRICE) VALUES (?,?,?)";
+            if (stockNameExists(stockName, time)){
+                String query = "UPDATE "+mainTable+" SET STOCKNAME=? WHERE STOCKNAME=? AND DATE=?";
+                PreparedStatement pstmt = conJavaDB.prepareStatement(query);
+
+                pstmt.setFloat(1, closingPrice);
+                pstmt.setString(2, stockName);
+
+                Calendar cal = time.getCalendar();
+                java.util.Date searchDay = cal.getTime();
+                java.sql.Date sqlDate = new java.sql.Date(searchDay.getTime());
+                pstmt.setDate(3, sqlDate, time.getCalendar());
+
+            }else {
+                String query = "INSERT INTO "+mainTable+" (STOCKNAME,DATE,CLOSINGPRICE) VALUES (?,?,?)";
 
 
-            PreparedStatement pstmt = conJavaDB.prepareStatement(query);
-  
-            pstmt.setString(1, stockName);
+                PreparedStatement pstmt = conJavaDB.prepareStatement(query);
+
+                pstmt.setString(1, stockName);
 
 
-            Calendar cal = date.getCalendar();
-            java.util.Date searchDay = cal.getTime();
+                Calendar cal = time.getCalendar();
+                java.util.Date searchDay = cal.getTime();
 
 
-            java.sql.Date sqlDate = new java.sql.Date(searchDay.getTime());
-            pstmt.setDate(2, sqlDate, date.getCalendar());
+                java.sql.Date sqlDate = new java.sql.Date(searchDay.getTime());
+                pstmt.setDate(2, sqlDate, time.getCalendar());
 
 
-            pstmt.setFloat(3, closingPrice);
+                pstmt.setFloat(3, closingPrice);
 
+                int result = pstmt.executeUpdate();
 
-            int result = pstmt.executeUpdate();
+                System.out.printf("Stock:%s price:%f res:%d\n", stockName, closingPrice, result);
 
-            System.out.printf("Stock:%s price:%f res:%d\n", stockName, closingPrice, result);
-
-            pstmt.clearParameters();
-            pstmt.close();
+                pstmt.clearParameters();
+                pstmt.close();
+            }
         } catch (SQLException ex) {
             Logger.getLogger(LocalJavaDB.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+        
         return ;
 
     }

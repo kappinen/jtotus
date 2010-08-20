@@ -21,8 +21,8 @@ public class JtotusApp extends SingleFrameApplication {
      * At startup create and show the main frame of the application.
      */
     @Override protected void startup() {
-        JtotusView mainWindow=new JtotusView(this);;
-        Engine mainEngine=new Engine();
+        JtotusView mainWindow=new JtotusView(this);
+        Engine mainEngine=Engine.getInstance();
         
 
 

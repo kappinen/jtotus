@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import jtotus.database.DataFetcher;
 
 
@@ -79,15 +80,31 @@ public class StockType implements Iterator{
     }
     
 
-
-
-
-
     public Float fetchClosingPrice(SimpleDateFormat time){
 
         help.debug(this.getClass().getName(), "Fetching:%s: Time:%s\n", stockName, help.dateToString(time));
 
         return fetcher.fetchClosingPrice(stockName, time);
+    }
+
+
+    public float fetchPastDayClosingPrice(int count){
+        Float tmp = null;
+
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat date = new SimpleDateFormat("dd-MM-yyyy");
+
+        cal.add(Calendar.DAY_OF_MONTH, count*-1);
+
+        date.setCalendar(cal);
+
+        tmp = fetcher.fetchClosingPrice(stockName, date);
+
+        if (tmp != null) {
+            return tmp.floatValue();
+        }
+        
+        return 0.0f;
     }
     
 }

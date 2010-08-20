@@ -94,8 +94,8 @@ public class Helper {
 
         Calendar cal = date.getCalendar();
         cal.add(Calendar.DAY_OF_MONTH, count*-1);
-        date.setCalendar(cal);
 
+        date.setCalendar(cal);
         debug(this.getClass().toString(),"TimeReduction:%s\n", date.format(cal.getTime()));
 
         return date;

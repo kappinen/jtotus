@@ -14,7 +14,6 @@
  *
  * 
  */
-
 package jtotus.threads;
 
 import java.util.Iterator;
@@ -26,96 +25,85 @@ import jtotus.common.Helper;
 import jtotus.common.MethodConfig;
 import jtotus.engine.DummyMethod;
 
-
 /**
  *
  * @author kappiev
  */
 public class Dispatcher {
+
     private Helper help = null;
-    private LinkedList <VoterThread>threadList;
+    private LinkedList<VoterThread> threadList;
     ExecutorService threadExecutor = null;
 
-    
     private void init() {
         help = Helper.getInstance();
         threadList = new LinkedList<VoterThread>();
         threadExecutor = Executors.newCachedThreadPool();
-        
+
     }
 
     public Dispatcher() {
 
-
         init();
-
 
         // Add methods to thread
         threadList.add(new DummyMethod(this));
 //        threadList.add(new Thread(new DummyMethod(this)));
-//        threadList.add(new Thread(new DummyMethod(this)));
-//        threadList.add(new Thread(new DummyMethod(this)));
-//        threadList.add(new Thread(new DummyMethod(this)));
-//        threadList.add(new Thread(new DummyMethod(this)));
-        
+
     }
 
-    public Dispatcher(LinkedList <VoterThread>threads) {
+    public Dispatcher(LinkedList<VoterThread> threads) {
 
         init();
 
-        
-        Iterator <VoterThread>iterator = threadList.iterator();
+
+        Iterator<VoterThread> iterator = threadList.iterator();
         while (iterator.hasNext()) {
             threadList.add(iterator.next());
-         }
- 
+        }
+
     }
 
-    public boolean setList(LinkedList <VoterThread>threads) {
+    public boolean setList(LinkedList<VoterThread> threads) {
 
         help = Helper.getInstance();
 
         if (threadList == null) {
             threadList = new LinkedList<VoterThread>();
         }
-        
-        if(!threadList.isEmpty())
-        {
+
+        if (!threadList.isEmpty()) {
             threadList.clear();
         }
-        
+
         Iterator<VoterThread> iterator = threads.iterator();
         while (iterator.hasNext()) {
             threadList.add(iterator.next());
-         }
-        
+        }
+
         return false;
     }
 
     public void run() {
-        help.debug(this.getClass().getName(),"Dispatcher started..\n");
+        help.debug(this.getClass().getName(), "Dispatcher started..\n");
 
 
 
         //Start threads       
-        Iterator <VoterThread>iterator = threadList.iterator();
+        Iterator<VoterThread> iterator = threadList.iterator();
         while (iterator.hasNext()) {
-            VoterThread tmp =  iterator.next();
+            VoterThread tmp = iterator.next();
             threadExecutor.execute(tmp);
         }
 
-        help.debug(this.getClass().getName(),"Dispatcher ended.. List:%d\n",threadList.size());
+        help.debug(this.getClass().getName(), "Dispatcher ended.. List:%d\n", threadList.size());
     }
 
-
-    public MethodConfig fetchConfig(String method)
-    {
+    public MethodConfig fetchConfig(String method) {
         //TODO: add which configuration to run by user
 
         MethodConfig config = new MethodConfig();
 
         return config;
     }
-
 }
