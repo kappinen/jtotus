@@ -21,7 +21,8 @@ public class Helper {
     private String []debugFilter= { "SimpleMovinAvg",
                                     "jtotus.database.FileSystemFromHex",
                                     "jtotus.database.NetworkNordnet",
-                                    "jtotus.common.Helper" };
+                                    "jtotus.common.Helper",
+                                    "jtotus.database.NetworkOP"};
 
 
     protected Helper() {

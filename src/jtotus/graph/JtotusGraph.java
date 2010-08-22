@@ -120,6 +120,8 @@ public class JtotusGraph implements Runnable{
             }
 
             //FIXME:change this ugliness
+            System.out.printf("Drawing %d:%d:%d val:%f\n",
+                    packet.day, packet.month, packet.year, packet.result);
              Day tmpDay = new Day(packet.day,
                                   packet.month,
                                   packet.year);
@@ -230,8 +232,7 @@ public class JtotusGraph implements Runnable{
 
                     GraphPacket obj = (GraphPacket) is.readObject();
 
-
-
+                    System.out.print("Putting to queue\n");
                     // add it to blocking queue
                     mainQueue.put(obj);
                     

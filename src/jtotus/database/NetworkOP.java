@@ -17,8 +17,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import jtotus.common.Helper;
 import jtotus.common.StockType;
 
@@ -60,6 +58,7 @@ public class NetworkOP implements InterfaceDataBase {
         Float result = null;
         URL url;
 
+        
         help.debug(this.getClass().getName(), "fetchClosingPrice(%s,%s)\n",stockName, help.dateToString(time));
         help.debug(this.getClass().getName(),
                 "The value for Stock: %s is :%s\n",stockName,
@@ -67,6 +66,7 @@ public class NetworkOP implements InterfaceDataBase {
 
         try {
             url = new URL(urlName + new StockType(stockName).getHexName() + urlParam);
+
             Document doc = Jsoup.parse(url, 3*1000);
 
                 String title  = doc.title();
@@ -109,7 +109,8 @@ public class NetworkOP implements InterfaceDataBase {
 
 
         } catch (IOException ex) {
-            Logger.getLogger(NetworkGoogle.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.printf("Failed in :%s\n",this.getClass().getName());
+            //Logger.getLogger(NetworkGoogle.class.getName()).log(Level.SEVERE, null, ex);
         }
 
 

@@ -54,10 +54,6 @@ System.out.println(help)
 
 
 
-
-
-
-
 //Example 5
 Engine engine = Engine.getInstance()
 dispatcher = new Dispatcher()
@@ -70,19 +66,20 @@ method.run()
 // Draw the past 20 days of stock
 
 fortum = new jtotus.common.StockType("Fortum Oyj")
-
+//
 sender = new jtotus.graph.GraphSender(engine);
 packet = new jtotus.graph.GraphPacket();
 packet.seriesTitle = "Fortum Oyj"
-
-
+//
+//
 date = Calendar.getInstance();
 
-Date time = date.getTime();
+Date time = date.getTime()
 
-packet.day = time.day
-packet.month = time.month
-packet.year = time.year
+packet.day = 20
+packet.month = 8
+packet.year = 2010
+println packet.day + ":" +packet.month + ":" + packet.year 
 for (int i=0; i<15;i++) {
     packet.day -= i
     packet.result = fortum.fetchPastDayClosingPrice(i);
