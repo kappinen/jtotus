@@ -463,10 +463,6 @@ public class JtotusView extends FrameView {
     }//GEN-LAST:event_jButton1MouseClicked
 
     private void jButtonRunScriptsMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonRunScriptsMousePressed
-//        XYDataset dataset = createDataset();
-//        JFreeChart chart = createChart(dataset);
-//        ChartPanel chartPanel = new ChartPanel(chart);
-//        jInternalFrameGraph.setContentPane(chartPanel);
 
         totusGraph = new JtotusGraph(jInternalFrameGraph, "Fortum Oyj");
         if(totusGraph.initialize()==false) { //Failed to bind to port
@@ -480,7 +476,7 @@ public class JtotusView extends FrameView {
         painter.start();
 
 
-        mainEngine.testGrapth();
+      //  mainEngine.testGrapth();
 
 }//GEN-LAST:event_jButtonRunScriptsMousePressed
 

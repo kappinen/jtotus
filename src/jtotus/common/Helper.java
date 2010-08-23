@@ -22,7 +22,9 @@ public class Helper {
                                     "jtotus.database.FileSystemFromHex",
                                     "jtotus.database.NetworkNordnet",
                                     "jtotus.common.Helper",
-                                    "jtotus.database.NetworkOP"};
+                                    "jtotus.database.NetworkOP",
+                                  //  "jtotus.graph.JtotusGraph",
+                                    "jtotus.database.LocalJavaDB"};
 
 
     protected Helper() {
@@ -56,13 +58,13 @@ public class Helper {
            return;
        }
 
-
-       for(int i=0; i < debugFilter.length-1;i++)
+       for(int i=0; i < debugFilter.length;i++)
        {
             if (debugFilter[i].compareTo(filter) == 0)
             {
                 System.out.printf("[%s] ",filter);
                 System.out.printf(pattern, arguments);
+                break;
             }
 
 //            Pattern stringPattern = Pattern.compile(filter);

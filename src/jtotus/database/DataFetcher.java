@@ -36,6 +36,7 @@ public class DataFetcher {
 
         result = javadb.fetchClosingPrice(stockName, time);
         if(result == null) {
+            System.out.printf("Not found in javadb!!\n");
             while(resources.hasNext()){
                 InterfaceDataBase res = resources.next();
 

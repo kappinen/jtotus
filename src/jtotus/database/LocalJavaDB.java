@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jtotus.common.Helper;
 
 
 /**
@@ -28,6 +29,7 @@ public class LocalJavaDB implements InterfaceDataBase {
     private String []connectionUrl = { "jdbc:derby://localhost:1527/OMXHelsinki",
                                        "hex", "hex"};
     public String mainTable = "APP.OMXHELSINKI";
+    private Helper help = Helper.getInstance();
 
 
     public LocalJavaDB() {
@@ -46,7 +48,8 @@ public class LocalJavaDB implements InterfaceDataBase {
 
 
         } catch (SQLException ex) {
-            Logger.getLogger(LocalJavaDB.class.getName()).log(Level.SEVERE, null, ex);
+           // Logger.getLogger(LocalJavaDB.class.getName()).log(Level.SEVERE, null, ex);
+           System.err.printf("Unable to connecto to JavaDB !\n");
             return -2;//Unable to connect to database
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(LocalJavaDB.class.getName()).log(Level.SEVERE, null, ex);
@@ -79,14 +82,16 @@ public class LocalJavaDB implements InterfaceDataBase {
             Calendar cal = time.getCalendar();
             java.util.Date searchDay = cal.getTime();
 
-
             java.sql.Date sqlDate = new java.sql.Date(searchDay.getTime());
             pstmt.setDate(2, sqlDate, time.getCalendar());
 
+            help.debug(this.getClass().getName(), "Query:%s\n", query);
+            //Perform query
             ResultSet results = pstmt.executeQuery();
 
             while (results.next()) {
                 float tmpFloat = results.getFloat("CLOSINGPRICE");
+                help.debug(this.getClass().getName(), "Javadb got closing price %f for %s\n", tmpFloat, stockName);
                 closingPrice = new Float(tmpFloat);
                 break;
             }

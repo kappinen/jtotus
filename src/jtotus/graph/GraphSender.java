@@ -38,6 +38,11 @@ public class GraphSender {
         int port=0;
         ObjectOutputStream os = null;
 
+        if (packetObj == null) {
+            return false;
+        }
+
+
         if (mainEngine != null) {
             port = mainEngine.fetchGraph(reviewTarget);
         } else if(mainPort != 0) {
@@ -51,7 +56,7 @@ public class GraphSender {
 
 
             clientSock = new DatagramSocket();
-            ByteArrayOutputStream byteStream = new ByteArrayOutputStream(1024 * 10 * 10);
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream(1024 * 10 * 5);
 
             os = new ObjectOutputStream(new BufferedOutputStream(byteStream));
             os.flush();

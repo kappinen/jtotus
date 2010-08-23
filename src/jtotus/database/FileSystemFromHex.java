@@ -106,6 +106,7 @@ public Float fetchValue(String stockName, SimpleDateFormat time, int row)
             }
         }
     }
+    help.debug(this.getClass().getName(), "Not found value for:%s\n", stockName);
     return result;
 }
 

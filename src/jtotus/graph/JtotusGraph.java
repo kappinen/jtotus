@@ -17,14 +17,12 @@ import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import jtotus.common.Helper;
 import org.jfree.data.time.Day;
@@ -119,9 +117,20 @@ public class JtotusGraph implements Runnable{
                 continue;
             }
 
-            //FIXME:change this ugliness
-            System.out.printf("Drawing %d:%d:%d val:%f\n",
+            
+            help.debug(this.getClass().getName(),"Drawing %d:%d:%d val:%f\n",
                     packet.day, packet.month, packet.year, packet.result);
+
+            //Sanity checks
+            if (packet.day <=0 || packet.day > 31 ||
+                packet.month <=0 || packet.month > 12){
+                System.err.printf("%s incorrect packet format\n", this.getClass().getName());
+                continue;
+            }
+
+            help.debug(this.getClass().getName(), "The packet:%d.%d.%d: result:%f\n",
+                    packet.day, packet.month, packet.year, packet.result);
+            //FIXME:change this ugliness
              Day tmpDay = new Day(packet.day,
                                   packet.month,
                                   packet.year);
@@ -135,7 +144,7 @@ public class JtotusGraph implements Runnable{
                 if (hashSeries.addOrUpdate(tmpDay, packet.result) != null)
                 {
                     help.debug(this.getClass().getName(),
-                        "Warning overwritting existent value in time series");
+                        "Warning overwritting existent value in time series\n");
                 }
 
             } else {  // New series
@@ -206,9 +215,9 @@ public class JtotusGraph implements Runnable{
         
         public void run() {
 
-            final int maxSizeOfPacket = 1024*10*10;
+            final int maxSizeOfPacket = 1024*10*5;
             byte []buf = new byte[maxSizeOfPacket];
-  
+
 
            if(serverSocket==null)
            {
@@ -218,23 +227,29 @@ public class JtotusGraph implements Runnable{
                }
            }
 
+
+           
+            //Convert data to object
+           
+           ObjectInputStream is = null;
+           
            DatagramPacket packet = new DatagramPacket(buf, maxSizeOfPacket);
+           ByteArrayInputStream byteStream = new ByteArrayInputStream(buf);
+
 
            while(true) {
                 try {
+                  //  byteStream.reset();
                     //Recieve packet
                     serverSocket.receive(packet);
 
-                    //Convert data to object
-                    ByteArrayInputStream byteStream = new ByteArrayInputStream(buf);
-                    ObjectInputStream is = new
-                        ObjectInputStream(new BufferedInputStream(byteStream));
+                     is = new ObjectInputStream(new BufferedInputStream(byteStream));
 
                     GraphPacket obj = (GraphPacket) is.readObject();
 
-                    System.out.print("Putting to queue\n");
                     // add it to blocking queue
                     mainQueue.put(obj);
+                    byteStream.reset();
                     
 
                 } catch (InterruptedException ex) {
@@ -248,7 +263,6 @@ public class JtotusGraph implements Runnable{
                     break;
                 }
             }
-
 
 
             return;

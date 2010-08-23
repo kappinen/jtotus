@@ -12,6 +12,7 @@ import java.util.Set;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import jtotus.database.DataFetcher;
+import jtotus.graph.GraphPacket;
 
 
 
@@ -88,7 +89,7 @@ public class StockType implements Iterator{
     }
 
 
-    public float fetchPastDayClosingPrice(int count){
+    public Float fetchPastDayClosingPrice(int count){
         Float tmp = null;
 
         Calendar cal = Calendar.getInstance();
@@ -104,7 +105,32 @@ public class StockType implements Iterator{
             return tmp.floatValue();
         }
         
-        return 0.0f;
+        return tmp;
+    }
+
+        public GraphPacket fetchPastDayClosingPricePacket(int count){
+        GraphPacket packet = null;
+        Float tmp = null;
+
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat date = new SimpleDateFormat("dd-MM-yyyy");
+
+        cal.add(Calendar.DAY_OF_MONTH, count*-1);
+
+        date.setCalendar(cal);
+
+        tmp = fetcher.fetchClosingPrice(stockName, date);
+
+        if (tmp != null) {
+            packet = new GraphPacket();
+            packet.seriesTitle = stockName;
+            packet.day = cal.get(Calendar.DATE);
+            packet.month = cal.get(Calendar.MONTH) + 1;
+            packet.year = cal.get(Calendar.YEAR);
+            packet.result = tmp.floatValue();
+        }
+
+        return packet;
     }
     
 }

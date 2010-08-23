@@ -8,6 +8,8 @@ package jtotus.graph;
 import java.awt.Color;
 import java.awt.Container;
 import java.text.SimpleDateFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -89,11 +91,9 @@ public class GraphPrinter {
 
     private XYDataset createDataset() {
 
-
-        mainDataset = new TimeSeriesCollection();
-
-
-        mainDataset.setDomainIsPointsInTime(true);
+        if (mainDataset == null) {
+            mainDataset = new TimeSeriesCollection();
+        }
 
         return mainDataset;
 
@@ -121,11 +121,18 @@ public class GraphPrinter {
 
  
 
-    public void drawSeries(TimeSeries series){
+    public synchronized void drawSeries(TimeSeries series){
         mainDataset.addSeries(series);
+        try {
+            //FIXME:TimeSeriesCollection is crashing
+            Thread.sleep(100);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(GraphPrinter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
-    public void cleanChart() {
+    public synchronized void cleanChart() {
         mainDataset.removeAllSeries();
     }
 

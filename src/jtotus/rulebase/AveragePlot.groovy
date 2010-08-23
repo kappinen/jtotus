@@ -70,20 +70,12 @@ fortum = new jtotus.common.StockType("Fortum Oyj")
 sender = new jtotus.graph.GraphSender(engine);
 packet = new jtotus.graph.GraphPacket();
 packet.seriesTitle = "Fortum Oyj"
-//
-//
-date = Calendar.getInstance();
 
-Date time = date.getTime()
 
-packet.day = 20
-packet.month = 8
-packet.year = 2010
 println packet.day + ":" +packet.month + ":" + packet.year 
-for (int i=0; i<15;i++) {
-    packet.day -= i
-    packet.result = fortum.fetchPastDayClosingPrice(i);
-    sender.sentPacket("Fortum Oyj", packet)
-}
+for (int i=0; i<300;i++) {
+        sender.sentPacket("Fortum Oyj", fortum.fetchPastDayClosingPricePacket(i))
+    }
 
+println "DONE for AveragePlot"
 

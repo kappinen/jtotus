@@ -56,6 +56,7 @@ public class SimpleMovingAvg implements VoterThread {
                     avr += tmp;
                     count++;
                 }
+
             }
             avr /= count;
             help.debug(methodName, "%s:%.2f\n", stocks[i], avr.floatValue());
