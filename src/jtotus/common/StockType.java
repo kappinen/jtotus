@@ -79,7 +79,10 @@ public class StockType implements Iterator{
     public String getHexName() {
         return stockMap.get(stockName);
     }
-    
+
+    public String getName() {
+        return stockName;
+    }
 
     public Float fetchClosingPrice(SimpleDateFormat time){
 

@@ -73,7 +73,7 @@ packet.seriesTitle = "Fortum Oyj"
 
 
 println packet.day + ":" +packet.month + ":" + packet.year 
-for (int i=0; i<300;i++) {
+for (int i=0; i<100;i++) {
         sender.sentPacket("Fortum Oyj", fortum.fetchPastDayClosingPricePacket(i))
     }
 
