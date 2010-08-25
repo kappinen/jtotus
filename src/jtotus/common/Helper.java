@@ -19,11 +19,11 @@ public class Helper {
     private static Helper help = null;
     private int debugLvl = 1;
     private String []debugFilter= { "SimpleMovinAvg",
-                                    "jtotus.database.FileSystemFromHex",
-                                    "jtotus.database.NetworkNordnet",
-                                    "jtotus.common.Helper",
+                                  //  "jtotus.database.FileSystemFromHex",
+                                  //  "jtotus.database.NetworkNordnet",
+                                  //  "jtotus.common.Helper",
                                     "jtotus.database.NetworkOP",
-                                  //  "jtotus.graph.JtotusGraph",
+                                    "jtotus.graph.JtotusGraph",
                                     "jtotus.database.LocalJavaDB"};
 
 

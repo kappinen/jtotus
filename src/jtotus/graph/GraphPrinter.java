@@ -30,7 +30,7 @@ public class GraphPrinter {
     private JFreeChart mainChart = null;
     private ChartPanel mainPanel = null;
     private TimeSeriesCollection mainDataset = null;
-
+    int draw = 0;
 
     
     public GraphPrinter(String reviewTarget) {
@@ -120,21 +120,19 @@ public class GraphPrinter {
     }
 
  
-
-    public synchronized void drawSeries(TimeSeries series){
+   
+    public synchronized void drawSeries(TimeSeries series) {
         mainDataset.addSeries(series);
-        try {
-            //FIXME:TimeSeriesCollection is crashing
-            Thread.sleep(100);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(GraphPrinter.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
+        return;
     }
 
     public synchronized void cleanChart() {
-        mainDataset.removeAllSeries();
+        //TODO: dummy remove
+        //mainDataset.removeAllSeries();
+        return;
     }
+
+
 
 
 

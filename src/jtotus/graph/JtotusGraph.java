@@ -33,14 +33,18 @@ import org.jfree.data.time.TimeSeries;
  * @author kappiev
  */
 public class JtotusGraph implements Runnable{
-    JInternalFrame mainFrame = null;
-    GraphPrinter lineChart = null;
-    BlockingQueue<GraphPacket> queue = null;
-    Helper help = null;
+    private JInternalFrame mainFrame = null;
+  //  GraphPrinter lineChart = null;
+    protected BlockingQueue<GraphPacket> queue = null;
+    private Helper help = Helper.getInstance();
     
     protected int defaultPort = 8888;
+    public final Object seriesMap_lock  = new Object();
+    String mainReviewTarget = null;
     DatagramSocket serverSocket = null;
     Thread serverThread = null;
+    private GraphPrinter lineChart = null;
+
     
     /* 
      * Secondary Object (DecisionName)
@@ -55,10 +59,12 @@ public class JtotusGraph implements Runnable{
         mainFrame = tmpFrame;
         seriesMap = new HashMap<String,TimeSeries>();
         queue = new LinkedBlockingQueue<GraphPacket>();
-        help = Helper.getInstance();
 
         
         //Initialize Graph
+        //lineChart = new GraphPrinter(reviewTarget);
+        mainReviewTarget = reviewTarget;
+       // mainFrame.setContentPane(lineChart.getContainer());
         lineChart = new GraphPrinter(reviewTarget);
         mainFrame.setContentPane(lineChart.getContainer());
         mainFrame.setDefaultCloseOperation(JInternalFrame.EXIT_ON_CLOSE);
@@ -106,24 +112,27 @@ public class JtotusGraph implements Runnable{
         while(true){
             
             packet = queue.poll();
+
             if (packet==null){ //Queue is empty
                 try {
                     //Queue is empty
-                    Thread.sleep(100);
+                    Thread.sleep(50);
+                   // System.err.printf("We are sleeping !!\n");
                 } catch (InterruptedException ex) {
                     Logger.getLogger(JtotusGraph.class.getName()).log(Level.SEVERE, null, ex);
-                    break;
+                   // System.err.printf("Thread is waiken up\n");
                 }
                 continue;
             }
 
             
-            help.debug(this.getClass().getName(),"Drawing %d:%d:%d val:%f\n",
-                    packet.day, packet.month, packet.year, packet.result);
+            help.debug(this.getClass().getName(),"Drawing %d:%d:%d val:%f queue capacity:%d and contains:%d\n",
+                    packet.day, packet.month, packet.year, packet.result, queue.remainingCapacity(),
+                    queue.size());
 
             //Sanity checks
             if (packet.day <=0 || packet.day > 31 ||
-                packet.month <=0 || packet.month > 12){
+                packet.month <=0 || packet.month > 12) {
                 System.err.printf("%s incorrect packet format\n", this.getClass().getName());
                 continue;
             }
@@ -151,19 +160,9 @@ public class JtotusGraph implements Runnable{
                  TimeSeries newSeries = new TimeSeries(packet.seriesTitle);
                  newSeries.add(tmpDay, packet.result);
                  seriesMap.put(packet.seriesTitle, newSeries);
+                 lineChart.drawSeries(newSeries);
             }
-
-             
-            // Ask drawer to clean screen
-            lineChart.cleanChart();
-
-             
-            // Draw the series
-            Iterator <String>mapIter = seriesMap.keySet().iterator();
-            while(mapIter.hasNext()){
-                TimeSeries mapSeries = seriesMap.get(mapIter.next());
-                lineChart.drawSeries(mapSeries);
-            }
+    
         }
         
  
@@ -172,13 +171,15 @@ public class JtotusGraph implements Runnable{
 
     //Creates Datagram server and reads packet in form of GraphPacket objects
     //and puts them to blocking queue
-    class JtotusGraphDispatcher implements Runnable {
+    private class JtotusGraphDispatcher implements Runnable {
 
-        BlockingQueue<GraphPacket> mainQueue;
+        private BlockingQueue<GraphPacket> mainQueue;
+        //private Thread parent = null;
 
 
         public JtotusGraphDispatcher(BlockingQueue <GraphPacket>tmpQueue) {
             mainQueue = tmpQueue;
+            //parent = tmpThread;
         }
 
 
@@ -250,6 +251,10 @@ public class JtotusGraph implements Runnable{
                     // add it to blocking queue
                     mainQueue.put(obj);
                     byteStream.reset();
+
+//                    if(parent.getState() == Thread.State.TIMED_WAITING) {
+//                        parent.interrupt();
+//                    }
                     
 
                 } catch (InterruptedException ex) {

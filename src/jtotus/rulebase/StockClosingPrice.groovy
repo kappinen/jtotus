@@ -17,7 +17,7 @@ import jtotus.engine.Engine;
 import jtotus.graph.GraphPacket;
 
 def reviewTarget = "Fortum Oyj"
-def daysToSearch = 100;
+def daysToSearch = 300;
 
 
 
@@ -28,7 +28,7 @@ stockType = new jtotus.common.StockType(reviewTarget)
 
 sender = new jtotus.graph.GraphSender(engine);
 packet = new jtotus.graph.GraphPacket();
-packet.seriesTitle = stockType.getName();
+packet.seriesTitle = stockType.getName()+"_ClosingPrice";
 
 
 println packet.day + ":" +packet.month + ":" + packet.year
