@@ -19,11 +19,10 @@ public class SimpleMovingAvg implements VoterThread {
     private Dispatcher dispatch = null;
     private MethodConfig config = null;
     private String methodName = "SimpleMovinAvg";
-    private Helper help = null;
+    private Helper help = Helper.getInstance();;
 
     public SimpleMovingAvg(Dispatcher tmp) {
         dispatch = tmp;
-        help = Helper.getInstance();
     }
 
     public String getMethName() {

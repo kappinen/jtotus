@@ -26,7 +26,7 @@
                       </Group>
                   </Group>
                   <EmptySpace pref="101" max="32767" attributes="0"/>
-                  <Component id="jInternalFrameGraph" min="-2" max="-2" attributes="0"/>
+                  <Component id="jInternalFrameGraph" max="32767" attributes="0"/>
                   <EmptySpace min="-2" pref="92" max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -51,7 +51,7 @@
                       </Group>
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace min="-2" pref="35" max="-2" attributes="0"/>
-                          <Component id="jInternalFrameGraph" min="-2" max="-2" attributes="0"/>
+                          <Component id="jInternalFrameGraph" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace pref="59" max="32767" attributes="0"/>
@@ -152,11 +152,12 @@
             <Property name="closable" type="boolean" value="true"/>
             <Property name="iconifiable" type="boolean" value="true"/>
             <Property name="maximizable" type="boolean" value="true"/>
-            <Property name="resizable" type="boolean" value="true"/>
             <Property name="toolTipText" type="java.lang.String" resourceKey="jInternalFrameGraph.toolTipText"/>
             <Property name="doubleBuffered" type="boolean" value="true"/>
             <Property name="inheritsPopupMenu" type="boolean" value="true"/>
+            <Property name="layer" type="int" value="5"/>
             <Property name="name" type="java.lang.String" value="jInternalFrameGraph" noResource="true"/>
+            <Property name="opaque" type="boolean" value="false"/>
             <Property name="visible" type="boolean" value="true"/>
           </Properties>
           <BindingProperties>

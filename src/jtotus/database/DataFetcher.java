@@ -15,7 +15,8 @@ import jtotus.common.Helper;
  *
  * @author kappiev
  */
-public class DataFetcher {
+
+public class DataFetcher implements InterfaceDataBase {
 
     private LinkedList<InterfaceDataBase> listOfResources = null;
     private LocalJavaDB javadb = null;
@@ -30,14 +31,31 @@ public class DataFetcher {
         // listOfResources.add(new NetworkGoogle());
     }
 
-    public Float fetchClosingPrice(String stockName, SimpleDateFormat time){
-        Float result = null;
+    //TRUE  failuer
+    //FALSE success
+    private boolean timeFailsSanityCheck(SimpleDateFormat time) {
+        boolean result = false;
         Calendar cal = null;
 
         cal = time.getCalendar();
         if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY ||
-           cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY)
+           cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+           result = true;
+        }
+
+        cal = null;
+        return result;
+    }
+
+    //TODO:generic fetcher with EnumFetcherCall
+
+    public Float fetchClosingPrice(String stockName, SimpleDateFormat time){
+        Float result = null;
+        
+
+        if (timeFailsSanityCheck(time)) {
             return result;
+        }
 
         Iterator <InterfaceDataBase>resources = listOfResources.iterator();
 
@@ -58,6 +76,13 @@ public class DataFetcher {
             }
         }
         return result;
+    }
+
+    public Float fetchAveragePrice(String stockName, SimpleDateFormat time) {
+       Float result = null;
+
+
+          return result;
     }
 
 }

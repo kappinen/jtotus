@@ -33,14 +33,13 @@ import org.jsoup.select.Elements;
  * @author kappiev
  */
 public class NetworkOP implements InterfaceDataBase {
-    Helper help = null;
+    Helper help = Helper.getInstance();;
     public String urlName="https://www.op.fi/op?sym=";
     public String urlParam="&id=32455&srcpl=8";
     public String patternString="yyyy-MM-dd";
 
 
     public NetworkOP (){
-        help = Helper.getInstance();
         BasicConfigurator.configure();
     }
 
@@ -69,7 +68,6 @@ public class NetworkOP implements InterfaceDataBase {
 
             Document doc = Jsoup.parse(url, 3*1000);
 
-                String title  = doc.title();
                 Elements elems = doc.select("td");
 
                 Iterator <Element>iter = elems.iterator();

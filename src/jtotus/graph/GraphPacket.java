@@ -6,13 +6,14 @@
 package jtotus.graph;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 
 /**
  *
  * @author kappiev
  */
-public class GraphPacket implements Serializable{
+public class // <editor-fold defaultstate="collapsed" desc="Packet for JtotusGraph">
+        GraphPacket// </editor-fold>
+ implements Serializable{
     private static final long serialVersionUID = 1L;
 
     

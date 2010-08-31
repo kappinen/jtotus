@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  *
- * FIXME:
  * http://www.javalobby.org/forums/thread.jspa?messageID=91836328
  * http://java-x.blogspot.com/2006/11/java-5-concurrency-callable-and-future.html
  * http://blogs.sun.com/CoreJavaTechTips/entry/get_netbeans_6

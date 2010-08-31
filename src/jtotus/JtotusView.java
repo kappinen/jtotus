@@ -217,14 +217,14 @@ public class JtotusView extends FrameView {
         });
 
         jInternalFrameGraph.setClosable(true);
-        jInternalFrameGraph.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
         jInternalFrameGraph.setIconifiable(true);
         jInternalFrameGraph.setMaximizable(true);
-        jInternalFrameGraph.setResizable(true);
         jInternalFrameGraph.setToolTipText(resourceMap.getString("jInternalFrameGraph.toolTipText")); // NOI18N
         jInternalFrameGraph.setDoubleBuffered(true);
         jInternalFrameGraph.setInheritsPopupMenu(true);
+        jInternalFrameGraph.setLayer(5);
         jInternalFrameGraph.setName("jInternalFrameGraph"); // NOI18N
+        jInternalFrameGraph.setOpaque(false);
         jInternalFrameGraph.setVisible(true);
 
         org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, jInternalFrameGraph, org.jdesktop.beansbinding.ELProperty.create("${enabled}"), jInternalFrameGraph, org.jdesktop.beansbinding.BeanProperty.create("defaultCloseOperation"));
@@ -257,8 +257,8 @@ public class JtotusView extends FrameView {
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButtonRunScripts, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 103, Short.MAX_VALUE)
-                .addComponent(jInternalFrameGraph, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 101, Short.MAX_VALUE)
+                .addComponent(jInternalFrameGraph)
                 .addGap(92, 92, 92))
         );
         mainPanelLayout.setVerticalGroup(
@@ -278,8 +278,8 @@ public class JtotusView extends FrameView {
                             .addComponent(jButtonRunScripts, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(mainPanelLayout.createSequentialGroup()
                         .addGap(35, 35, 35)
-                        .addComponent(jInternalFrameGraph, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(57, Short.MAX_VALUE))
+                        .addComponent(jInternalFrameGraph)))
+                .addContainerGap(59, Short.MAX_VALUE))
         );
 
         menuBar.setName("menuBar"); // NOI18N
@@ -322,7 +322,7 @@ public class JtotusView extends FrameView {
             .addGroup(statusPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(statusMessageLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 933, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 935, Short.MAX_VALUE)
                 .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(statusAnimationLabel)
@@ -464,16 +464,7 @@ public class JtotusView extends FrameView {
 
     private void jButtonRunScriptsMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonRunScriptsMousePressed
 
-        totusGraph = new JtotusGraph(jInternalFrameGraph, "Fortum Oyj");
-        if(totusGraph.initialize()==false) { //Failed to bind to port
-             System.out.printf("[%s] Failed ot bind to port\n",this.getClass().getName());
-            return;
-        }
-        mainEngine.registerGraph("Fortum Oyj", totusGraph.getBindPort());
-        
-        System.out.printf("Binded to port:%d\n", totusGraph.getBindPort());
-        Thread painter = new Thread(totusGraph);
-        painter.start();
+
 
 
       //  mainEngine.testGrapth();
@@ -507,4 +498,37 @@ public class JtotusView extends FrameView {
     private int busyIconIndex = 0;
 
     private JDialog aboutBox;
+
+    public int createIntFrame(String reviewTarget) {
+        int bindPort=-1;
+
+        javax.swing.JInternalFrame tempFrameGraph = new javax.swing.JInternalFrame();
+        
+        tempFrameGraph.setClosable(true);
+        tempFrameGraph.setIconifiable(true);
+        tempFrameGraph.setMaximizable(true);
+        tempFrameGraph.setDoubleBuffered(true);
+        tempFrameGraph.setInheritsPopupMenu(true);
+        tempFrameGraph.setLayer(5);
+        tempFrameGraph.setName("tempFrameGraph"); // NOI18N
+        tempFrameGraph.setOpaque(false);
+        tempFrameGraph.setVisible(true);
+
+        mainPanel.add(tempFrameGraph);
+
+        JtotusGraph tempGraph = new JtotusGraph(jInternalFrameGraph, reviewTarget);
+        if(tempGraph.initialize()==false) { //Failed to bind to port
+             System.out.printf("[%s] Failed ot bind to port\n",this.getClass().getName());
+            return bindPort;
+        }
+
+        bindPort = tempGraph.getBindPort();
+        System.out.printf("Binded to port:%d\n", tempGraph.getBindPort());
+        Thread painter = new Thread(tempGraph);
+        painter.start();
+
+
+        
+        return bindPort;
+    }
 }

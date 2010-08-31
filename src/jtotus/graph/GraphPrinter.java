@@ -8,8 +8,6 @@ package jtotus.graph;
 import java.awt.Color;
 import java.awt.Container;
 import java.text.SimpleDateFormat;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -30,7 +28,6 @@ public class GraphPrinter {
     private JFreeChart mainChart = null;
     private ChartPanel mainPanel = null;
     private TimeSeriesCollection mainDataset = null;
-    int draw = 0;
 
     
     public GraphPrinter(String reviewTarget) {

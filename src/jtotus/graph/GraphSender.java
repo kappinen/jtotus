@@ -21,30 +21,35 @@ import jtotus.engine.Engine;
  * @author kappiev
  */
 public class GraphSender {
-    Engine mainEngine = null;
-    int mainPort = 0;
-    DatagramSocket clientSock = null;
+    private Engine mainEngine = null;
+    private int mainPort = 0;
+    private DatagramSocket clientSock = null;
 
     public GraphSender(Engine tmpEngine){
         mainEngine = tmpEngine;
     }
 
     public GraphSender(int port){
-
+        mainPort = port;
     }
 
 
     public boolean sentPacket(String reviewTarget, GraphPacket packetObj){
         int port=0;
         ObjectOutputStream os = null;
-
-        if (packetObj == null) {
+        
+        if (packetObj == null || reviewTarget == null) {
             return false;
         }
-
+        
 
         if (mainEngine != null) {
             port = mainEngine.fetchGraph(reviewTarget);
+            if (port <= 0) {
+                System.err.printf("Unable to fetch Graph port!\n");
+                return false;
+            }
+            mainPort = port;
         } else if(mainPort != 0) {
             port = mainPort;
         } else {
@@ -56,7 +61,7 @@ public class GraphSender {
 
 
             clientSock = new DatagramSocket();
-            ByteArrayOutputStream byteStream = new ByteArrayOutputStream(1024 * 10 * 5);
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream(1024 * 10);
 
             os = new ObjectOutputStream(new BufferedOutputStream(byteStream));
             os.flush();

@@ -162,6 +162,7 @@ public class Engine {
     public void registerGraph(String reviewTarget, int acceccPoint){
 
         if(graphAccessPoints.containsKey(reviewTarget)) {
+             System.err.printf("Warning FIXME!!\n");
             //FIXME:what to do when..
             return;
         }
@@ -172,7 +173,17 @@ public class Engine {
     }
 
     public int fetchGraph(String reviewTarget) {
+        int accessPort = 0;
         Integer tmp = graphAccessPoints.get(reviewTarget);
+        if (tmp==null) {
+            //FIXME: create new internal frame
+            accessPort = mainWindow.createIntFrame(reviewTarget);
+            if (accessPort <= 0) {
+                return accessPort;
+            }
+            registerGraph(reviewTarget, accessPort);
+            return accessPort;
+        }
         return tmp.intValue();
     }
 

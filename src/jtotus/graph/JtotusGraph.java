@@ -216,7 +216,7 @@ public class JtotusGraph implements Runnable{
         
         public void run() {
 
-            final int maxSizeOfPacket = 1024*10*5;
+            final int maxSizeOfPacket = 1024*10;
             byte []buf = new byte[maxSizeOfPacket];
 
 
