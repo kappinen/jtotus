@@ -13,7 +13,9 @@ package jtotus.common;
  */
 public class MethodConfig {
 
-    public String []StockNames = { "Fortum Oyj", "Nokia Oyj"};
+    public String []StockNames = { "Fortum Oyj", 
+                                   "Nokia Oyj",
+                                   "UPM-Kymmene Oyj" };
     public int day_period = 5;
     
     

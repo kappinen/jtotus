@@ -15,6 +15,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jtotus.JtotusView;
 import jtotus.common.Helper;
+import jtotus.common.MethodConfig;
+import jtotus.database.AutoUpdateStocks;
 import jtotus.database.DataFetcher;
 import jtotus.graph.GraphPacket;
 import jtotus.graph.GraphSender;
@@ -94,6 +96,14 @@ public class Engine {
         if(dispatcher.setList(methodList)){
             help.debug(1, "Dispatcher is already full");
             return;
+        }
+
+        MethodConfig config = new MethodConfig();
+
+        String[] stocks = config.StockNames;
+        for (int i = stocks.length - 1; i >= 0; i--) {
+            Thread updateThread = new Thread(new AutoUpdateStocks(stocks[i]));
+            updateThread.start();
         }
         
        // dispatcher.run();

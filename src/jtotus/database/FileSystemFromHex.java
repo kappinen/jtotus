@@ -10,12 +10,14 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jtotus.common.Helper;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.Cell;
 
 
 /**
@@ -138,10 +140,24 @@ public Float fetchValue(String stockName, SimpleDateFormat time, int row)
             {
                 HSSFRow rows = (HSSFRow)rowIter.next();
                 HSSFCell cell = rows.getCell(0);
-                String temp = cell.getStringCellValue();
+                String dateString = null;
+                if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
+                    dateString = cell.getStringCellValue();
+                } else if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC){
+                    Date date = cell.getDateCellValue();
+                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                    dateString = format.format(date);
+                    
+                    System.err.printf("File (%s) is corrucped ? type:%s\n", fileName, dateString);
+                    
+                } else {
+                    System.err.printf("File (%s) is corrucped ? type:%d formula:%d\n", fileName, cell.getCellType(), Cell.CELL_TYPE_FORMULA);
+                    return null;
+                }
+              
 
               //  help.debug(this.getClass().getName(),"Searching:%s from:%s\n", correctTime, temp);
-                if (correctTime.compareTo(temp) == 0)
+                if (correctTime.compareTo(dateString) == 0)
                 {
                     HSSFCell closingPrice = rows.getCell(row);
                     float floatTemp = (float)closingPrice.getNumericCellValue();

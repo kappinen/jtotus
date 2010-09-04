@@ -85,7 +85,7 @@ public class LocalJavaDB implements InterfaceDataBase {
             java.sql.Date sqlDate = new java.sql.Date(searchDay.getTime());
             pstmt.setDate(2, sqlDate, time.getCalendar());
 
-            help.debug(this.getClass().getName(), "Query:%s\n", query);
+            help.debug(this.getClass().getName(), "Query:%s Stock:%s\n", query, stockName   );
             //Perform query
             ResultSet results = pstmt.executeQuery();
 

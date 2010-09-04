@@ -19,7 +19,7 @@ public class Helper {
     private static Helper help = null;
     private int debugLvl = 1;
     private String []debugFilter= { "SimpleMovinAvg",
-                                  //  "jtotus.database.FileSystemFromHex",
+                                    "jtotus.database.FileSystemFromHex",
                                   //  "jtotus.database.NetworkNordnet",
                                   //  "jtotus.common.Helper",
                                     "jtotus.database.NetworkOP",
@@ -104,13 +104,13 @@ public class Helper {
         return date;
     }
 
-    public int stringToInt(String temp){
+    public int stringToInt(String temp) {
         return Integer.parseInt(temp);
 
     }
 
 
-    public String dateToString(SimpleDateFormat time){
+    public String dateToString(SimpleDateFormat time) {
         Calendar cal = time.getCalendar();
         
         return time.format(cal.getTime());
@@ -118,7 +118,7 @@ public class Helper {
 
 
 
-    public synchronized void printCrtDir(){
+    public synchronized void printCrtDir() {
 
      File dir1 = new File (".");
      File dir2 = new File ("..");
