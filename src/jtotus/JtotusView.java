@@ -19,6 +19,7 @@ import javax.swing.Timer;
 import javax.swing.Icon;
 import javax.swing.JDialog;
 import jtotus.engine.Engine;
+import jtotus.engine.StatisticsFreqPeriod;
 import jtotus.graph.JtotusGraph;
 import jtotus.threads.VoterThread;
 
@@ -465,7 +466,9 @@ public class JtotusView extends FrameView {
     private void jButtonRunScriptsMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonRunScriptsMousePressed
 
 
-
+        StatisticsFreqPeriod stats = new StatisticsFreqPeriod("Fortum Oyj");
+        stats.run();
+        
 
       //  mainEngine.testGrapth();
 

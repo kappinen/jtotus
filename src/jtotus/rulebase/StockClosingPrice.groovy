@@ -16,8 +16,8 @@ import jtotus.common.Helper;
 import jtotus.engine.Engine;
 import jtotus.graph.GraphPacket;
 
-def reviewTarget = "UPM-Kymmene Oyj"
-def daysToSearch = 300;
+def reviewTarget = "Fortum Oyj"
+def daysToSearch = 7;
 
 
 

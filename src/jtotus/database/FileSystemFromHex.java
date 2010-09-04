@@ -148,7 +148,7 @@ public Float fetchValue(String stockName, SimpleDateFormat time, int row)
                     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
                     dateString = format.format(date);
                     
-                    System.err.printf("File (%s) is corrucped ? type:%s\n", fileName, dateString);
+//                    System.err.printf("File (%s) is corrucped ? type:%s\n", fileName, dateString);
                     
                 } else {
                     System.err.printf("File (%s) is corrucped ? type:%d formula:%d\n", fileName, cell.getCellType(), Cell.CELL_TYPE_FORMULA);

@@ -63,19 +63,5 @@ method.run()
 
 
 
-// Draw the past 20 days of stock
-
-fortum = new jtotus.common.StockType("Fortum Oyj")
-//
-sender = new jtotus.graph.GraphSender(engine);
-packet = new jtotus.graph.GraphPacket();
-packet.seriesTitle = "Fortum Oyj"
-
-
-println packet.day + ":" +packet.month + ":" + packet.year 
-for (int i=0; i<100;i++) {
-        sender.sentPacket("Fortum Oyj", fortum.fetchPastDayClosingPricePacket(i))
-    }
-
 println "DONE for AveragePlot"
 
