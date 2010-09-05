@@ -466,7 +466,7 @@ public class JtotusView extends FrameView {
     private void jButtonRunScriptsMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonRunScriptsMousePressed
 
 
-        StatisticsFreqPeriod stats = new StatisticsFreqPeriod("Fortum Oyj");
+        StatisticsFreqPeriod stats = new StatisticsFreqPeriod();
         stats.run();
         
 

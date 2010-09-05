@@ -160,6 +160,9 @@ public Float fetchValue(String stockName, SimpleDateFormat time, int row)
                 if (correctTime.compareTo(dateString) == 0)
                 {
                     HSSFCell closingPrice = rows.getCell(row);
+                    if (closingPrice == null)
+                        return null;
+                    
                     float floatTemp = (float)closingPrice.getNumericCellValue();
                     help.debug(this.getClass().getName(), 
                             "Closing price at:%d f:%.4f Time:%s\n",

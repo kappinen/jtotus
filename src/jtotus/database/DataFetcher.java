@@ -68,6 +68,7 @@ public class DataFetcher implements InterfaceDataBase {
             while(resources.hasNext()){
                 InterfaceDataBase res = resources.next();
 
+                
                 result = res.fetchClosingPrice(stockName, time);
                 if (result != null) {
                         javadb.storeClosingPrice(stockName, time, result);

@@ -6,10 +6,12 @@
 package jtotus.engine;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import jtotus.common.DateIterator;
+import jtotus.common.MethodConfig;
 import jtotus.common.StockType;
 import jtotus.threads.VoterThread;
 
@@ -26,9 +28,15 @@ public class StatisticsFreqPeriod implements VoterThread{
     private int []neuCurrent = new int[maxPeriod]; // Neutral current
 
 
+
+
+    public StatisticsFreqPeriod() {
+    }
+
     
     public StatisticsFreqPeriod(String tmpName) {
         stockName = tmpName;
+        
     }
 
     public String getMethName() {
@@ -53,16 +61,41 @@ public class StatisticsFreqPeriod implements VoterThread{
 
 
 
-    public void run() {
-        if (stockName == null) {
-            return;
-        }
+public void run() {
 
-        StockType stock = new StockType(stockName);
 
-        
+    MethodConfig config = new MethodConfig();
 
-        
+    ArrayList<String> stockList = new ArrayList<String>();
+
+
+    if (stockName == null) {//Stock Name is not provided, lets use config file
+        String []tempList = config.fetchStockName();
+
+        for (int i = 0; i < tempList.length;i++)
+            stockList.add(tempList[i]);
+        String []stockNames = config.fetchStockName();
+    }
+    else {
+        stockList.add(stockName);
+    }
+    
+    StatisticsForFreqPeriod(stockList,config);
+    
+    
+}
+
+
+private void StatisticsForFreqPeriod(ArrayList<String> stockList,
+                                     MethodConfig config) {
+
+
+    Iterator<String> list = stockList.iterator();
+
+    while (list.hasNext()) {
+        StockType stock = new StockType(list.next());
+
+               
         Float previousDay = null;
         Float searchDady = null;
         SimpleDateFormat dayFormat = new SimpleDateFormat();
@@ -71,13 +104,12 @@ public class StatisticsFreqPeriod implements VoterThread{
         Float localCurrent = 0.0f;
         int strikes = 0;
 
-        Calendar calen = Calendar.getInstance();
-        //FIXME:get values from config or elsewere!s
-        calen.set(2005, 8 -1, 30);
+        Date startDate = config.getStartTime();
+        Date endDate = config.getEndTime();
 
-        Iterator<Date> dateIter = new DateIterator(calen.getTime());
+        Iterator<Date> dateIter = new DateIterator(startDate, endDate);
 
-        System.err.print(calen.getTime());
+        System.err.print(startDate + ":"+ endDate + "\n");
 
         while(dateIter.hasNext()) {
 
@@ -147,10 +179,10 @@ public class StatisticsFreqPeriod implements VoterThread{
             else {
                 neuCurrent[strikes]++;
             }
-        //results
-
-        printResultsToOur();
     }
+        //results
+        printResultsToOur();
+}
     
     
     
