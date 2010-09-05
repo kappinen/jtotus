@@ -16,11 +16,11 @@ import jtotus.common.Helper;
 import jtotus.engine.Engine;
 import jtotus.graph.GraphPacket;
 
-def reviewTarget = "Fortum Oyj"
-def daysToSearch = 7;
+//def reviewTarget = "Fortum Oyj"
+//def daysToSearch = 70;
 
 
-
+def drawClosingPrice (String reviewTarget, int daysToSearch) {
 
 Engine engine = Engine.getInstance()
 
@@ -35,6 +35,12 @@ println packet.day + ":" +packet.month + ":" + packet.year
 for (int i=0; i<daysToSearch;i++) {
         sender.sentPacket(stockType.getName(), stockType.fetchPastDayClosingPricePacket(i))
     }
+
+
+}
+
+drawClosingPrice("Fortum Oyj", 70)
+drawClosingPrice("UPM-Kymmene Oyj",100)
 
 println "DONE for StockClosingPrice"
 

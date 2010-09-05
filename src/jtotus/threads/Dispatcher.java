@@ -65,12 +65,14 @@ public class Dispatcher {
 
     public boolean setList(LinkedList<VoterThread> threads) {
 
-        help = Helper.getInstance();
 
         if (threadList == null) {
             threadList = new LinkedList<VoterThread>();
         }
 
+        help.debug(this.getClass().getName(), "setting list with size:%d\n",
+                threads.size());
+        
         if (!threadList.isEmpty()) {
             threadList.clear();
         }

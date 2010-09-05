@@ -80,7 +80,9 @@ public class JtotusGraph implements Runnable{
         }
     
     synchronized private int addtBindPort(int value){
-            return defaultPort+=value;
+        defaultPort+=value;
+        
+        return defaultPort;
         }
 
 

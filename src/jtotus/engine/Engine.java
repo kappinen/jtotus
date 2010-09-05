@@ -34,7 +34,6 @@ public class Engine {
     private static Engine singleton = null;
     private Dispatcher dispatcher = null;
     private LinkedList <VoterThread>methodList;
-    private DataFetcher fetcher = null;
     private Helper help = null;
     private JtotusView mainWindow = null;
     private HashMap <String,Integer> graphAccessPoints = null;
@@ -113,7 +112,10 @@ public class Engine {
     public void train(){
 
         LinkedList<String>methodNames = mainWindow.getMethodList();
-        Iterator <VoterThread>methodIter = methodList.iterator();
+
+
+        LinkedList <VoterThread>methodL = (LinkedList<VoterThread>) methodList.clone();
+        Iterator <VoterThread>methodIter = methodL.iterator();
         boolean found = false;
 
 
@@ -125,7 +127,7 @@ public class Engine {
             
             while(nameIter.hasNext()){
                 String nameList = nameIter.next();
-               // System.out.printf("Search name:%s in list:%s\n",tempName, nameList);
+                System.out.printf("Search name:%s in list:%s\n",tempName, nameList);
                 if(nameList.compareTo(tempName)==0){
                     found=true;
                     break;
@@ -138,7 +140,7 @@ public class Engine {
             found=false;
         }
 
-        if(dispatcher.setList(methodList)){
+        if(dispatcher.setList(methodL)){
             help.debug(1, "Dispatcher is already full");
             return;
         }

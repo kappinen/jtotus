@@ -33,12 +33,15 @@ public class StockType implements Iterator{
         stockName = name;
         help = Helper.getInstance();
         fetcher = new DataFetcher();
-        
+
+        //Aliases
         stockMap.put("Fortum Oyj", "FUM1V.HE");
         stockMap.put("Fortum Oyj", "FUM1V.HSE");
-
-
+        
         stockMap.put("Nokia Oyj", "NOK1V.HSE");
+
+
+
 
        Set entries = stockMap.entrySet();
        mapIter = entries.iterator();
