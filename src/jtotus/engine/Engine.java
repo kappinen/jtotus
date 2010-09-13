@@ -14,8 +14,9 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jtotus.JtotusView;
+import jtotus.config.ConfigLoader;
 import jtotus.common.Helper;
-import jtotus.common.MethodConfig;
+import jtotus.config.MethodConfig;
 import jtotus.database.AutoUpdateStocks;
 import jtotus.database.DataFetcher;
 import jtotus.graph.GraphPacket;
@@ -60,6 +61,8 @@ public class Engine {
                 Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+
+      
 
     }
 

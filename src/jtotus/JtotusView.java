@@ -152,7 +152,6 @@ public class JtotusView extends FrameView {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
         mainPanel = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -167,7 +166,6 @@ public class JtotusView extends FrameView {
         jComboBox1 = new javax.swing.JComboBox();
         jSeparator1 = new javax.swing.JSeparator();
         jDesktopPane1 = new javax.swing.JDesktopPane();
-        jInternalFrameGraph = new javax.swing.JInternalFrame();
         menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
@@ -245,34 +243,6 @@ public class JtotusView extends FrameView {
 
         jDesktopPane1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         jDesktopPane1.setName("jDesktopPane1"); // NOI18N
-
-        jInternalFrameGraph.setClosable(true);
-        jInternalFrameGraph.setIconifiable(true);
-        jInternalFrameGraph.setMaximizable(true);
-        jInternalFrameGraph.setResizable(true);
-        jInternalFrameGraph.setToolTipText(resourceMap.getString("jInternalFrameGraph.toolTipText")); // NOI18N
-        jInternalFrameGraph.setDoubleBuffered(true);
-        jInternalFrameGraph.setInheritsPopupMenu(true);
-        jInternalFrameGraph.setName("jInternalFrameGraph"); // NOI18N
-        jInternalFrameGraph.setOpaque(false);
-        jInternalFrameGraph.setVisible(true);
-
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, jInternalFrameGraph, org.jdesktop.beansbinding.ELProperty.create("${enabled}"), jInternalFrameGraph, org.jdesktop.beansbinding.BeanProperty.create("defaultCloseOperation"));
-        bindingGroup.addBinding(binding);
-
-        javax.swing.GroupLayout jInternalFrameGraphLayout = new javax.swing.GroupLayout(jInternalFrameGraph.getContentPane());
-        jInternalFrameGraph.getContentPane().setLayout(jInternalFrameGraphLayout);
-        jInternalFrameGraphLayout.setHorizontalGroup(
-            jInternalFrameGraphLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 580, Short.MAX_VALUE)
-        );
-        jInternalFrameGraphLayout.setVerticalGroup(
-            jInternalFrameGraphLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 428, Short.MAX_VALUE)
-        );
-
-        jInternalFrameGraph.setBounds(10, 10, 590, 460);
-        jDesktopPane1.add(jInternalFrameGraph, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
@@ -381,8 +351,6 @@ public class JtotusView extends FrameView {
         setComponent(mainPanel);
         setMenuBar(menuBar);
         setStatusBar(statusPanel);
-
-        bindingGroup.bind();
     }// </editor-fold>//GEN-END:initComponents
 
     private void SelectedListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SelectedListMouseClicked
@@ -522,7 +490,6 @@ public class JtotusView extends FrameView {
     private javax.swing.JButton jButtonRunScripts;
     private javax.swing.JComboBox jComboBox1;
     private javax.swing.JDesktopPane jDesktopPane1;
-    private javax.swing.JInternalFrame jInternalFrameGraph;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
@@ -535,7 +502,6 @@ public class JtotusView extends FrameView {
     private javax.swing.JLabel statusAnimationLabel;
     private javax.swing.JLabel statusMessageLabel;
     private javax.swing.JPanel statusPanel;
-    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
     private final Timer messageTimer;

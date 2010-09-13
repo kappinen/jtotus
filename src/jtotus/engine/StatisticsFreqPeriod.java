@@ -11,7 +11,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import jtotus.common.DateIterator;
-import jtotus.common.MethodConfig;
+import jtotus.config.MethodConfig;
 import jtotus.common.StockType;
 import jtotus.threads.VoterThread;
 

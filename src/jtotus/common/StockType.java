@@ -40,6 +40,7 @@ public class StockType implements Iterator{
         
         stockMap.put("Nokia Oyj", "NOK1V.HSE");
 
+        stockMap.put("UPM-Kymmene Oyj","UPM1V.HSE");
 
 
 

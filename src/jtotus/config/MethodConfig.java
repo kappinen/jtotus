@@ -5,7 +5,7 @@
  * 
  */
 
-package jtotus.common;
+package jtotus.config;
 
 import java.util.Calendar;
 import java.util.Date;

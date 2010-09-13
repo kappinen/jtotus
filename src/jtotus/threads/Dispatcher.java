@@ -21,7 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import jtotus.common.Helper;
-import jtotus.common.MethodConfig;
+import jtotus.config.MethodConfig;
 import jtotus.engine.DummyMethod;
 
 /**

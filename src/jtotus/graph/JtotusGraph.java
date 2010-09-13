@@ -66,8 +66,13 @@ public class JtotusGraph implements Runnable{
         mainReviewTarget = reviewTarget;
        // mainFrame.setContentPane(lineChart.getContainer());
         lineChart = new GraphPrinter(reviewTarget);
+
+        mainFrame.setName(reviewTarget);
+        mainFrame.setTitle(reviewTarget);
         mainFrame.setContentPane(lineChart.getContainer());
         mainFrame.setDefaultCloseOperation(JInternalFrame.EXIT_ON_CLOSE);
+
+        
         
         
     }

@@ -220,43 +220,6 @@
           </Properties>
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.support.JLayeredPaneSupportLayout"/>
-          <SubComponents>
-            <Container class="javax.swing.JInternalFrame" name="jInternalFrameGraph">
-              <Properties>
-                <Property name="closable" type="boolean" value="true"/>
-                <Property name="iconifiable" type="boolean" value="true"/>
-                <Property name="maximizable" type="boolean" value="true"/>
-                <Property name="resizable" type="boolean" value="true"/>
-                <Property name="toolTipText" type="java.lang.String" resourceKey="jInternalFrameGraph.toolTipText"/>
-                <Property name="doubleBuffered" type="boolean" value="true"/>
-                <Property name="inheritsPopupMenu" type="boolean" value="true"/>
-                <Property name="name" type="java.lang.String" value="jInternalFrameGraph" noResource="true"/>
-                <Property name="opaque" type="boolean" value="false"/>
-                <Property name="visible" type="boolean" value="true"/>
-              </Properties>
-              <BindingProperties>
-                <BindingProperty name="defaultCloseOperation" source="jInternalFrameGraph" sourcePath="${enabled}" target="jInternalFrameGraph" targetPath="defaultCloseOperation" updateStrategy="0" immediately="false"/>
-              </BindingProperties>
-              <Constraints>
-                <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JLayeredPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JLayeredPaneSupportLayout$JLayeredPaneConstraintsDescription">
-                  <JLayeredPaneConstraints x="10" y="10" width="590" height="460" layer="0" position="-1"/>
-                </Constraint>
-              </Constraints>
-
-              <Layout>
-                <DimensionLayout dim="0">
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <EmptySpace min="0" pref="580" max="32767" attributes="0"/>
-                  </Group>
-                </DimensionLayout>
-                <DimensionLayout dim="1">
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <EmptySpace min="0" pref="428" max="32767" attributes="0"/>
-                  </Group>
-                </DimensionLayout>
-              </Layout>
-            </Container>
-          </SubComponents>
         </Container>
       </SubComponents>
     </Container>

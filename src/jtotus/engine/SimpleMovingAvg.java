@@ -5,7 +5,7 @@
 package jtotus.engine;
 
 import jtotus.common.Helper;
-import jtotus.common.MethodConfig;
+import jtotus.config.MethodConfig;
 import jtotus.common.StockType;
 import jtotus.threads.Dispatcher;
 import jtotus.threads.VoterThread;
