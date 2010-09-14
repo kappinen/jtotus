@@ -18,6 +18,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.Timer;
 import javax.swing.Icon;
 import javax.swing.JDialog;
+import jtotus.config.GUIConfig;
 import jtotus.engine.Engine;
 import jtotus.engine.StatisticsFreqPeriod;
 import jtotus.graph.JtotusGraph;
@@ -47,6 +48,14 @@ public class JtotusView extends FrameView {
             dlm.add(dlm.size(),((VoterThread)iterator.next()).getMethName());
          }
 
+         GUIConfig uiConfig = new GUIConfig();
+         String listOfStocks[] = uiConfig.fetchStockName();
+
+         for (int i = 0;i<listOfStocks.length-1;i++){
+             dlm2.addElement(listOfStocks[i]);
+         }
+
+         
     }
 
    public LinkedList<String> getMethodList() {
@@ -163,9 +172,9 @@ public class JtotusView extends FrameView {
         jSplitPane1 = new javax.swing.JSplitPane();
         jButton1 = new javax.swing.JButton();
         jButtonRunScripts = new javax.swing.JButton();
-        jComboBox1 = new javax.swing.JComboBox();
         jSeparator1 = new javax.swing.JSeparator();
         jDesktopPane1 = new javax.swing.JDesktopPane();
+        jTextField1 = new javax.swing.JTextField();
         menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
@@ -236,13 +245,13 @@ public class JtotusView extends FrameView {
         });
         jSplitPane1.setRightComponent(jButtonRunScripts);
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jComboBox1.setName("jComboBox1"); // NOI18N
-
         jSeparator1.setName("jSeparator1"); // NOI18N
 
         jDesktopPane1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         jDesktopPane1.setName("jDesktopPane1"); // NOI18N
+
+        jTextField1.setText(resourceMap.getString("jTextField1.text")); // NOI18N
+        jTextField1.setName("jTextField1"); // NOI18N
 
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
@@ -250,21 +259,20 @@ public class JtotusView extends FrameView {
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(mainPanelLayout.createSequentialGroup()
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(1, 1, 1)
-                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(mainPanelLayout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addGap(169, 169, 169))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 388, Short.MAX_VALUE)))
-                .addGap(18, 18, 18)
-                .addComponent(jDesktopPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 795, Short.MAX_VALUE)
+                    .addComponent(jSeparator1)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 286, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2))
+                .addGap(27, 27, 27)
+                .addComponent(jDesktopPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 891, Short.MAX_VALUE)
                 .addContainerGap())
         );
         mainPanelLayout.setVerticalGroup(
@@ -276,7 +284,7 @@ public class JtotusView extends FrameView {
                     .addGroup(mainPanelLayout.createSequentialGroup()
                         .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(12, 12, 12)
@@ -287,7 +295,7 @@ public class JtotusView extends FrameView {
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(45, 45, 45)
                         .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+                .addGap(17, 17, 17))
         );
 
         menuBar.setName("menuBar"); // NOI18N
@@ -326,11 +334,11 @@ public class JtotusView extends FrameView {
         statusPanel.setLayout(statusPanelLayout);
         statusPanelLayout.setHorizontalGroup(
             statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 1229, Short.MAX_VALUE)
+            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 1232, Short.MAX_VALUE)
             .addGroup(statusPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(statusMessageLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 1045, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 1048, Short.MAX_VALUE)
                 .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(statusAnimationLabel)
@@ -354,11 +362,9 @@ public class JtotusView extends FrameView {
     }// </editor-fold>//GEN-END:initComponents
 
     private void SelectedListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SelectedListMouseClicked
-         
+
+
         if (SelectedList.isSelectionEmpty()){
-            dlm2.add(0, "SelectedList test");
-            dlm2.add(0, "SelectedList test2");
-            dlm2.add(0, "SelectedList test3");
             return;
         }
         else if (SelectedList.getModel().getSize() == 0){
@@ -367,40 +373,11 @@ public class JtotusView extends FrameView {
         }
         else
         {
-            int element = SelectedList.getSelectedIndex();
-
-            if (element == 0)
-            {
-                   while(dlm2.size() > 1)
-                {
-                    boolean found=false;
-                    for (int i = dlm.size()-1;i>=1;i--)
-                    {
-                        String tmp = (String) dlm.get(i);
-                        if(tmp.compareTo((String) dlm2.get(dlm2.size()-1)) == 0)
-                        {
-                          found=true;
-                          break;
-                        }
-                    }
-
-                    if (!found)
-                    {
-                        dlm.add(dlm.size(), dlm2.get(dlm2.size()-1));
-                        found = false;
-                    }
-
-                     dlm2.remove(dlm2.size()-1);
-                }
-
+            if (SelectedList.getSelectedIndex() == 0) {
+                System.out.printf("All selected\n");
+                SelectedList.setSelectionInterval(1, dlm2.getSize());
+                return;
             }
-            else {
-                String name = (String) dlm2.getElementAt(element);
-                dlm.add(dlm.size(), name);
-                dlm2.remove(SelectedList.getSelectedIndex());
-                SelectedList.clearSelection();
-            }
-
 
         }
     }//GEN-LAST:event_SelectedListMouseClicked
@@ -408,58 +385,21 @@ public class JtotusView extends FrameView {
     private void AvailableListMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_AvailableListMouseReleased
 
 
-        if (true)
-            return;
+     
         
         if (AvailableList.isSelectionEmpty()){
-            dlm.add(0, "AvailableList test");
-             dlm.add(0, "AvailableList test2");
-              dlm.add(0, "AvailableList test3");
-               dlm.add(0, "AvailableList test");
-                dlm.add(0, "AvailableList test4");
-                
             return;
         }
         else if (AvailableList.getModel().getSize() == 0){
             dlm.add(0, "(All)");
             return;
-        }
-        else
-        {
-            int element = AvailableList.getSelectedIndex();
-            if (element == 0)
-            {
-                while(dlm.size() > 1)
-                {
-                    boolean found=false;
-                    for (int i = dlm2.size()-1;i>=1;i--)
-                    {
-                        String tmp = (String) dlm2.get(i);
-                        if(tmp.compareTo((String) dlm.get(dlm.size()-1)) == 0)
-                        {
-                          found=true;
-                          break;
-                        }
-                    }
-
-                    if (!found)
-                    {
-                        dlm2.add(dlm2.size(), dlm.get(dlm.size()-1));
-                        found = false;
-                    }
-
-                     dlm.remove(dlm.size()-1);
-                }
+        }else if (AvailableList.getSelectedIndex() == 0) {
+                System.out.printf("All selected\n");
+                AvailableList.setSelectionInterval(1, dlm.getSize());
+                return;
             }
-            else {
-                String name = (String) dlm.getElementAt(element);
-                dlm.remove(AvailableList.getSelectedIndex());
-                dlm2.add(dlm2.size(), name);
-                AvailableList.clearSelection();
-            }
-         
 
-        }
+    
 
     }//GEN-LAST:event_AvailableListMouseReleased
 
@@ -488,7 +428,6 @@ public class JtotusView extends FrameView {
     public javax.swing.JList SelectedList;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButtonRunScripts;
-    private javax.swing.JComboBox jComboBox1;
     private javax.swing.JDesktopPane jDesktopPane1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -496,6 +435,7 @@ public class JtotusView extends FrameView {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSplitPane jSplitPane1;
+    private javax.swing.JTextField jTextField1;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JProgressBar progressBar;
@@ -509,8 +449,6 @@ public class JtotusView extends FrameView {
     private final Icon idleIcon;
     private final Icon[] busyIcons = new Icon[15];
     private int busyIconIndex = 0;
-
-    private JDialog aboutBox;
 
     public int createIntFrame(String reviewTarget) {
         int bindPort=-1;

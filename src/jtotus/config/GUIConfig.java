@@ -1,20 +1,15 @@
 /*
- *
- * Tells Methods what to do, for example which stocks
- * to evaluate and how. General porpose Configuration.
- * 
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
 
 package jtotus.config;
-
-import java.util.Calendar;
-import java.util.Date;
 
 /**
  *
  * @author kappiev
  */
-public class MethodConfig {
+public class GUIConfig {
 
     public final String []StockNames = { "Fortum Oyj",
                                          "Nokia Oyj",
@@ -36,16 +31,6 @@ public class MethodConfig {
         return StockNames;
     }
 
-    public Date getStartTime() {
-        Calendar calen = Calendar.getInstance();
-        calen.set(2005, 8 -1, 30);
-        return calen.getTime();
-    }
-
-    public Date getEndTime() {
-        Calendar calen = Calendar.getInstance();
-        return calen.getTime();
-    }
-    
 
 }
+
