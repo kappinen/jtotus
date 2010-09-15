@@ -107,10 +107,16 @@ public class Engine {
             Thread updateThread = new Thread(new AutoUpdateStocks(stocks[i]));
             updateThread.start();
         }
-        
+
+        testRun();
        // dispatcher.run();
     }
 
+    private void testRun() {
+        PotentialWithIn pot = new PotentialWithIn();
+        Thread th = new Thread(pot);
+        th.start();
+    }
 
     public void train(){
 

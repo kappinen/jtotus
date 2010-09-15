@@ -16,7 +16,8 @@ import jtotus.threads.Dispatcher
 import jtotus.common.Helper;
 import jtotus.engine.Engine;
 import jtotus.graph.GraphPacket;
-
+import jtotus.methods.PeriodClosingPrice;
+import jtotus.engine.PotentialWithIn;
 
 //Example 1
 class Callee {
@@ -61,7 +62,18 @@ dispatcher = new Dispatcher()
 method = new jtotus.engine.SimpleMovingAvg(dispatcher)
 method.run()
 
+StockType stock = new StockType("Fortum Oyj")
+PeriodClosingPrice period = new PeriodClosingPrice(stock);
 
+Float max =  period.getMaxValue()
+Float min = period.getMinValue();
+println stock.getHexName() +  " Max:" + max + " Min:" + min + "\n";
+
+
+
+
+//Thread potential = new Thread(new PotentialWithIn());
+//potential.start();
 
 println "DONE for AveragePlot"
 

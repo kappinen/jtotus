@@ -49,7 +49,7 @@ public class SimpleMovingAvg implements VoterThread {
             count = 0;
             StockType stockType = new StockType(stocks[i]);
 
-            for (int y = 0; y <= (config.day_period - 1); y++) {
+            for (int y = 0; count <= (config.day_period - 1) && count < Integer.MAX_VALUE-1; y++) {
                 tmp = stockType.fetchClosingPrice(help.dateReduction(help.getTimeNow(), y));
                 if (tmp != null) {
                     avr += tmp;

@@ -40,10 +40,10 @@ for (int i=0; i<daysToSearch;i++) {
 }
 
 drawClosingPrice("Fortum Oyj", 70)
-drawClosingPrice("UPM-Kymmene Oyj",100)
-drawClosingPrice("Kemira Oyj",100)
-drawClosingPrice("Tieto Oyj",100)
-drawClosingPrice("Metso Oyj",100)
+drawClosingPrice("UPM-Kymmene Oyj", 100)
+drawClosingPrice("Kemira Oyj", 100)
+drawClosingPrice("Tieto Oyj", 100)
+drawClosingPrice("Metso Oyj", 100)
 
 println "DONE for StockClosingPrice"
 
