@@ -5,6 +5,7 @@
 
 package jtotus.common;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -97,7 +98,7 @@ public class StockType implements Iterator{
         return stockName;
     }
 
-    public Float fetchCurrentClosingPrice() {
+    public BigDecimal fetchCurrentClosingPrice() {
         Calendar cal = Calendar.getInstance();
         SimpleDateFormat format = new SimpleDateFormat();
         format.setCalendar(cal);
@@ -105,20 +106,25 @@ public class StockType implements Iterator{
         help.debug(this.getClass().getName(), "Fetching:%s: Time:" + cal.getTime() + "\n" , stockName);
 
         while(fetcher.fetchClosingPrice(stockName, format) == null) {
+            //TODO:check end
             cal.add(Calendar.DATE, -1);
         }
-        
+
         return fetcher.fetchClosingPrice(stockName, format);
-        
     }
-    public Float fetchClosingPrice(SimpleDateFormat time) {
+
+    public BigDecimal fetchClosingPrice(SimpleDateFormat time) {
 
         help.debug(this.getClass().getName(), "Fetching:%s: Time:%s\n", stockName, help.dateToString(time));
 
         return fetcher.fetchClosingPrice(stockName, time);
     }
-    public Float fetchClosingPrice(Date time){
+    public BigDecimal fetchClosingPrice(Date time){
 
+        if (time==null) {
+            return null;
+        }
+        
         Calendar cal = Calendar.getInstance();
         cal.setTime(time);
         SimpleDateFormat format = new SimpleDateFormat();
@@ -129,8 +135,8 @@ public class StockType implements Iterator{
         return fetcher.fetchClosingPrice(stockName, format);
     }
 
-    public Float fetchPastDayClosingPrice(int count){
-        Float tmp = null;
+    public BigDecimal fetchPastDayClosingPrice(int count){
+        BigDecimal tmp = null;
 
         Calendar cal = Calendar.getInstance();
         SimpleDateFormat date = new SimpleDateFormat("dd-MM-yyyy");
@@ -140,17 +146,13 @@ public class StockType implements Iterator{
         date.setCalendar(cal);
 
         tmp = fetcher.fetchClosingPrice(stockName, date);
-
-        if (tmp != null) {
-            return tmp.floatValue();
-        }
         
         return tmp;
     }
 
         public GraphPacket fetchPastDayClosingPricePacket(int count){
         GraphPacket packet = null;
-        Float tmp = null;
+        BigDecimal tmp = null;
 
         Calendar cal = Calendar.getInstance();
         SimpleDateFormat date = new SimpleDateFormat("dd-MM-yyyy");

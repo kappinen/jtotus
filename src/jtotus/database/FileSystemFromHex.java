@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.math.BigDecimal;
 import jtotus.common.Helper;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
@@ -58,38 +59,38 @@ public class FileSystemFromHex implements InterfaceDataBase {
 
     
     
-public Float fetchHighestPrice(String stockName, SimpleDateFormat time){
+public BigDecimal fetchHighestPrice(String stockName, SimpleDateFormat time){
     return fetchValue(stockName, time, 1);
 }
 
-public Float fetchLowestPrice(String stockName, SimpleDateFormat time){
+public BigDecimal fetchLowestPrice(String stockName, SimpleDateFormat time){
     return fetchValue(stockName, time, 2);
 }
 
-public Float fetchClosingPrice(String stockName, SimpleDateFormat time){
+public BigDecimal fetchClosingPrice(String stockName, SimpleDateFormat time){
     return fetchValue(stockName, time, 3);
 }
 
-public Float fetchAveragePrice(String stockName, SimpleDateFormat time){
+public BigDecimal fetchAveragePrice(String stockName, SimpleDateFormat time){
     return fetchValue(stockName, time, 4);
 }
 
-public Float fetchTotalVolume(String stockName, SimpleDateFormat time){
+public BigDecimal fetchTotalVolume(String stockName, SimpleDateFormat time){
     return fetchValue(stockName, time, 5);
 }
 
-public Float fetchTurnOver(String stockName, SimpleDateFormat time){
+public BigDecimal fetchTurnOver(String stockName, SimpleDateFormat time){
     return fetchValue(stockName, time, 6);
 }
 
-public Float fetchTrades(String stockName, SimpleDateFormat time){
+public BigDecimal fetchTrades(String stockName, SimpleDateFormat time){
     return fetchValue(stockName, time, 7);
 }
 
 
-public Float fetchValue(String stockName, SimpleDateFormat time, int row)
+public BigDecimal fetchValue(String stockName, SimpleDateFormat time, int row)
 {
-    Float result = null;
+    BigDecimal result = null;
 
     File dir = new File("./" + pathToDataBaseDir);
     FileFilter filter = filterForDir();
@@ -116,8 +117,8 @@ public Float fetchValue(String stockName, SimpleDateFormat time, int row)
 
 
 
-    public Float omxNordicFile(String fileName, SimpleDateFormat time,int row) {
-        Float result = null;
+    public BigDecimal omxNordicFile(String fileName, SimpleDateFormat time,int row) {
+        BigDecimal result = null;
 
         try {
 
@@ -168,7 +169,7 @@ public Float fetchValue(String stockName, SimpleDateFormat time, int row)
                             "Closing price at:%d f:%.4f Time:%s\n",
                             cell.getRowIndex(), floatTemp, correctTime);
                     
-                    return new Float(floatTemp);
+                    return new BigDecimal(floatTemp);
                 }
             }
 

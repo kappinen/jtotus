@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.math.BigDecimal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jtotus.common.Helper;
@@ -64,8 +65,8 @@ public class LocalJavaDB implements InterfaceDataBase {
 
     
 
-    public Float fetchClosingPrice(String stockName, SimpleDateFormat time) {
-        Float closingPrice = null;
+    public BigDecimal fetchClosingPrice(String stockName, SimpleDateFormat time) {
+        BigDecimal closingPrice = null;
         
         try {
             if (conJavaDB == null) {
@@ -90,9 +91,9 @@ public class LocalJavaDB implements InterfaceDataBase {
             ResultSet results = pstmt.executeQuery();
 
             while (results.next()) {
-                float tmpFloat = results.getFloat("CLOSINGPRICE");
-                help.debug(this.getClass().getName(), "Javadb got closing price %f for %s\n", tmpFloat, stockName);
-                closingPrice = new Float(tmpFloat);
+                BigDecimal tmpBigDecimal = results.getBigDecimal("CLOSINGPRICE");
+                help.debug(this.getClass().getName(), "Javadb got closing price %f for %s\n", tmpBigDecimal, stockName);
+                closingPrice = tmpBigDecimal;
                 break;
             }
 
@@ -107,7 +108,7 @@ public class LocalJavaDB implements InterfaceDataBase {
 
     }
 
-    public Float fetchAveragePrice(String stockName, SimpleDateFormat time) {
+    public BigDecimal fetchAveragePrice(String stockName, SimpleDateFormat time) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -150,9 +151,7 @@ public class LocalJavaDB implements InterfaceDataBase {
     //FIXME:add if failed store values to file in other database
     public void storeClosingPrice(String stockName, 
                                   SimpleDateFormat time,
-                                  Float value) {
-
-        float closingPrice = value.floatValue();
+                                  BigDecimal value) {
         
         if (conJavaDB == null) {
             if (initialize() < 0) {
@@ -166,7 +165,7 @@ public class LocalJavaDB implements InterfaceDataBase {
                 String query = "UPDATE "+mainTable+" SET STOCKNAME=? WHERE STOCKNAME=? AND DATE=?";
                 PreparedStatement pstmt = conJavaDB.prepareStatement(query);
 
-                pstmt.setFloat(1, closingPrice);
+                pstmt.setBigDecimal(1, value);
                 pstmt.setString(2, stockName);
 
                 Calendar cal = time.getCalendar();
@@ -191,11 +190,11 @@ public class LocalJavaDB implements InterfaceDataBase {
                 pstmt.setDate(2, sqlDate, time.getCalendar());
 
 
-                pstmt.setFloat(3, closingPrice);
+                pstmt.setBigDecimal(3, value);
 
                 int result = pstmt.executeUpdate();
 
-                System.out.printf("Stock:%s price:%f res:%d\n", stockName, closingPrice, result);
+                System.out.printf("Stock:%s price:"+value+" res:%d\n", stockName, result);
 
                 pstmt.clearParameters();
                 pstmt.close();

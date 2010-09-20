@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.math.BigDecimal;
 import jtotus.common.Helper;
 
 /**
@@ -49,8 +50,8 @@ public class DataFetcher implements InterfaceDataBase {
 
     //TODO:generic fetcher with EnumFetcherCall
 
-    public Float fetchClosingPrice(String stockName, SimpleDateFormat time){
-        Float result = null;
+    public BigDecimal fetchClosingPrice(String stockName, SimpleDateFormat time){
+        BigDecimal result = null;
         
 
         if (timeFailsSanityCheck(time)) {
@@ -79,8 +80,8 @@ public class DataFetcher implements InterfaceDataBase {
         return result;
     }
 
-    public Float fetchAveragePrice(String stockName, SimpleDateFormat time) {
-       Float result = null;
+    public BigDecimal fetchAveragePrice(String stockName, SimpleDateFormat time) {
+       BigDecimal result = null;
 
 
           return result;

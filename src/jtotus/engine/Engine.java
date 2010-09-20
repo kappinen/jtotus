@@ -116,6 +116,8 @@ public class Engine {
         PotentialWithIn pot = new PotentialWithIn();
         Thread th = new Thread(pot);
         th.start();
+
+        
     }
 
     public void train(){

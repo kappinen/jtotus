@@ -7,9 +7,9 @@ package jtotus.engine;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
+import java.math.BigDecimal;
 import jtotus.common.DateIterator;
 import jtotus.config.MethodConfig;
 import jtotus.common.StockType;
@@ -43,20 +43,14 @@ public class StatisticsFreqPeriod implements VoterThread{
         return this.getClass().getName();
     }
 
-    private int normilize(Float tmp) {
-        Float result = 0.0f;
-        
+    private int normilize(double tmp) {
+
         if (tmp > 0)
-            result = tmp / tmp;
-        else if(tmp <0)
-            result = tmp / (-1 * tmp);
-
-
-
-        //System.err.printf("Normilize returns;%d\n", result.intValue());
-
-        return result.intValue();
-
+            return(1);
+        else if(tmp < 0)
+            return(-1);
+        
+       return 0;
     }
 
 
@@ -96,12 +90,12 @@ private void StatisticsForFreqPeriod(ArrayList<String> stockList,
         StockType stock = new StockType(list.next());
 
                
-        Float previousDay = null;
-        Float searchDady = null;
+        BigDecimal previousDay = null;
+        BigDecimal searchDady = null;
         SimpleDateFormat dayFormat = new SimpleDateFormat();
 
         int mainCurrent = 0;
-        Float localCurrent = 0.0f;
+        double localCurrent = 0;
         int strikes = 0;
 
         Date startDate = config.getStartTime();
@@ -140,7 +134,7 @@ private void StatisticsForFreqPeriod(ArrayList<String> stockList,
 
 
               
-             localCurrent = searchDady - previousDay;
+             localCurrent = searchDady.doubleValue() - previousDay.doubleValue();
 //             System.err.printf("The previous;%f and search;%f\n",
 //                      previousDay, searchDady);
 

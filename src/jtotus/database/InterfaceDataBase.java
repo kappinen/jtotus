@@ -4,6 +4,7 @@
  */
 package jtotus.database;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 
 /**
@@ -12,7 +13,7 @@ import java.text.SimpleDateFormat;
  */
 public interface InterfaceDataBase {
 
-    public Float fetchClosingPrice(String stockName, SimpleDateFormat time);
+    public BigDecimal fetchClosingPrice(String stockName, SimpleDateFormat time);
 
-    public Float fetchAveragePrice(String stockName, SimpleDateFormat time);
+    public BigDecimal fetchAveragePrice(String stockName, SimpleDateFormat time);
 }

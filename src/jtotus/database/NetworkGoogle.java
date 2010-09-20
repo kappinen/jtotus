@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.math.BigDecimal;
 import jtotus.common.Helper;
 
 
@@ -48,8 +49,8 @@ public class NetworkGoogle implements InterfaceDataBase {
     }
 
 
-    public Float fetchClosingPrice(String stockName, SimpleDateFormat time) {
-        Float result = null;
+    public BigDecimal fetchClosingPrice(String stockName, SimpleDateFormat time) {
+        BigDecimal result = null;
         URL url;
 
         help.debug(this.getClass().getName(), "fetchClosingPrice(%s,%s)\n",stockName, help.dateToString(time));
@@ -98,8 +99,8 @@ public class NetworkGoogle implements InterfaceDataBase {
         return result;
     }
 
-    public Float fetchAveragePrice(String stockName, SimpleDateFormat time) {
-        return Float.valueOf("0.0");
+    public BigDecimal fetchAveragePrice(String stockName, SimpleDateFormat time) {
+        return BigDecimal.valueOf(0.0);
     }
 
 

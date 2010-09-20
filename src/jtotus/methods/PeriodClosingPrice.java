@@ -5,12 +5,11 @@
 
 package jtotus.methods;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import jtotus.common.DateIterator;
 import jtotus.common.StockType;
 
@@ -20,15 +19,53 @@ import jtotus.common.StockType;
  */
 public class PeriodClosingPrice {
     private StockType stock = null;
-    private ArrayList<Float> priceList = null;
+    private ArrayList<BigDecimal> priceList = null;
+    private ArrayList<BigDecimal> sortedList = null;
     private Date endingDate = null;
     private boolean initDone = false;
+
+    //Helps to identify, which stock period
+    private String stockName = null;
     public int period = 90;
     
     public PeriodClosingPrice(StockType stockTmp) {
         stock = stockTmp;
-        priceList = new ArrayList<Float>();
+        priceList = new ArrayList<BigDecimal>();
     }
+
+    public PeriodClosingPrice(StockType stockTmp, String stockTemp) {
+        stock = stockTmp;
+        stockName = stockTemp;
+        priceList = new ArrayList<BigDecimal>();
+    }
+
+    public void setStockName(String stockTemp) {
+        stockName = stockTemp;
+    }
+
+    public String getStockName() {
+        if (stockName == null && stock != null) {
+            stockName =  stock.getName();
+        }
+        return stockName;
+    }
+
+    public StockType getStockType() {
+        return stock;
+    }
+
+    public BigDecimal getPotential() {
+        initList();
+        
+//        BigDecimal current = stock.fetchClosingPrice(endingDate);
+        //FIXME !! loop (ending date)--
+        BigDecimal current = stock.fetchCurrentClosingPrice();
+        BigDecimal potential = getMaxValue();
+        return potential.subtract(current);
+
+    }
+
+
 
     public void setStartDate(Date endDate) {
         endingDate = endDate;
@@ -55,8 +92,8 @@ public class PeriodClosingPrice {
         DateIterator iter = new DateIterator(startCal.getTime(),
                                              endCal.getTime());
 
-        priceList = new ArrayList<Float>();
-        Float closingPrice = null;
+        priceList = new ArrayList<BigDecimal>();
+        BigDecimal closingPrice = null;
         while(iter.hasNext()) {
             closingPrice = stock.fetchClosingPrice(iter.next());
             if (closingPrice != null) {
@@ -64,26 +101,26 @@ public class PeriodClosingPrice {
             }
         }
 
-        Collections.sort(priceList);
+        sortedList = priceList;
+        Collections.sort(sortedList);
         initDone = true;
     }
 
-    public float getMaxValue(){
+    public BigDecimal getMaxValue(){
         initList();
-        if (priceList != null && priceList.size() != 0) {
-            Float ret = priceList.get(priceList.size()-1);
-            return ret.floatValue();
+        if (sortedList != null && sortedList.size() != 0) {
+            return  sortedList.get(sortedList.size()-1);
         }
 
-        return 0.0f;
+        return null;
     }
     
-    public float getMinValue() {
+    public BigDecimal getMinValue() {
         initList();
-        if (priceList != null) {
-            return priceList.get(0).floatValue();
+        if (sortedList != null) {
+            return sortedList.get(0);
         }
-        return 0.0f;
+        return null;
     }
     
 }

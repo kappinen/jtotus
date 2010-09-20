@@ -19,7 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import jtotus.common.Helper;
 import jtotus.common.StockType;
-
+import java.math.BigDecimal;
 import org.apache.log4j.BasicConfigurator;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -45,16 +45,16 @@ public class NetworkOP implements InterfaceDataBase {
 
 
 
-   public Float fetchClosingPrice(String stockName, SimpleDateFormat time) {
+   public BigDecimal fetchClosingPrice(String stockName, SimpleDateFormat time) {
         return fetchData(stockName, time, 1);
     }
 
-   public Float fetchAveragePrice(String stockName, SimpleDateFormat time){
+   public BigDecimal fetchAveragePrice(String stockName, SimpleDateFormat time){
         return fetchData(stockName, time, 4);
    }
 
-    public Float fetchData(String stockName, SimpleDateFormat time, int col) {
-        Float result = null;
+    public BigDecimal fetchData(String stockName, SimpleDateFormat time, int col) {
+        BigDecimal result = null;
         URL url;
 
         
@@ -95,7 +95,8 @@ public class NetworkOP implements InterfaceDataBase {
                                 Float.valueOf(fdata).floatValue(),
                                 help.dateToString(trueDate));
 
-                        return Float.valueOf(fdata);
+
+                        return BigDecimal.valueOf(Double.valueOf(fdata).doubleValue());
                     }
 
 
@@ -103,11 +104,8 @@ public class NetworkOP implements InterfaceDataBase {
 
                 //System.out.printf("The host title:%s found:%d\n", title, elems.size());
 
-
-
-
         } catch (IOException ex) {
-            System.out.printf("Failed in :%s\n",this.getClass().getName());
+            //System.out.printf("Failed in :%s\n",this.getClass().getName());
             //Logger.getLogger(NetworkGoogle.class.getName()).log(Level.SEVERE, null, ex);
         }
 
