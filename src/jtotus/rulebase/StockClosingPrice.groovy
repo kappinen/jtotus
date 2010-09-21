@@ -15,9 +15,8 @@ import jtotus.engine.SimpleMovingAvg
 import jtotus.common.Helper;
 import jtotus.engine.Engine;
 import jtotus.graph.GraphPacket;
+import jtotus.config.MethodConfig;
 
-//def reviewTarget = "Fortum Oyj"
-//def daysToSearch = 70;
 
 
 def drawClosingPrice (String reviewTarget, int daysToSearch) {
@@ -39,11 +38,14 @@ for (int i=0; i<daysToSearch;i++) {
 
 }
 
-drawClosingPrice("Fortum Oyj", 70)
-drawClosingPrice("UPM-Kymmene Oyj", 100)
-drawClosingPrice("Kemira Oyj", 100)
-drawClosingPrice("Tieto Oyj", 100)
-drawClosingPrice("Metso Oyj", 100)
+
+MethodConfig method = new MethodConfig();
+Iterator<String> iter = method.iterator();
+
+while(iter.hasNext()) {
+drawClosingPrice(iter.next(), 100)
+}
+
 
 println "DONE for StockClosingPrice"
 

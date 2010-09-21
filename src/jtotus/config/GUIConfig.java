@@ -18,14 +18,12 @@ public class GUIConfig {
                                          "Kemira Oyj",
                                          "Konecranes Oyj",
                                          "KONE Oyj",
-                                         "Rautaruukki Oy",
-                                         "Sanoma Oyj"
+                                         "Rautaruukki Oyj",
+                                         "Sanoma Oyj",
+                                         "Tieto Oyj",
+                                         "Uponor Oyj"
                                           };
     public final int day_period = 5;
-
-
-
-
 
     public String []fetchStockName() {
         return StockNames;

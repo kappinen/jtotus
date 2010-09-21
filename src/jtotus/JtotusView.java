@@ -17,7 +17,7 @@ import java.util.LinkedList;
 import javax.swing.DefaultListModel;
 import javax.swing.Timer;
 import javax.swing.Icon;
-import javax.swing.JDialog;
+import jtotus.common.Helper;
 import jtotus.config.GUIConfig;
 import jtotus.engine.Engine;
 import jtotus.engine.StatisticsFreqPeriod;
@@ -35,6 +35,7 @@ public class JtotusView extends FrameView {
    private DefaultListModel dlm2 = new DefaultListModel(); //selectedList
    private Engine mainEngine = null;
    private JtotusGraph totusGraph = null;
+   private Helper help = Helper.getInstance();
 
 
    public void prepareMethodList(LinkedList <VoterThread>methods)
@@ -475,7 +476,9 @@ public class JtotusView extends FrameView {
         }
 
         bindPort = tempGraph.getBindPort();
-        System.out.printf("Binded to port:%d\n", tempGraph.getBindPort());
+        help.debug(this.getClass().getName(),
+                "Binded to port:%d\n", tempGraph.getBindPort());
+        
         Thread painter = new Thread(tempGraph);
         painter.start();
 

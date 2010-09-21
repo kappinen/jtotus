@@ -17,21 +17,15 @@ import java.util.Iterator;
  */
 public class MethodConfig implements Iterable<String>, Iterator<String>{
     private int iterPoint = 0;
-    
-    public final String []StockNames = { "Fortum Oyj",
-                                         "Nokia Oyj",
-                                         "UPM-Kymmene Oyj",
-                                         "Metso Oyj",
-                                         "Kemira Oyj",
-                                         "Konecranes Oyj",
-                                         "KONE Oyj",
-                                         "Rautaruukki Oy",
-                                         "Sanoma Oyj"
-                                          };
-    public final int day_period = 5;
+    private GUIConfig config = null;
+    public String []StockNames = null;
+    public int day_period = 5;
 
-
-
+    public MethodConfig() {
+        config = new GUIConfig();
+        StockNames = config.fetchStockName();
+        day_period = config.day_period;
+    }
 
 
     public String []fetchStockName() {
@@ -55,7 +49,7 @@ public class MethodConfig implements Iterable<String>, Iterator<String>{
     }
 
     public boolean hasNext() {
-        if(iterPoint + 1< StockNames.length) {
+        if(iterPoint < StockNames.length) {
             return true;
         }
         
@@ -63,7 +57,7 @@ public class MethodConfig implements Iterable<String>, Iterator<String>{
     }
 
     public String next() {
-        if (iterPoint < StockNames.length - 1) {
+        if (iterPoint < StockNames.length) {
             String ret = StockNames[iterPoint];
             iterPoint++;
             return ret;

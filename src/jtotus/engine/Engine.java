@@ -113,10 +113,6 @@ public class Engine {
     }
 
     private void testRun() {
-        PotentialWithIn pot = new PotentialWithIn();
-        Thread th = new Thread(pot);
-        th.start();
-
         
     }
 

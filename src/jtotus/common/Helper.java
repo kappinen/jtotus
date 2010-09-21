@@ -65,7 +65,7 @@ public class Helper {
             if (debugFilter[i].compareTo(filter) == 0)
             {
                 System.out.printf("[%s] ",filter);
-                System.out.printf(pattern, arguments);
+                System.out.printf(pattern, arguments)   ;
                 break;
             }
 

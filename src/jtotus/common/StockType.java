@@ -51,7 +51,9 @@ public class StockType implements Iterator{
 
         stockMap.put("KONE Oyj","KNEBV.HSE");
         stockMap.put("Konecranes Oyj","KCR1V.HSE");
-        stockMap.put("Kemira Oyj","KRA1V.HSEE");
+        stockMap.put("Kemira Oyj","KRA1V.HSE");
+        stockMap.put("Uponor Oyj","UNR1V.HSE");
+
 
 
        Set entries = stockMap.entrySet();

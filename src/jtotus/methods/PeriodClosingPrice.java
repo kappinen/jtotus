@@ -6,11 +6,13 @@
 package jtotus.methods;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import jtotus.common.DateIterator;
+import jtotus.common.Helper;
 import jtotus.common.StockType;
 
 /**
@@ -23,6 +25,7 @@ public class PeriodClosingPrice {
     private ArrayList<BigDecimal> sortedList = null;
     private Date endingDate = null;
     private boolean initDone = false;
+    private Helper help = Helper.getInstance();
 
     //Helps to identify, which stock period
     private String stockName = null;
@@ -60,9 +63,27 @@ public class PeriodClosingPrice {
 //        BigDecimal current = stock.fetchClosingPrice(endingDate);
         //FIXME !! loop (ending date)--
         BigDecimal current = stock.fetchCurrentClosingPrice();
-        BigDecimal potential = getMaxValue();
-        return potential.subtract(current);
+        BigDecimal max = getMaxValue();
+        BigDecimal pot = max.subtract(current).abs();
+        BigDecimal ret = pot.divide(current,MathContext.DECIMAL64).multiply(BigDecimal.valueOf(100.00));
+        help.debug(this.getClass().getName(),
+                "Stock: %s ret:%f - %f =ret:%f\n",
+                stock.getName(),max.floatValue(),current.floatValue(),ret.floatValue());
+        return ret;
+    }
 
+
+    public BigDecimal getLowPotential(){
+        initList();
+       
+        BigDecimal current = stock.fetchCurrentClosingPrice();
+        BigDecimal min = getMinValue();
+        BigDecimal lowPot = min.subtract(current).abs();
+        BigDecimal ret = lowPot.divide(current,MathContext.DECIMAL64).multiply(BigDecimal.valueOf(100.00));
+        help.debug(this.getClass().getName(),
+                "Stock: %s ret:%f - %f =ret:%f\n",
+                stock.getName(),min.floatValue(),current.floatValue(),ret.floatValue());
+        return ret;
     }
 
 
@@ -108,7 +129,7 @@ public class PeriodClosingPrice {
 
     public BigDecimal getMaxValue(){
         initList();
-        if (sortedList != null && sortedList.size() != 0) {
+        if (sortedList != null && !sortedList.isEmpty()) {
             return  sortedList.get(sortedList.size()-1);
         }
 
