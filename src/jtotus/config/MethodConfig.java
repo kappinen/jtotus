@@ -22,7 +22,11 @@ public class MethodConfig implements Iterable<String>, Iterator<String>{
     public int day_period = 5;
 
     public MethodConfig() {
-        config = new GUIConfig();
+        ConfigLoader<GUIConfig> loader = new ConfigLoader<GUIConfig>("GUIConfig");
+
+        //config = new GUIConfig();
+        config = loader.getConfig();
+        
         StockNames = config.fetchStockName();
         day_period = config.day_period;
     }

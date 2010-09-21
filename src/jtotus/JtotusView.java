@@ -18,7 +18,9 @@ import javax.swing.DefaultListModel;
 import javax.swing.Timer;
 import javax.swing.Icon;
 import jtotus.common.Helper;
+import jtotus.config.ConfigLoader;
 import jtotus.config.GUIConfig;
+import jtotus.config.MethodConfig;
 import jtotus.engine.Engine;
 import jtotus.engine.StatisticsFreqPeriod;
 import jtotus.graph.JtotusGraph;
@@ -35,6 +37,7 @@ public class JtotusView extends FrameView {
    private DefaultListModel dlm2 = new DefaultListModel(); //selectedList
    private Engine mainEngine = null;
    private JtotusGraph totusGraph = null;
+   GUIConfig uiConfig = null;
    private Helper help = Helper.getInstance();
 
 
@@ -49,7 +52,7 @@ public class JtotusView extends FrameView {
             dlm.add(dlm.size(),((VoterThread)iterator.next()).getMethName());
          }
 
-         GUIConfig uiConfig = new GUIConfig();
+         uiConfig = new GUIConfig();
          String listOfStocks[] = uiConfig.fetchStockName();
 
          for (int i = 0;i<listOfStocks.length-1;i++){
@@ -406,6 +409,11 @@ public class JtotusView extends FrameView {
 
     private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
         // TODO Tell engine to start training
+
+        if (uiConfig != null) {
+            ConfigLoader<GUIConfig> loader = new ConfigLoader<GUIConfig>("GUIConfig");
+            loader.storeConfig(uiConfig);
+        }
         mainEngine.train();
 
         

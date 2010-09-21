@@ -14,6 +14,7 @@ package jtotus.config;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.DomDriver;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.logging.Level;
@@ -30,7 +31,7 @@ public class ConfigLoader <T> {
 
     public ConfigLoader(String config) {
         configName = config;
-        xstream = new XStream();
+        xstream = new XStream(new DomDriver());
 
     }
 
@@ -84,9 +85,10 @@ public class ConfigLoader <T> {
         
         try {
             fis = new FileInputStream(path);
-            xstream.fromXML(fis, retObj);
+            retObj = (T) xstream.fromXML(fis);
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(ConfigLoader.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.printf("Failure to read config:%s\n", configName);
+            //Logger.getLogger(ConfigLoader.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
 
@@ -97,10 +99,9 @@ public class ConfigLoader <T> {
     public boolean storeConfig(T saveObj){
         return writeObj(saveObj, configDir + configName + ".xml");
     }
+    
     public T getConfig(){
         return readObj(configDir + configName + ".xml");
-
-
     }
 
     
