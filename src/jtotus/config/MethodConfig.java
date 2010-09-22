@@ -26,7 +26,10 @@ public class MethodConfig implements Iterable<String>, Iterator<String>{
 
         //config = new GUIConfig();
         config = loader.getConfig();
-        
+        //if config does not exists create new one
+        if (config == null) {
+            config = new GUIConfig();
+        }
         StockNames = config.fetchStockName();
         day_period = config.day_period;
     }
