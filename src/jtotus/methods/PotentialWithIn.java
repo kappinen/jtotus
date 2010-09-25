@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package jtotus.engine;
+package jtotus.methods;
 
 import java.util.HashMap;
 import java.util.Iterator;

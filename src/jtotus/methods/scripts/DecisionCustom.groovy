@@ -5,7 +5,7 @@
 
 package jtotus.rulebase
 
-import jtotus.engine.PotentialWithIn;
+import jtotus.methods.PotentialWithIn;
 
 
 

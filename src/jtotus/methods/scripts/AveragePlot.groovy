@@ -10,14 +10,14 @@
 
 package jtotus.rulebase
 
-import jtotus.common.StockType
-import jtotus.engine.SimpleMovingAvg
-import jtotus.threads.Dispatcher
+import jtotus.common.StockType;
+import jtotus.methods.SimpleMovingAvg;
+import jtotus.threads.PortfolioDecision;
 import jtotus.common.Helper;
 import jtotus.engine.Engine;
-import jtotus.graph.GraphPacket;
+import jtotus.gui.graph.GraphPacket;
 import jtotus.methods.PeriodClosingPrice;
-import jtotus.engine.PotentialWithIn;
+import jtotus.methods.PotentialWithIn;
 
 //Example 1
 class Callee {
@@ -57,9 +57,9 @@ System.out.println(help)
 
 //Example 5
 Engine engine = Engine.getInstance()
-dispatcher = new Dispatcher()
+dispatcher = new PortfolioDecision()
 //logger = new jtotus.graph.GraphSender(engine);
-method = new jtotus.engine.SimpleMovingAvg(dispatcher)
+method = new jtotus.methods.SimpleMovingAvg(dispatcher)
 method.run()
 
 StockType stock = new StockType("Fortum Oyj")

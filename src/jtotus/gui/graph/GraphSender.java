@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package jtotus.graph;
+package jtotus.gui.graph;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;

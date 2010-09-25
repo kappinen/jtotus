@@ -2,7 +2,7 @@
  * JtotusView.java
  */
 
-package jtotus;
+package jtotus.gui;
 
 
 
@@ -17,7 +17,7 @@ import java.util.LinkedList;
 import javax.swing.Timer;
 import javax.swing.Icon;
 import jtotus.engine.Engine;
-import jtotus.engine.StatisticsFreqPeriod;
+import jtotus.methods.StatisticsFreqPeriod;
 
  
     
@@ -32,27 +32,13 @@ public class JtotusView extends FrameView {
    public void initialize()
     {
        ((JtotusPortfolioView)portfolioTabbedPane).initialize();
-       ((jtotusMethodView)jTabbedPane2).initialize();
+       ((jtotusMethodView)methodTabbedPane).initialize();
     }
 
    public LinkedList<String> getMethodList() {
-       LinkedList<String>list = new LinkedList<String>();
-//
-//       if(AvailableList.isSelectionEmpty()) {
-//           return list;
-//       }
-//
-//       int selList[]  = AvailableList.getSelectedIndices();
-//
-//
-//       System.out.printf("The list is created : %d \n", selList.length);
-//       for (int i = selList.length-1; i>=0 ;i--){
-//          System.out.printf("JtotusView adding:%s\n", AvailableList.getModel().getElementAt(selList[i]));
-//          list.add((String) AvailableList.getModel().getElementAt(selList[i]));
-       list.add("StockClosingPrice");
-//       }
 
-       return list;
+       //Returns selected methods from methoTabPane
+       return ((jtotusMethodView)methodTabbedPane).getSelectedMethods();
    }
 
 
@@ -144,9 +130,8 @@ public class JtotusView extends FrameView {
         jSplitPane1 = new javax.swing.JSplitPane();
         jButton1 = new javax.swing.JButton();
         jButtonRunScripts = new javax.swing.JButton();
-        jSeparator1 = new javax.swing.JSeparator();
-        portfolioTabbedPane = new jtotus.JtotusPortfolioView();
-        jTabbedPane2 = new jtotus.jtotusMethodView();
+        portfolioTabbedPane = new jtotus.gui.JtotusPortfolioView();
+        methodTabbedPane = new jtotus.gui.jtotusMethodView();
         menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
@@ -157,13 +142,14 @@ public class JtotusView extends FrameView {
         statusMessageLabel = new javax.swing.JLabel();
         statusAnimationLabel = new javax.swing.JLabel();
         progressBar = new javax.swing.JProgressBar();
+        infoLable = new javax.swing.JLabel();
 
         mainPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         mainPanel.setName("mainPanel"); // NOI18N
 
         jSplitPane1.setName("jSplitPane1"); // NOI18N
 
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(jtotus.JtotusApp.class).getContext().getResourceMap(JtotusView.class);
+        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(jtotus.gui.JtotusApp.class).getContext().getResourceMap(JtotusView.class);
         jButton1.setText(resourceMap.getString("jButton1.text")); // NOI18N
         jButton1.setName("jButton1"); // NOI18N
         jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -182,15 +168,13 @@ public class JtotusView extends FrameView {
         });
         jSplitPane1.setRightComponent(jButtonRunScripts);
 
-        jSeparator1.setName("jSeparator1"); // NOI18N
-
         portfolioTabbedPane.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         portfolioTabbedPane.setName("portfolioTabbedPane"); // NOI18N
 
-        jTabbedPane2.setBorder(new javax.swing.border.MatteBorder(null));
-        jTabbedPane2.setTabLayoutPolicy(javax.swing.JTabbedPane.SCROLL_TAB_LAYOUT);
-        jTabbedPane2.setAutoscrolls(true);
-        jTabbedPane2.setName("jTabbedPane2"); // NOI18N
+        methodTabbedPane.setBorder(new javax.swing.border.MatteBorder(null));
+        methodTabbedPane.setTabLayoutPolicy(javax.swing.JTabbedPane.SCROLL_TAB_LAYOUT);
+        methodTabbedPane.setAutoscrolls(true);
+        methodTabbedPane.setName("methodTabbedPane"); // NOI18N
 
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
@@ -200,24 +184,22 @@ public class JtotusView extends FrameView {
                 .addContainerGap()
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(mainPanelLayout.createSequentialGroup()
-                        .addGap(642, 642, 642)
-                        .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTabbedPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 769, Short.MAX_VALUE)
-                    .addComponent(portfolioTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 769, Short.MAX_VALUE))
-                .addGap(358, 358, 358))
+                        .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(469, Short.MAX_VALUE))
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(portfolioTabbedPane, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 646, Short.MAX_VALUE)
+                            .addComponent(methodTabbedPane, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 646, Short.MAX_VALUE))
+                        .addGap(27, 27, 27))))
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(mainPanelLayout.createSequentialGroup()
-                .addComponent(portfolioTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
+                .addComponent(portfolioTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 216, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTabbedPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 463, Short.MAX_VALUE)
-                .addGap(33, 33, 33)
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10))
+                .addComponent(methodTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 535, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         menuBar.setName("menuBar"); // NOI18N
@@ -225,7 +207,7 @@ public class JtotusView extends FrameView {
         fileMenu.setText(resourceMap.getString("fileMenu.text")); // NOI18N
         fileMenu.setName("fileMenu"); // NOI18N
 
-        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(jtotus.JtotusApp.class).getContext().getActionMap(JtotusView.class, this);
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(jtotus.gui.JtotusApp.class).getContext().getActionMap(JtotusView.class, this);
         exitMenuItem.setAction(actionMap.get("quit")); // NOI18N
         exitMenuItem.setName("exitMenuItem"); // NOI18N
         fileMenu.add(exitMenuItem);
@@ -252,30 +234,43 @@ public class JtotusView extends FrameView {
 
         progressBar.setName("progressBar"); // NOI18N
 
+        infoLable.setText(resourceMap.getString("infoLable.text")); // NOI18N
+        infoLable.setName("infoLable"); // NOI18N
+
         javax.swing.GroupLayout statusPanelLayout = new javax.swing.GroupLayout(statusPanel);
         statusPanel.setLayout(statusPanelLayout);
         statusPanelLayout.setHorizontalGroup(
             statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 1143, Short.MAX_VALUE)
+            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 689, Short.MAX_VALUE)
             .addGroup(statusPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(statusMessageLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 959, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 505, Short.MAX_VALUE)
                 .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(statusAnimationLabel)
                 .addContainerGap())
+            .addGroup(statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(statusPanelLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(infoLable, javax.swing.GroupLayout.PREFERRED_SIZE, 423, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(254, Short.MAX_VALUE)))
         );
         statusPanelLayout.setVerticalGroup(
             statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(statusPanelLayout.createSequentialGroup()
                 .addComponent(statusPanelSeparator, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
                 .addGroup(statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(statusMessageLabel)
                     .addComponent(statusAnimationLabel)
                     .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(3, 3, 3))
+                .addGap(12, 12, 12))
+            .addGroup(statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(statusPanelLayout.createSequentialGroup()
+                    .addGap(9, 9, 9)
+                    .addComponent(infoLable)
+                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
 
         setComponent(mainPanel);
@@ -307,13 +302,13 @@ public class JtotusView extends FrameView {
    
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel infoLable;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButtonRunScripts;
-    private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSplitPane jSplitPane1;
-    private javax.swing.JTabbedPane jTabbedPane2;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JMenuBar menuBar;
+    private javax.swing.JTabbedPane methodTabbedPane;
     public javax.swing.JTabbedPane portfolioTabbedPane;
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JLabel statusAnimationLabel;
@@ -328,6 +323,6 @@ public class JtotusView extends FrameView {
     private int busyIconIndex = 0;
 
     public int createIntFrame(String reviewTarget) {
-        return ((jtotusMethodView)jTabbedPane2).createIntFrame(reviewTarget);
+        return ((jtotusMethodView)methodTabbedPane).createIntFrame(reviewTarget);
     }
 }

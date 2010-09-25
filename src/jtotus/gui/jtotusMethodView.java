@@ -1,9 +1,22 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+    This file is part of jTotus.
 
-package jtotus;
+    jTotus is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    jTotus is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+package jtotus.gui;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -11,10 +24,11 @@ import javax.swing.JDesktopPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 import jtotus.common.Helper;
 import jtotus.config.GUIConfig;
-import jtotus.graph.JtotusGraph;
+import jtotus.gui.graph.JtotusGraph;
 import jtotus.threads.VoterThread;
 
 /**
@@ -24,6 +38,7 @@ import jtotus.threads.VoterThread;
 public class jtotusMethodView extends JTabbedPane{
     private JScrollPane  jScrollPane1 = null;
     private JDesktopPane drawDesktopPane = null;
+    private JTable methodTable = null;
     private Helper help = Helper.getInstance();
 
     
@@ -63,6 +78,27 @@ public class jtotusMethodView extends JTabbedPane{
         return bindPort;
     }
 
+
+
+    public LinkedList<String> getSelectedMethods() {
+        LinkedList<String> selectedRows = new LinkedList<String>();
+
+        int []selRow = methodTable.getSelectedRows();
+        help.debug(this.getClass().getName(),
+                   "Selected total:%d\n", selRow.length);
+
+        DefaultTableModel methodModel = (DefaultTableModel) methodTable.getModel();
+        
+        for (int i = 0; i < selRow.length;i++) {
+            help.debug(this.getClass().getName(),
+                    "Selected:%s\n", (String)methodModel.getValueAt(selRow[i], 0));
+            
+            selectedRows.add((String)methodModel.getValueAt(selRow[i], 0));
+        }
+
+        return selectedRows;
+    }
+
     private JTable createMethodTable() {
         JTable retValue = new JTable();
         
@@ -87,7 +123,11 @@ public class jtotusMethodView extends JTabbedPane{
         }
         
         retValue.setModel(methodModel);
+        retValue.setUpdateSelectionOnSort(true);
+        
+        retValue.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
+ 
         return retValue;
     }
     
@@ -102,16 +142,18 @@ public class jtotusMethodView extends JTabbedPane{
         jScrollPane1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         jScrollPane1.setName("jScrollPane1");
 
-
-        jScrollPane1.setViewportView(createMethodTable());
+        methodTable = createMethodTable();
+        jScrollPane1.setViewportView(methodTable);
 
         //First tab - Method result
         this.addTab("Methods", jScrollPane1);
-
+        
         //Second tab - Graphs
+        this.addTab("Graphs", drawDesktopPane);
+
         drawDesktopPane.setAutoscrolls(true);
-        drawDesktopPane.setName("drawDesktopPane"); // NOI18N
-        this.addTab("Graphs", drawDesktopPane); // NOI18N
+        drawDesktopPane.setName("drawDesktopPane");
+
     }
 
     public void initialize(){

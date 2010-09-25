@@ -1,6 +1,21 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+
+    This file is part of jTotus.
+
+    jTotus is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    jTotus is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
+
+
  *
  * http://www.javalobby.org/forums/thread.jspa?messageID=91836328
  * http://java-x.blogspot.com/2006/11/java-5-concurrency-callable-and-future.html
@@ -22,13 +37,12 @@ import java.util.concurrent.Executors;
 
 import jtotus.common.Helper;
 import jtotus.config.MethodConfig;
-import jtotus.engine.DummyMethod;
 
 /**
  *
  * @author kappiev
  */
-public class Dispatcher {
+public class PortfolioDecision implements Runnable{
 
     private Helper help = null;
     private LinkedList<VoterThread> threadList;
@@ -41,17 +55,12 @@ public class Dispatcher {
 
     }
 
-    public Dispatcher() {
+    public PortfolioDecision() {
 
         init();
-
-        // Add methods to thread
-        threadList.add(new DummyMethod(this));
-//        threadList.add(new Thread(new DummyMethod(this)));
-
     }
 
-    public Dispatcher(LinkedList<VoterThread> threads) {
+    public PortfolioDecision(LinkedList<VoterThread> threads) {
 
         init();
 
@@ -85,10 +94,21 @@ public class Dispatcher {
         return false;
     }
 
+    public MethodConfig fetchConfig(String method) {
+        //TODO: add which configuration to run by user
+
+        MethodConfig config = new MethodConfig();
+
+        return config;
+    }
+
     public void run() {
         help.debug(this.getClass().getName(), "Dispatcher started..\n");
 
-
+        if (threadList == null ||
+            threadList.isEmpty()) {
+            System.err.printf("Not tasks for Portfolio Decision\n");
+        }
 
         //Start threads       
         Iterator<VoterThread> iterator = threadList.iterator();
@@ -100,11 +120,5 @@ public class Dispatcher {
         help.debug(this.getClass().getName(), "Dispatcher ended.. List:%d\n", threadList.size());
     }
 
-    public MethodConfig fetchConfig(String method) {
-        //TODO: add which configuration to run by user
 
-        MethodConfig config = new MethodConfig();
-
-        return config;
-    }
 }

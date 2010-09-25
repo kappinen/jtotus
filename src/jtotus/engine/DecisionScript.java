@@ -1,7 +1,20 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+    This file is part of jTotus.
+
+    jTotus is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    jTotus is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  *
+ * 
  * TODO: result from scripts
  * http://groovy.codehaus.org/Embedding+Groovy
  */
@@ -17,6 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jtotus.threads.VoterThread;
 import org.codehaus.groovy.control.CompilationFailedException;
+
 
 /**
  *
@@ -59,20 +73,18 @@ public class DecisionScript implements VoterThread{
             groovyObject = (GroovyObject) groovyClass.newInstance();
 
 
-        } catch (InstantiationException ex) {
+        }
+        catch (InstantiationException ex) {
             Logger.getLogger(DecisionScript.class.getName()).log(Level.SEVERE, null, ex);
-            return;
         } catch (IllegalAccessException ex) {
             Logger.getLogger(DecisionScript.class.getName()).log(Level.SEVERE, null, ex);
-            return;
-        } catch (CompilationFailedException ex) {
+        }        catch (CompilationFailedException ex) {
             Logger.getLogger(DecisionScript.class.getName()).log(Level.SEVERE, null, ex);
-            return;
         } catch (IOException ex) {
             Logger.getLogger(DecisionScript.class.getName()).log(Level.SEVERE, null, ex);
-            return;
         }
 
+        
         Object[] args = {};
         groovyObject.invokeMethod("run", args);
     }

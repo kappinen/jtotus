@@ -1,13 +1,26 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package jtotus.engine;
+    This file is part of jTotus.
+
+    jTotus is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    jTotus is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+package jtotus.methods;
 
 import jtotus.common.Helper;
 import jtotus.config.MethodConfig;
 import jtotus.common.StockType;
-import jtotus.threads.Dispatcher;
+import jtotus.threads.PortfolioDecision;
 import jtotus.threads.VoterThread;
 import java.math.BigDecimal;
 /**
@@ -16,12 +29,12 @@ import java.math.BigDecimal;
  */
 public class SimpleMovingAvg implements VoterThread {
 
-    private Dispatcher dispatch = null;
+    private PortfolioDecision dispatch = null;
     private MethodConfig config = null;
     private String methodName = "SimpleMovinAvg";
     private Helper help = Helper.getInstance();;
 
-    public SimpleMovingAvg(Dispatcher tmp) {
+    public SimpleMovingAvg(PortfolioDecision tmp) {
         dispatch = tmp;
     }
 
