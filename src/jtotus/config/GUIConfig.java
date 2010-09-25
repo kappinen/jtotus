@@ -5,6 +5,10 @@
 
 package jtotus.config;
 
+import java.util.LinkedList;
+import jtotus.engine.Engine;
+import jtotus.threads.VoterThread;
+
 /**
  *
  * @author kappiev
@@ -29,6 +33,10 @@ public class GUIConfig {
         return StockNames;
     }
 
+    public LinkedList <VoterThread> getSupportedMethodsList() {
+        Engine engine = Engine.getInstance();
+        return  engine.getMethods();
+    }
 
 }
 

@@ -40,6 +40,7 @@ public class DateIterator implements Iterator<Date>, Iterable<Date>
         return !current.after(end);
     }
 
+
     public Date next()
     {
         current.add(Calendar.DATE, 1);

@@ -13,20 +13,11 @@ import org.jdesktop.application.FrameView;
 import org.jdesktop.application.TaskMonitor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Iterator;
 import java.util.LinkedList;
-import javax.swing.DefaultListModel;
 import javax.swing.Timer;
 import javax.swing.Icon;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
-import jtotus.common.Helper;
-import jtotus.config.ConfigLoader;
-import jtotus.config.GUIConfig;
 import jtotus.engine.Engine;
 import jtotus.engine.StatisticsFreqPeriod;
-import jtotus.graph.JtotusGraph;
-import jtotus.threads.VoterThread;
 
  
     
@@ -35,79 +26,31 @@ import jtotus.threads.VoterThread;
  */
 public class JtotusView extends FrameView {
 
-   private DefaultListModel dlm = new DefaultListModel(); //Available list
    private Engine mainEngine = null;
-   GUIConfig uiConfig = null;
-   private Helper help = Helper.getInstance();
-
-
-
-   JTable allocateTable() {
-       JTable retValue = null;
-       ConfigLoader<JTable> tableState = new ConfigLoader<JTable>("GuiTableState");
-       retValue = tableState.getConfig();
-       
-        if (retValue == null){
-            retValue = new JTable();
-        }
-
-       return retValue;
-   }
-
    
-   public void prepareMethodList(LinkedList <VoterThread>methods)
+   
+   public void initialize()
     {
-
-//        TableModel  tableModel = portfolioTable.getModel();
-        DefaultTableModel tableModel = new DefaultTableModel(new Object [][] {
-                            {null, null, null, null},
-                            {null, null, null, null},
-                            {null, null, null, null},
-                            {null, null, null, null}
-                            },
-                            new String [] {
-                                "Stock", "Title 2", "Title 3", "Title 4"
-                            });
-        portfolioTable.setModel(tableModel);
-
-        dlm.add(0, "(All)");
-
-        
-        
-        Iterator iterator = methods.iterator();
-        while (iterator.hasNext()) {
-            dlm.add(dlm.size(),((VoterThread)iterator.next()).getMethName());
-         }
-
-         uiConfig = new GUIConfig();
-         String listOfStocks[] = uiConfig.fetchStockName();
-
-         for (int i = 0;i<listOfStocks.length-1;i++){
-             if (i>=tableModel.getRowCount()){
-                 tableModel.addRow(new Object[] {null,null,null,null});
-             }
-             
-             tableModel.setValueAt(listOfStocks[i], i, 0);
-         }
-
-         
+       ((JtotusPortfolioView)portfolioTabbedPane).initialize();
+       ((jtotusMethodView)jTabbedPane2).initialize();
     }
 
    public LinkedList<String> getMethodList() {
        LinkedList<String>list = new LinkedList<String>();
-
-       if(AvailableList.isSelectionEmpty()) {
-           return list;
-       }
-
-       int selList[]  = AvailableList.getSelectedIndices();
-
-
-       System.out.printf("The list is created : %d \n", selList.length);
-       for (int i = selList.length-1; i>=0 ;i--){
-          System.out.printf("JtotusView adding:%s\n", AvailableList.getModel().getElementAt(selList[i]));
-          list.add((String) AvailableList.getModel().getElementAt(selList[i]));
-       }
+//
+//       if(AvailableList.isSelectionEmpty()) {
+//           return list;
+//       }
+//
+//       int selList[]  = AvailableList.getSelectedIndices();
+//
+//
+//       System.out.printf("The list is created : %d \n", selList.length);
+//       for (int i = selList.length-1; i>=0 ;i--){
+//          System.out.printf("JtotusView adding:%s\n", AvailableList.getModel().getElementAt(selList[i]));
+//          list.add((String) AvailableList.getModel().getElementAt(selList[i]));
+       list.add("StockClosingPrice");
+//       }
 
        return list;
    }
@@ -198,18 +141,12 @@ public class JtotusView extends FrameView {
     private void initComponents() {
 
         mainPanel = new javax.swing.JPanel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        AvailableList = new javax.swing.JList();
         jSplitPane1 = new javax.swing.JSplitPane();
         jButton1 = new javax.swing.JButton();
         jButtonRunScripts = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
-        jDesktopPane1 = new javax.swing.JDesktopPane();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
-        jTabbedPane1 = new javax.swing.JTabbedPane();
-        jScrollPane4 = new javax.swing.JScrollPane();
-        portfolioTable = allocateTable();
+        portfolioTabbedPane = new jtotus.JtotusPortfolioView();
+        jTabbedPane2 = new jtotus.jtotusMethodView();
         menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
@@ -223,20 +160,6 @@ public class JtotusView extends FrameView {
 
         mainPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         mainPanel.setName("mainPanel"); // NOI18N
-
-        jScrollPane2.setName("jScrollPane2"); // NOI18N
-
-        AvailableList.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        AvailableList.setModel(dlm);
-        AvailableList.setDragEnabled(true);
-        AvailableList.setDropMode(javax.swing.DropMode.ON);
-        AvailableList.setName("AvailableList"); // NOI18N
-        AvailableList.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseReleased(java.awt.event.MouseEvent evt) {
-                AvailableListMouseReleased(evt);
-            }
-        });
-        jScrollPane2.setViewportView(AvailableList);
 
         jSplitPane1.setName("jSplitPane1"); // NOI18N
 
@@ -261,53 +184,13 @@ public class JtotusView extends FrameView {
 
         jSeparator1.setName("jSeparator1"); // NOI18N
 
-        jDesktopPane1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        jDesktopPane1.setName("jDesktopPane1"); // NOI18N
+        portfolioTabbedPane.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        portfolioTabbedPane.setName("portfolioTabbedPane"); // NOI18N
 
-        jScrollPane3.setName("jScrollPane3"); // NOI18N
-
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
-        jTable1.setName("jTable1"); // NOI18N
-        jScrollPane3.setViewportView(jTable1);
-
-        jScrollPane3.setBounds(-170, -80, 560, 60);
-        jDesktopPane1.add(jScrollPane3, javax.swing.JLayeredPane.DEFAULT_LAYER);
-
-        jTabbedPane1.setName("jTabbedPane1"); // NOI18N
-
-        jScrollPane4.setName("jScrollPane4"); // NOI18N
-
-        portfolioTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Stock Name", "Title 2", "Title 3", "Title 4"
-            }
-        ));
-        portfolioTable.setColumnSelectionAllowed(true);
-        portfolioTable.setName("portfolioTable"); // NOI18N
-        jScrollPane4.setViewportView(portfolioTable);
-        portfolioTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        portfolioTable.getColumnModel().getColumn(0).setHeaderValue(resourceMap.getString("portfolioTable.columnModel.title0")); // NOI18N
-        portfolioTable.getColumnModel().getColumn(1).setHeaderValue(resourceMap.getString("portfolioTable.columnModel.title1")); // NOI18N
-        portfolioTable.getColumnModel().getColumn(2).setHeaderValue(resourceMap.getString("portfolioTable.columnModel.title2")); // NOI18N
-        portfolioTable.getColumnModel().getColumn(3).setHeaderValue(resourceMap.getString("portfolioTable.columnModel.title3")); // NOI18N
-
-        jTabbedPane1.addTab(resourceMap.getString("jScrollPane4.TabConstraints.tabTitle"), jScrollPane4); // NOI18N
+        jTabbedPane2.setBorder(new javax.swing.border.MatteBorder(null));
+        jTabbedPane2.setTabLayoutPolicy(javax.swing.JTabbedPane.SCROLL_TAB_LAYOUT);
+        jTabbedPane2.setAutoscrolls(true);
+        jTabbedPane2.setName("jTabbedPane2"); // NOI18N
 
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
@@ -316,32 +199,25 @@ public class JtotusView extends FrameView {
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 1032, Short.MAX_VALUE)
                     .addGroup(mainPanelLayout.createSequentialGroup()
-                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane2, 0, 0, Short.MAX_VALUE)
-                            .addGroup(mainPanelLayout.createSequentialGroup()
-                                .addGap(214, 214, 214)
-                                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jDesktopPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 802, Short.MAX_VALUE)))
-                .addContainerGap())
+                        .addGap(642, 642, 642)
+                        .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTabbedPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 769, Short.MAX_VALUE)
+                    .addComponent(portfolioTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 769, Short.MAX_VALUE))
+                .addGap(358, 358, 358))
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 191, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(mainPanelLayout.createSequentialGroup()
+                .addComponent(portfolioTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jDesktopPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 500, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, mainPanelLayout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 467, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(28, 28, 28))
+                .addComponent(jTabbedPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 463, Short.MAX_VALUE)
+                .addGap(33, 33, 33)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(10, 10, 10))
         );
 
         menuBar.setName("menuBar"); // NOI18N
@@ -380,11 +256,11 @@ public class JtotusView extends FrameView {
         statusPanel.setLayout(statusPanelLayout);
         statusPanelLayout.setHorizontalGroup(
             statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 1060, Short.MAX_VALUE)
+            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 1143, Short.MAX_VALUE)
             .addGroup(statusPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(statusMessageLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 874, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 959, Short.MAX_VALUE)
                 .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(statusAnimationLabel)
@@ -407,34 +283,11 @@ public class JtotusView extends FrameView {
         setStatusBar(statusPanel);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void AvailableListMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_AvailableListMouseReleased
-
-
-     
-        
-        if (AvailableList.isSelectionEmpty()){
-            return;
-        }
-        else if (AvailableList.getModel().getSize() == 0){
-            dlm.add(0, "(All)");
-            return;
-        }else if (AvailableList.getSelectedIndex() == 0) {
-                System.out.printf("All selected\n");
-                AvailableList.setSelectionInterval(1, dlm.getSize());
-                return;
-            }
-
-    
-
-    }//GEN-LAST:event_AvailableListMouseReleased
-
     private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
         // TODO Tell engine to start training
+//       ConfigLoader<JTable> tableState = new ConfigLoader<JTable>("GuiTableState");
+//       tableState.storeConfig(portfolioTable);
 
-        if (uiConfig != null) {
-            ConfigLoader<GUIConfig> loader = new ConfigLoader<GUIConfig>("GUIConfig");
-            loader.storeConfig(uiConfig);
-        }
         mainEngine.train();
 
         
@@ -454,20 +307,14 @@ public class JtotusView extends FrameView {
    
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    public javax.swing.JList AvailableList;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButtonRunScripts;
-    private javax.swing.JDesktopPane jDesktopPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSplitPane jSplitPane1;
-    public javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JTabbedPane jTabbedPane2;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JMenuBar menuBar;
-    private javax.swing.JTable portfolioTable;
+    public javax.swing.JTabbedPane portfolioTabbedPane;
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JLabel statusAnimationLabel;
     private javax.swing.JLabel statusMessageLabel;
@@ -481,38 +328,6 @@ public class JtotusView extends FrameView {
     private int busyIconIndex = 0;
 
     public int createIntFrame(String reviewTarget) {
-        int bindPort=-1;
-
-        javax.swing.JInternalFrame tempFrameGraph = new javax.swing.JInternalFrame();
-        
-        tempFrameGraph.setClosable(true);
-        tempFrameGraph.setIconifiable(true);
-        tempFrameGraph.setMaximizable(true);
-        tempFrameGraph.setDoubleBuffered(true);
-        tempFrameGraph.setInheritsPopupMenu(true);
-        tempFrameGraph.setLayer(5);
-        tempFrameGraph.setName("tempFrameGraph"); // NOI18N
-        tempFrameGraph.setOpaque(false);
-        tempFrameGraph.setVisible(true);
-
-        tempFrameGraph.setBounds(10, 10, 590, 460);
-        
-
-        JtotusGraph tempGraph = new JtotusGraph(tempFrameGraph, reviewTarget);
-        if(tempGraph.initialize()==false) { //Failed to bind to port
-             System.out.printf("[%s] Failed ot bind to port\n",this.getClass().getName());
-            return bindPort;
-        }
-
-        bindPort = tempGraph.getBindPort();
-        help.debug(this.getClass().getName(),
-                "Binded to port:%d\n", tempGraph.getBindPort());
-        
-        Thread painter = new Thread(tempGraph);
-        painter.start();
-
-        jDesktopPane1.add(tempFrameGraph, javax.swing.JLayeredPane.DEFAULT_LAYER);
-        jDesktopPane1.setAutoscrolls(true);
-        return bindPort;
+        return ((jtotusMethodView)jTabbedPane2).createIntFrame(reviewTarget);
     }
 }

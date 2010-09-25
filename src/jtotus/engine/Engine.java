@@ -14,11 +14,9 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jtotus.JtotusView;
-import jtotus.config.ConfigLoader;
 import jtotus.common.Helper;
 import jtotus.config.MethodConfig;
 import jtotus.database.AutoUpdateStocks;
-import jtotus.database.DataFetcher;
 import jtotus.graph.GraphPacket;
 import jtotus.graph.GraphSender;
 import jtotus.threads.*;
@@ -89,9 +87,12 @@ public class Engine {
 
    public void setGUI(JtotusView tempView) {
         mainWindow = tempView;
-        mainWindow.prepareMethodList(methodList);
+        mainWindow.initialize();
     }
-    
+
+   public synchronized LinkedList<VoterThread>getMethods() {
+       return methodList;
+   }
 
     public void run(){
 
@@ -224,10 +225,6 @@ public class Engine {
 
         
     }
-
-
-
-
 
 
 }
