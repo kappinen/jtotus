@@ -32,10 +32,17 @@ package jtotus.threads;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.naming.spi.DirStateFactory.Result;
 
 import jtotus.common.Helper;
+import jtotus.common.MethodResults;
 import jtotus.config.MethodConfig;
 
 /**
@@ -45,13 +52,19 @@ import jtotus.config.MethodConfig;
 public class PortfolioDecision implements Runnable{
 
     private Helper help = null;
-    private LinkedList<VoterThread> threadList;
-    ExecutorService threadExecutor = null;
+    private LinkedList<MethodEntry> threadList;
+    private LinkedList<Future<MethodResults>> methodResults = null;
+    private ExecutorService threadExecutor = null;
 
     private void init() {
-        help = Helper.getInstance();
-        threadList = new LinkedList<VoterThread>();
-        threadExecutor = Executors.newCachedThreadPool();
+        if (help == null)
+            help = Helper.getInstance();
+        if(threadList == null)
+            threadList = new LinkedList<MethodEntry>();
+        if (threadExecutor == null)
+            threadExecutor = Executors.newCachedThreadPool();
+        if (methodResults == null)
+            methodResults = new LinkedList<Future<MethodResults>>();
 
     }
 
@@ -60,23 +73,23 @@ public class PortfolioDecision implements Runnable{
         init();
     }
 
-    public PortfolioDecision(LinkedList<VoterThread> threads) {
+    public PortfolioDecision(LinkedList<MethodEntry> threads) {
 
         init();
 
 
-        Iterator<VoterThread> iterator = threadList.iterator();
+        Iterator<MethodEntry> iterator = threadList.iterator();
         while (iterator.hasNext()) {
             threadList.add(iterator.next());
         }
 
     }
 
-    public boolean setList(LinkedList<VoterThread> threads) {
+    public boolean setList(LinkedList<MethodEntry> threads) {
 
 
         if (threadList == null) {
-            threadList = new LinkedList<VoterThread>();
+            threadList = new LinkedList<MethodEntry>();
         }
 
         help.debug(this.getClass().getName(), "setting list with size:%d\n",
@@ -86,7 +99,7 @@ public class PortfolioDecision implements Runnable{
             threadList.clear();
         }
 
-        Iterator<VoterThread> iterator = threads.iterator();
+        Iterator<MethodEntry> iterator = threads.iterator();
         while (iterator.hasNext()) {
             threadList.add(iterator.next());
         }
@@ -103,22 +116,70 @@ public class PortfolioDecision implements Runnable{
     }
 
     public void run() {
-        help.debug(this.getClass().getName(), "Dispatcher started..\n");
+        Future<MethodResults> methodResult = null;
 
+        help.debug(this.getClass().getName(), "Dispatcher started..\n");
+        
         if (threadList == null ||
             threadList.isEmpty()) {
             System.err.printf("Not tasks for Portfolio Decision\n");
         }
 
         //Start threads       
-        Iterator<VoterThread> iterator = threadList.iterator();
+        Iterator<MethodEntry> iterator = threadList.iterator();
         while (iterator.hasNext()) {
-            VoterThread tmp = iterator.next();
-            threadExecutor.execute(tmp);
+            MethodEntry tmp = iterator.next();
+            if (tmp.isCallable()){
+                Callable<MethodResults> callableTmp = (Callable<MethodResults>)tmp;
+                methodResult = threadExecutor.submit(callableTmp);
+                methodResults.add(methodResult);
+            }else {
+                //Lets support Runnable for now.
+                threadExecutor.execute(tmp);
+            }
         }
+        help.debug(this.getClass().getName(), "Dispatcher ended.. List:%d:%d\n",
+                    threadList.size(),methodResults.size());
 
-        help.debug(this.getClass().getName(), "Dispatcher ended.. List:%d\n", threadList.size());
+        //All tasks are executing.. lets wait for results
+        while(!methodResults.isEmpty()) {
+            Iterator<Future<MethodResults>> taskIter = methodResults.iterator();
+            while (taskIter.hasNext()) {
+                Future<MethodResults> task = taskIter.next();
+                MethodResults result = null;
+                if(task.isDone()) {
+                     System.out.printf("Run all tasks: the size:"+task.isDone()+"\n");
+                    try {
+                        result = task.get();
+
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(PortfolioDecision.class.getName()).log(Level.SEVERE, null, ex);
+                        taskIter.remove();
+                        continue;
+                    } catch (ExecutionException ex) {
+                        Logger.getLogger(PortfolioDecision.class.getName()).log(Level.SEVERE, null, ex);
+                        taskIter.remove();
+                        continue;
+                    }
+
+                    result.printToConsole();
+                    //Remove task from the list
+                    taskIter.remove();
+                    Thread.yield();
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(PortfolioDecision.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        }
+        
     }
 
+
+
+ 
+    
 
 }

@@ -13,19 +13,29 @@
 
     You should have received a copy of the GNU General Public License
     along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *
+ * http://tutorials.jenkov.com/java-collections/navigableset.html
 */
 
+package jtotus.common;
 
-package jtotus.threads;
-
+import java.util.Date;
+import java.util.TreeMap;
 
 /**
  *
- * @author kappiev
+ * @author Evgeni Kappinen
  */
-public interface VoterThread extends Runnable{
+public class StateIterator {
+                    /*Represents Paramater for a given value*/
+    private TreeMap <String, Float>FloatValues = null;
+    private TreeMap <String, Integer>intValues = null;
+    private TreeMap <String, Double>DoubleValues = null;
+    private TreeMap <String, Date>dateValues = null;
+
+
+
+
     
-    public String getMethName();
-
-
 }

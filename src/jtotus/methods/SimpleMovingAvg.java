@@ -21,13 +21,13 @@ import jtotus.common.Helper;
 import jtotus.config.MethodConfig;
 import jtotus.common.StockType;
 import jtotus.threads.PortfolioDecision;
-import jtotus.threads.VoterThread;
+import jtotus.threads.MethodEntry;
 import java.math.BigDecimal;
 /**
  *
  * @author kappiev
  */
-public class SimpleMovingAvg implements VoterThread {
+public class SimpleMovingAvg implements MethodEntry {
 
     private PortfolioDecision dispatch = null;
     private MethodConfig config = null;
@@ -74,5 +74,9 @@ public class SimpleMovingAvg implements VoterThread {
             help.debug(methodName, "%s:%.2f for %d last days\n",
                     stocks[i], avr.floatValue(), count);
         }
+    }
+
+    public boolean isCallable() {
+       return false;
     }
 }

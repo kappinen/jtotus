@@ -13,25 +13,22 @@
 
     You should have received a copy of the GNU General Public License
     along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
-package jtotus.gui.graph;
 
-import java.io.Serializable;
+package jtotus.threads;
+
 
 /**
  *
  * @author Evgeni Kappinen
  */
-public class // <editor-fold defaultstate="collapsed" desc="Packet for JtotusGraph">
-        GraphPacket// </editor-fold>
- implements Serializable{
-    private static final long serialVersionUID = 1L;
-
+public interface MethodEntry extends Runnable {
     
-    public String seriesTitle;
-    public int day;
-    public int month;
-    public int year;
-    public float result;
+    public String getMethName();
+
+    //If Method supports return value this
+    // method will return true
+    public boolean isCallable();
+
 }

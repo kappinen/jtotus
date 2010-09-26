@@ -19,7 +19,7 @@
  * http://groovy.codehaus.org/Embedding+Groovy
  */
 
-package jtotus.engine;
+package jtotus.methods;
 
 
 import groovy.lang.GroovyClassLoader;
@@ -28,7 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jtotus.threads.VoterThread;
+import jtotus.threads.MethodEntry;
 import org.codehaus.groovy.control.CompilationFailedException;
 
 
@@ -36,7 +36,7 @@ import org.codehaus.groovy.control.CompilationFailedException;
  *
  * @author kappiev
  */
-public class DecisionScript implements VoterThread{
+public class DecisionScript implements MethodEntry{
 
     private String path_to_script = null;
     
@@ -94,6 +94,10 @@ public class DecisionScript implements VoterThread{
       int dot = path_to_script.lastIndexOf(".");
       int sep = path_to_script.lastIndexOf("/");
       return path_to_script.substring(sep + 1, dot);
+    }
+
+    public boolean isCallable() {
+        return false;
     }
 
 

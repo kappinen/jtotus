@@ -1,6 +1,18 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+    This file is part of jTotus.
+
+    jTotus is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    jTotus is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package jtotus.methods;
@@ -12,23 +24,25 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import jtotus.common.Helper;
+import jtotus.common.MethodResults;
 import jtotus.common.StockType;
 import jtotus.config.MethodConfig;
-import jtotus.methods.PeriodClosingPrice;
-import jtotus.threads.VoterThread;
+import jtotus.threads.MethodEntry;
 
 /**
  *
- * @author house
+ * @author Evgeni Kappinen
  */
-public class PotentialWithIn implements VoterThread {
+public class PotentialWithIn implements MethodEntry, Callable<MethodResults>{
     private HashMap<String,Integer> voteCounter = null;
     private ArrayList<PeriodClosingPrice> periodList = null;
     private Helper help = Helper.getInstance();
 
     public String getMethName() {
-        return this.getClass().getName();
+        String tmp = this.getClass().getName();
+        return tmp.substring(tmp.lastIndexOf(".")+1,tmp.length());
     }
 
     public void dumpVotes(HashMap<String,Integer> list){
@@ -165,6 +179,35 @@ public class PotentialWithIn implements VoterThread {
 
 
 
+    public MethodResults call() throws Exception {
+        MethodResults results = new MethodResults();
+
+        System.out.printf("Callable calls run method\n");
+        //Perform action
+         this.run();
+
+         System.out.printf("Callable calls run method done:%s\n", voteCounter.size());
+        //FIXME:Normilize
+        Set<Entry<String,Integer>> set = voteCounter.entrySet();
+        Iterator <Entry<String,Integer>>entryIter = set.iterator();
+
+
+        while(entryIter.hasNext()) {
+            Entry<String,Integer> entry = entryIter.next();
+
+            System.out.printf("Results for %s:%s votes:%d\n",
+                    this.getMethName(),entry.getKey(),entry.getValue());
+            
+            results.putResult(entry.getKey(), entry.getValue());
+        }
+        
+        return results;
+    }
+
+
+    public boolean isCallable() {
+        return true;
+    }
 
 
 

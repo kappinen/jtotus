@@ -19,6 +19,7 @@
 
 package jtotus.engine;
 
+import jtotus.methods.DecisionScript;
 import jtotus.methods.DummyMethod;
 import java.io.File;
 import java.io.FileFilter;
@@ -32,6 +33,7 @@ import jtotus.gui.JtotusView;
 import jtotus.common.Helper;
 import jtotus.config.MethodConfig;
 import jtotus.database.AutoUpdateStocks;
+import jtotus.methods.PotentialWithIn;
 import jtotus.threads.*;
 
 
@@ -45,7 +47,7 @@ import jtotus.threads.*;
 public class Engine {
     private static Engine singleton = null;
     private PortfolioDecision portfolioDecision = null;
-    private LinkedList <VoterThread>methodList;
+    private LinkedList <MethodEntry>methodList;
     private Helper help = null;
     private JtotusView mainWindow = null;
     private HashMap <String,Integer> graphAccessPoints = null;
@@ -56,7 +58,7 @@ public class Engine {
     private void prepareMethodsList(){
         // Available methods
         methodList.add(new DummyMethod(portfolioDecision));
-        
+        methodList.add(new PotentialWithIn());
 
         File scriptDir = new File("./src/jtotus/methods/scripts/");
         if(!scriptDir.isDirectory()) {
@@ -83,7 +85,7 @@ public class Engine {
         portfolioDecision = new PortfolioDecision();
         
         graphAccessPoints = new HashMap<String,Integer>();
-        methodList = new LinkedList<VoterThread>();
+        methodList = new LinkedList<MethodEntry>();
 
         prepareMethodsList();
     }
@@ -103,7 +105,7 @@ public class Engine {
         mainWindow.initialize();
     }
 
-   public synchronized LinkedList<VoterThread>getMethods() {
+   public synchronized LinkedList<MethodEntry>getMethods() {
        return methodList;
    }
 
@@ -124,7 +126,7 @@ public class Engine {
         }
 
         testRun();
-       // dispatcher.run();
+       
     }
 
     private void testRun() {
@@ -136,15 +138,15 @@ public class Engine {
         LinkedList<String>methodNames = mainWindow.getMethodList();
 
 
-        LinkedList <VoterThread>methodL = (LinkedList<VoterThread>) methodList.clone();
-        Iterator <VoterThread>methodIter = methodL.iterator();
+        LinkedList <MethodEntry>methodL = (LinkedList<MethodEntry>) methodList.clone();
+        Iterator <MethodEntry>methodIter = methodL.iterator();
         boolean found = false;
 
 
         while(methodIter.hasNext())
         {
             Iterator <String>nameIter = methodNames.iterator();
-            VoterThread methName = methodIter.next();
+            MethodEntry methName = methodIter.next();
             String tempName = methName.getMethName();
             
             while(nameIter.hasNext()){

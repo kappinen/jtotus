@@ -23,13 +23,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jtotus.common.Helper;
 import jtotus.threads.PortfolioDecision;
-import jtotus.threads.VoterThread;
+import jtotus.threads.MethodEntry;
 
 /**
  *
  * @author kappiev
  */
-public class DummyMethod implements Runnable,VoterThread {
+public class DummyMethod implements Runnable,MethodEntry {
 
     private Helper help = Helper.getInstance();
     private static Random genNum = new Random();
@@ -57,5 +57,11 @@ public class DummyMethod implements Runnable,VoterThread {
     public String getMethName() {
         return methodName;
     }
+
+    public boolean isCallable() {
+       return false;
+    }
+
+    
 
 }

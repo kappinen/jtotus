@@ -1,6 +1,20 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+    This file is part of jTotus.
+
+    jTotus is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    jTotus is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
+ *
+
  */
 
 package jtotus.methods;
@@ -13,13 +27,13 @@ import java.math.BigDecimal;
 import jtotus.common.DateIterator;
 import jtotus.config.MethodConfig;
 import jtotus.common.StockType;
-import jtotus.threads.VoterThread;
+import jtotus.threads.MethodEntry;
 
 /**
  *
  * @author house
  */
-public class StatisticsFreqPeriod implements VoterThread{
+public class StatisticsFreqPeriod implements MethodEntry{
     private String stockName = null;
     private int maxPeriod = 20;
     private int total_days = 0;
@@ -218,5 +232,9 @@ private void printResultsToOur()
     }
     System.out.printf("total days:%d \n", total_days);
 }
+
+    public boolean isCallable() {
+        return false;
+    }
     
 }

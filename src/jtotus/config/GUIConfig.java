@@ -19,7 +19,7 @@ package jtotus.config;
 
 import java.util.LinkedList;
 import jtotus.engine.Engine;
-import jtotus.threads.VoterThread;
+import jtotus.threads.MethodEntry;
 
 /**
  *
@@ -45,7 +45,7 @@ public class GUIConfig {
         return StockNames;
     }
 
-    public LinkedList <VoterThread> getSupportedMethodsList() {
+    public LinkedList <MethodEntry> getSupportedMethodsList() {
         Engine engine = Engine.getInstance();
         return  engine.getMethods();
     }

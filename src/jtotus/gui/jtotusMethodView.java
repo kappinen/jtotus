@@ -29,7 +29,7 @@ import javax.swing.table.DefaultTableModel;
 import jtotus.common.Helper;
 import jtotus.config.GUIConfig;
 import jtotus.gui.graph.JtotusGraph;
-import jtotus.threads.VoterThread;
+import jtotus.threads.MethodEntry;
 
 /**
  *
@@ -113,10 +113,10 @@ public class jtotusMethodView extends JTabbedPane{
             methodModel.addColumn(listOfStocks[i]);
          }
         
-        LinkedList<VoterThread> methods = uiConfig.getSupportedMethodsList();
-        Iterator <VoterThread>methIter = methods.iterator();
+        LinkedList<MethodEntry> methods = uiConfig.getSupportedMethodsList();
+        Iterator <MethodEntry>methIter = methods.iterator();
         while(methIter.hasNext()) {
-            VoterThread next = methIter.next();
+            MethodEntry next = methIter.next();
             String rowsValues[] = new String[listOfStocks.length];
             rowsValues[0] = next.getMethName();
             methodModel.addRow(rowsValues);
