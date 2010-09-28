@@ -23,11 +23,11 @@ package jtotus.common;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.NavigableMap;
-import java.util.TreeMap;
+import java.util.ListIterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,17 +44,15 @@ public class StateIterator {
 
 
     private LinkedList <String>sequence = null;
-
     /*Represents Paramater for a given value*/
-    private LinkedList <NumberRangeIter<Float>>FloatValues = null;
-    private LinkedList <NumberRangeIter<Integer>>IntegerValues = null;
-    private LinkedList <NumberRangeIter<Double>>DoubleValues = null;
-    private LinkedList <NumberRangeIter<Integer>>intValues = null;
+    private ArrayList <NumberRangeIter<Double>>numberParameter = null;
+
     private DateIterator dateRange = null;
 
 
     public StateIterator() {
         sequence = new LinkedList<String>();
+        numberParameter = new ArrayList<NumberRangeIter<Double>>();
     }
 
 
@@ -72,30 +70,20 @@ public class StateIterator {
 
         sequence.add(name);
         
-        if (type.compareTo("int") == 0) {
-            NumberRangeIter<Integer> val = new NumberRangeIter<Integer>(name);
-            val.setRange(rangeAndType);
-            intValues.add(val);
-        }else if (type.compareTo("Integer") == 0) {
-            NumberRangeIter<Integer> val = new NumberRangeIter<Integer>(name);
-            val.setRange(rangeAndType);
-            IntegerValues.add(val);
-        }else if (type.compareTo("Float") == 0) {
-            NumberRangeIter<Float> val = new NumberRangeIter<Float>(name);
-            val.setRange(rangeAndType);
-            FloatValues.add(val);
-        }else if (type.compareTo("Double") == 0) {
+        if (type.compareTo("int") == 0||
+            type.compareTo("Integer") == 0 ||
+            type.compareTo("Float") == 0 ||
+            type.compareTo("Double") == 0) {
             NumberRangeIter<Double> val = new NumberRangeIter<Double>(name);
             val.setRange(rangeAndType);
-            DoubleValues.add(val);
-        }
-        else if (type.compareTo("Date") == 0) {
+            numberParameter.add(val);
+        } else if (type.compareTo("Date") == 0) {
             if(dateRange != null) {
                 System.err.printf("Warning: date range is set for state iterator\n");
             }
 
-            DateFormat startingDate = new SimpleDateFormat("dd-MM-yyyy");
-            DateFormat endingDate = new SimpleDateFormat("dd-MM-yyyy");
+            DateFormat startingDate = new SimpleDateFormat("dd.MM.yyyy");
+            DateFormat endingDate = new SimpleDateFormat("dd.MM.yyyy");
 
             Date startDate=null;
             Date endDate=null;
@@ -111,9 +99,11 @@ public class StateIterator {
             
             dateRange = new DateIterator(startDate ,endDate);
 
-            String step = rangeType.substring(rangeType.lastIndexOf("{")+1,
-                                           rangeType.lastIndexOf("}"));
             //FIXME:check return value
+            
+            
+            String step = rangeType.substring(rangeType.lastIndexOf("{")+1,
+                                              rangeType.lastIndexOf("}"));
             Integer dateStep = new Integer(step);
             dateRange.setStep(dateStep.intValue());
 
@@ -126,75 +116,60 @@ public class StateIterator {
 
 
    public int hasNext(){
-       Iterator<String> seqIter = sequence.iterator();
        
        if (!dateRange.hasNext()){
-           
+            dateRange.reset();
+
+            //go to upper parameters
+           int last_index = numberParameter.size()-1;
+           for (;!numberParameter.get(last_index).hasNext();last_index--) {
+               if (0>=last_index) {
+                   //Nothing to reset, states are consumed
+                   return this.END_STATE;
+               }
+               numberParameter.get(last_index).reset();
+           }
+
+           return this.DATES_CONSUMED;
        }
 
-       while(seqIter.hasNext()){
-           
-       }
-
-
-       return this.END_STATE;
+      dateRange.next();
+      return this.COUNTINUE_STATE;
+       
    }
 
 
    //TODO:to templete
-    int nextInt(String paramName) {
-    Iterator <NumberRangeIter<Integer>> intValueIter = intValues.iterator();
-     while(intValueIter.hasNext()) {
-         NumberRangeIter<Integer> val = intValueIter.next();
-         if (paramName.compareTo(val.getName()) == 0) {
-             if(val.hasNext()){
-                return val.next().intValue();
-             }
-             System.err.printf("BUG:should no happend\n");
-             return -1;
-         }
-     }
-    
-     System.err.printf("Parameter not found:%s\n", paramName);
-     return 0;
+    public int nextInt(String paramName) {
+        return this.nextDouble(paramName).intValue();
     }
 
-    Integer nextInteger(String paramName) {
-        Iterator <NumberRangeIter<Integer>> IntegerValuesIter = IntegerValues.iterator();
-         while(IntegerValuesIter.hasNext()) {
-             NumberRangeIter<Integer> val = IntegerValuesIter.next();
-             if (paramName.compareTo(val.getName()) == 0) {
-                 if(val.hasNext()){
-                    return new Integer(val.next().intValue());
-                 }
-                 System.err.printf("BUG:should no happend\n");
-
-                 return new Integer("-1");
-             }
-         }
-        
-        System.err.printf("Parameter not found:%s\n", paramName);
-        return new Integer("0");
+    public Integer nextInteger(String paramName) {
+        Double retDouble = this.nextDouble(paramName);
+        Integer nextInt = new Integer(retDouble.intValue());
+        return nextInt;
     }
 
-    Double nextDouble(String paramName) {
-        Iterator <NumberRangeIter<Double>> DoubleValuesIter = DoubleValues.iterator();
-         while(DoubleValuesIter.hasNext()) {
-             NumberRangeIter<Double> val = DoubleValuesIter.next();
+    public Double nextDouble(String paramName) {
+        Iterator <NumberRangeIter<Double>> numIter = numberParameter.iterator();
+         while(numIter.hasNext()) {
+             NumberRangeIter<Double> val = numIter.next();
              if (paramName.compareTo(val.getName()) == 0) {
                  if(val.hasNext()){
-                    return val.next();
+                    return val.getCurrent();
                  }
                  System.err.printf("BUG:should no happend\n");
-
                  return new Double("-1");
              }
          }
-        System.err.printf("Parameter not found:%s\n", paramName);
-        return new Double("0");
+
+         System.err.printf("Parameter not found:%s\n", paramName);
+         return new Double("0");
     }
 
-
+    public Date nextDate() {
+        return dateRange.getCurrent();
+    }
 
 
 

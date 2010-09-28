@@ -25,7 +25,7 @@ import jtotus.threads.MethodEntry;
 import java.math.BigDecimal;
 /**
  *
- * @author kappiev
+ * @author Evgeni Kappinen
  */
 public class SimpleMovingAvg implements MethodEntry {
 

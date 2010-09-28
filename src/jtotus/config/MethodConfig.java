@@ -23,13 +23,13 @@ import java.util.Iterator;
 
 /**
  *
- * @author kappiev
+ * @author Evgeni Kappinen
  */
 public class MethodConfig implements Iterable<String>, Iterator<String>{
     private int iterPoint = 0;
     private GUIConfig config = null;
     public String []StockNames = null;
-    public int day_period = 5;
+    public int day_period = 5; /*Default value */
 
     public MethodConfig() {
         ConfigLoader<GUIConfig> loader = new ConfigLoader<GUIConfig>("GUIConfig");

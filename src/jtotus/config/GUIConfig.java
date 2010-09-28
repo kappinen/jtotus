@@ -37,7 +37,8 @@ public class GUIConfig {
                                          "Rautaruukki Oyj",
                                          "Sanoma Oyj",
                                          "Tieto Oyj",
-                                         "Uponor Oyj"
+                                         "Uponor Oyj",
+                                         "Stora Enso Oyj A"
                                           };
     public final int day_period = 5;
 

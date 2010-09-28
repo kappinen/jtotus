@@ -78,9 +78,7 @@ public class PeriodClosingPrice {
 //        BigDecimal current = stock.fetchClosingPrice(endingDate);
         //FIXME !! loop (ending date)--
         BigDecimal current = stock.fetchCurrentClosingPrice();
-        System.out.printf("Current:%f\n",current.doubleValue());
         BigDecimal max = this.getMaxValue();
-        System.out.printf("Current:%f max:%f\n",current.doubleValue(),max.doubleValue() );
         BigDecimal pot = max.subtract(current).abs();
         BigDecimal ret = pot.divide(current,MathContext.DECIMAL64).multiply(BigDecimal.valueOf(100.00));
         help.debug("PeriodClosingPrice",

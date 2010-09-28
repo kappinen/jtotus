@@ -39,7 +39,7 @@ import jtotus.gui.graph.GraphPacket;
 public class StockType implements Iterator{
     private String stockName=null;
     private Map<String,String> stockMap = new HashMap<String,String>();
-    Iterator mapIter = null;
+    private Iterator mapIter = null;
     private DataFetcher fetcher = null;
     private Helper help=null;
 
@@ -66,6 +66,7 @@ public class StockType implements Iterator{
         stockMap.put("Konecranes Oyj","KCR1V.HSE");
         stockMap.put("Kemira Oyj","KRA1V.HSE");
         stockMap.put("Uponor Oyj","UNR1V.HSE");
+        stockMap.put("Stora Enso Oyj A","STEAV.HSE");
 
 
 

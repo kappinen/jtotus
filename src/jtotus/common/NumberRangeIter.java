@@ -54,14 +54,13 @@ public class NumberRangeIter <T extends Number> implements Iterator , Iterable{
     public void setRange(String range) {
 
      //   String range = rangeString.replaceAll("[|]", "");
-        String startString = range.substring(
-                                            range.lastIndexOf("[")+1,
-                                            range.lastIndexOf("-"));
-        String endString = range.substring(
-                                            range.lastIndexOf("-")+1,
-                                            range.lastIndexOf("]"));
-        String stepString = range.substring(
-                                            range.lastIndexOf("{")+1,
+        String startString = range.substring(range.lastIndexOf("[")+1,
+                                             range.lastIndexOf("-"));
+
+        String endString = range.substring(range.lastIndexOf("-")+1,
+                                           range.lastIndexOf("]"));
+
+        String stepString = range.substring(range.lastIndexOf("{")+1,
                                             range.lastIndexOf("}"));
         if (stepString==null){
             stepString="1";
