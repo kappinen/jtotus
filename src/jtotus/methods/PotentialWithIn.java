@@ -41,7 +41,7 @@ public class PotentialWithIn implements MethodEntry, Callable<MethodResults>{
     private Helper help = Helper.getInstance();
 
     public String getMethName() {
-        String tmp = this.getClass().getName();
+        String tmp = "PotentialWithIn";
         return tmp.substring(tmp.lastIndexOf(".")+1,tmp.length());
     }
 
@@ -73,7 +73,7 @@ public class PotentialWithIn implements MethodEntry, Callable<MethodResults>{
        while(iter.hasNext()) {
            StockType stock = new StockType(iter.next());
             periodList.add(new PeriodClosingPrice(stock));
-            help.debug(this.getClass().getName(),
+            help.debug("PotentialWithIn",
                     "StockName for period:%s\n", stock.getName());
        }
 
@@ -84,7 +84,7 @@ public class PotentialWithIn implements MethodEntry, Callable<MethodResults>{
            PeriodClosingPrice stockPeriod = iterPer.next();
            BigDecimal value = stockPeriod.getPotential();
            listOfPrices.add(value);
-           help.debug(this.getClass().getName(),
+           help.debug("PotentialWithIn",
                    "Assiging for:%s : %f\n",stockPeriod.getStockName(),value.doubleValue());
         }
 
@@ -99,7 +99,7 @@ public class PotentialWithIn implements MethodEntry, Callable<MethodResults>{
            BigDecimal max = stockPer.getPotential();
            for(int i=0;i<listOfPrices.size();i++) {
            
-               help.debug(this.getClass().getName(),
+               help.debug("PotentialWithIn",
                    "Value for(%s):%f == %f\n",
                    stockPer.getStockName(),max.floatValue(), listOfPrices.get(i).floatValue());
 
@@ -135,7 +135,7 @@ public class PotentialWithIn implements MethodEntry, Callable<MethodResults>{
            PeriodClosingPrice stockPeriod = iterPer.next();
            BigDecimal value = stockPeriod.getLowPotential();
            listOfPrices.add(value);
-           help.debug(this.getClass().getName(),
+           help.debug("PotentialWithIn",
                    "Assiging for:%s : %f\n",stockPeriod.getStockName(), value.doubleValue());
         }
 
@@ -145,9 +145,9 @@ public class PotentialWithIn implements MethodEntry, Callable<MethodResults>{
        while(iterPer.hasNext()) {
            PeriodClosingPrice stockPer = iterPer.next();
            BigDecimal min = stockPer.getLowPotential();
-           help.debug(this.getClass().getName(),"Minimim value:%f for %s\n", min.floatValue(),stockPer.getStockName());
+           help.debug("PotentialWithIn","Minimim value:%f for %s\n", min.floatValue(),stockPer.getStockName());
            for(int i=listOfPrices.size()-1;i>0;i--) {
-           help.debug(this.getClass().getName(),
+           help.debug("PotentialWithIn",
                    "Value for(%s):%f == %f\n", 
                    stockPer.getStockName(),min.floatValue(), listOfPrices.get(i).floatValue());
            

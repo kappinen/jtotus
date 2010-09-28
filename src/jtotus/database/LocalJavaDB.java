@@ -34,11 +34,11 @@ import jtotus.common.Helper;
 
 /**
  *
- * @author kappiev
+ * @author Evgeni Kappinen
  */
 public class LocalJavaDB implements InterfaceDataBase {
 
-    private Connection conJavaDB = null;
+    private static Connection conJavaDB = null;
     private String driver = "org.apache.derby.jdbc.ClientDriver";
     private String []connectionUrl = { "jdbc:derby://localhost:1527/OMXHelsinki",
                                        "hex", "hex"};
@@ -99,13 +99,12 @@ public class LocalJavaDB implements InterfaceDataBase {
             java.sql.Date sqlDate = new java.sql.Date(searchDay.getTime());
             pstmt.setDate(2, sqlDate, time.getCalendar());
 
-            help.debug(this.getClass().getName(), "Query:%s Stock:%s\n", query, stockName   );
             //Perform query
             ResultSet results = pstmt.executeQuery();
 
             while (results.next()) {
                 BigDecimal tmpBigDecimal = results.getBigDecimal("CLOSINGPRICE");
-                help.debug(this.getClass().getName(), "Javadb got closing price %f for %s\n", tmpBigDecimal, stockName);
+                help.debug("LocalJavaDB", "Javadb got closing price %f for %s\n", tmpBigDecimal, stockName);
                 closingPrice = tmpBigDecimal;
                 break;
             }

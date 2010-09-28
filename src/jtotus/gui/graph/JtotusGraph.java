@@ -147,18 +147,18 @@ public class JtotusGraph implements Runnable{
             }
 
             
-            help.debug(this.getClass().getName(),"Drawing %d:%d:%d val:%f queue capacity:%d and contains:%d\n",
+            help.debug("JtotusGraph","Drawing %d:%d:%d val:%f queue capacity:%d and contains:%d\n",
                     packet.day, packet.month, packet.year, packet.result, queue.remainingCapacity(),
                     queue.size());
 
             //Sanity checks
             if (packet.day <=0 || packet.day > 31 ||
                 packet.month <=0 || packet.month > 12) {
-                System.err.printf("%s incorrect packet format\n", this.getClass().getName());
+                System.err.printf("%s incorrect packet format\n", "JtotusGraph");
                 continue;
             }
 
-            help.debug(this.getClass().getName(), "The packet:%d.%d.%d: result:%f\n",
+            help.debug("JtotusGraph", "The packet:%d.%d.%d: result:%f\n",
                     packet.day, packet.month, packet.year, packet.result);
             //FIXME:change this ugliness
              Day tmpDay = new Day(packet.day,
@@ -173,7 +173,7 @@ public class JtotusGraph implements Runnable{
                 //update if already exists
                 if (hashSeries.addOrUpdate(tmpDay, packet.result) != null)
                 {
-                    help.debug(this.getClass().getName(),
+                    help.debug("JtotusGraph",
                         "Warning overwritting existent value in time series\n");
                 }
 

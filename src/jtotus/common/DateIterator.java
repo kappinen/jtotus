@@ -1,6 +1,18 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+    This file is part of jTotus.
+
+    jTotus is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    jTotus is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package jtotus.common;
@@ -11,20 +23,37 @@ import java.util.Iterator;
 
 /**
  *
- * @author house
+ * @author Evgeni Kappinen
  */
 public class DateIterator implements Iterator<Date>, Iterable<Date>
 {
-
+    private int step = 1;
     private Calendar end = Calendar.getInstance();
+    private Calendar start = Calendar.getInstance();
     private Calendar current = Calendar.getInstance();
 
     public DateIterator(Date tmpStart, Date tmpEnd)
     {
         end.setTime(tmpEnd);
         end.add(Calendar.DATE, -1);
-        current.setTime(tmpStart);
+
+        start.setTime(tmpStart);
+        start.add(Calendar.DATE, -1);
+
+        if(!end.after(start)) {
+            System.err.printf("Warning startin date is afte ending date! Reversing dates("+start.getTime()+":"+end.getTime()+"\n");
+            Calendar tmp = Calendar.getInstance();
+
+            tmp.setTime(start.getTime());
+            start.setTime(end.getTime());
+            end.setTime(tmp.getTime());
+             System.err.printf("New time startin date is afte ending date! Reversing dates("+start.getTime()+":"+end.getTime()+"\n");
+        }
+
+        current.setTime(start.getTime());
         current.add(Calendar.DATE, -1);
+
+
     }
 
     public DateIterator(Date start)
@@ -35,15 +64,23 @@ public class DateIterator implements Iterator<Date>, Iterable<Date>
         current.add(Calendar.DATE, -1);
     }
 
+    public void setStep(int stepSize) {
+        step = stepSize;
+    }
+    
     public boolean hasNext()
     {
-        return !current.after(end);
+        Calendar rangeCheck = Calendar.getInstance();
+        rangeCheck.setTime(current.getTime());
+        rangeCheck.add(Calendar.DATE, step);
+
+        return !rangeCheck.after(end);
     }
 
 
     public Date next()
     {
-        current.add(Calendar.DATE, 1);
+        current.add(Calendar.DATE, step);
         return current.getTime();
     }
 
@@ -55,6 +92,7 @@ public class DateIterator implements Iterator<Date>, Iterable<Date>
 
    public Iterator<Date> iterator()
     {
+       current.setTime(start.getTime());
         return this;
    }
 }

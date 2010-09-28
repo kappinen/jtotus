@@ -32,7 +32,7 @@ import jtotus.common.StockType;
 
 /**
  *
- * @author house
+ * @author Evgeni Kappinen
  */
 public class PeriodClosingPrice {
     private StockType stock = null;
@@ -78,10 +78,12 @@ public class PeriodClosingPrice {
 //        BigDecimal current = stock.fetchClosingPrice(endingDate);
         //FIXME !! loop (ending date)--
         BigDecimal current = stock.fetchCurrentClosingPrice();
-        BigDecimal max = getMaxValue();
+        System.out.printf("Current:%f\n",current.doubleValue());
+        BigDecimal max = this.getMaxValue();
+        System.out.printf("Current:%f max:%f\n",current.doubleValue(),max.doubleValue() );
         BigDecimal pot = max.subtract(current).abs();
         BigDecimal ret = pot.divide(current,MathContext.DECIMAL64).multiply(BigDecimal.valueOf(100.00));
-        help.debug(this.getClass().getName(),
+        help.debug("PeriodClosingPrice",
                 "Stock: %s ret:%f - %f =ret:%f\n",
                 stock.getName(),max.floatValue(),current.floatValue(),ret.floatValue());
         return ret;
@@ -95,7 +97,7 @@ public class PeriodClosingPrice {
         BigDecimal min = getMinValue();
         BigDecimal lowPot = min.subtract(current).abs();
         BigDecimal ret = lowPot.divide(current,MathContext.DECIMAL64).multiply(BigDecimal.valueOf(100.00));
-        help.debug(this.getClass().getName(),
+        help.debug("PeriodClosingPrice",
                 "Stock: %s ret:%f - %f =ret:%f\n",
                 stock.getName(),min.floatValue(),current.floatValue(),ret.floatValue());
         return ret;

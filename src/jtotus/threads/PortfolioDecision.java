@@ -92,7 +92,7 @@ public class PortfolioDecision implements Runnable{
             threadList = new LinkedList<MethodEntry>();
         }
 
-        help.debug(this.getClass().getName(), "setting list with size:%d\n",
+        help.debug("PortfolioDecision", "setting list with size:%d\n",
                 threads.size());
         
         if (!threadList.isEmpty()) {
@@ -118,7 +118,7 @@ public class PortfolioDecision implements Runnable{
     public void run() {
         Future<MethodResults> methodResult = null;
 
-        help.debug(this.getClass().getName(), "Dispatcher started..\n");
+        help.debug("PortfolioDecision", "Dispatcher started..\n");
         
         if (threadList == null ||
             threadList.isEmpty()) {
@@ -138,7 +138,7 @@ public class PortfolioDecision implements Runnable{
                 threadExecutor.execute(tmp);
             }
         }
-        help.debug(this.getClass().getName(), "Dispatcher ended.. List:%d:%d\n",
+        help.debug("PortfolioDecision", "Dispatcher ended.. List:%d:%d\n",
                     threadList.size(),methodResults.size());
 
         //All tasks are executing.. lets wait for results

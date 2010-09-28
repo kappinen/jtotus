@@ -62,12 +62,12 @@ public class jtotusMethodView extends JTabbedPane{
 
         JtotusGraph tempGraph = new JtotusGraph(tempFrameGraph, reviewTarget);
         if(tempGraph.initialize()==false) { //Failed to bind to port
-             System.out.printf("[%s] Failed ot bind to port\n",this.getClass().getName());
+             System.out.printf("[%s] Failed ot bind to port\n","jtotusMethodView");
             return bindPort;
         }
 
         bindPort = tempGraph.getBindPort();
-        help.debug(this.getClass().getName(),
+        help.debug("jtotusMethodView",
                 "Binded to port:%d\n", tempGraph.getBindPort());
 
         Thread painter = new Thread(tempGraph);
@@ -84,13 +84,13 @@ public class jtotusMethodView extends JTabbedPane{
         LinkedList<String> selectedRows = new LinkedList<String>();
 
         int []selRow = methodTable.getSelectedRows();
-        help.debug(this.getClass().getName(),
+        help.debug("jtotusMethodView",
                    "Selected total:%d\n", selRow.length);
 
         DefaultTableModel methodModel = (DefaultTableModel) methodTable.getModel();
         
         for (int i = 0; i < selRow.length;i++) {
-            help.debug(this.getClass().getName(),
+            help.debug("jtotusMethodView",
                     "Selected:%s\n", (String)methodModel.getValueAt(selRow[i], 0));
             
             selectedRows.add((String)methodModel.getValueAt(selRow[i], 0));

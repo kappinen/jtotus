@@ -53,7 +53,7 @@ public class MethodResults {
 
 
     public String getName(){
-        String tmpName = this.getClass().getName();
+        String tmpName = "MethodResults";
         String trueName = tmpName.substring(tmpName.lastIndexOf(".")+1, tmpName.length());
         return trueName;
     }

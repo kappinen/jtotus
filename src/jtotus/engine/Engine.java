@@ -31,6 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jtotus.gui.JtotusView;
 import jtotus.common.Helper;
+import jtotus.common.StateIterator;
 import jtotus.config.MethodConfig;
 import jtotus.database.AutoUpdateStocks;
 import jtotus.methods.PotentialWithIn;
@@ -130,6 +131,11 @@ public class Engine {
     }
 
     private void testRun() {
+//        StateIterator iter = new StateIterator();
+//
+//        iter.addParam("Param1","int[0-100]");
+//        iter.addParam("Param2","Float[100.00-200]");
+//        iter.addParam("Param3","Double[300-400]");
         
     }
 
@@ -151,7 +157,7 @@ public class Engine {
             
             while(nameIter.hasNext()){
                 String nameList = nameIter.next();
-                help.debug(this.getClass().getName(),
+                help.debug("Engine",
                            "Search name:%s in list:%s\n",tempName, nameList);
                 
                 if(nameList.compareTo(tempName)==0){
@@ -160,7 +166,7 @@ public class Engine {
                 }
             }
             if (!found){
-               help.debug(this.getClass().getName(),"Removeing:%s\n",tempName);
+               help.debug("Engine","Removeing:%s\n",tempName);
                 methodIter.remove();
             }
             found=false;

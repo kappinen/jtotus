@@ -118,7 +118,7 @@ public class StockType implements Iterator{
         SimpleDateFormat format = new SimpleDateFormat();
         format.setCalendar(cal);
 
-        help.debug(this.getClass().getName(), "Fetching:%s: Time:" + cal.getTime() + "\n" , stockName);
+        help.debug("StockType", "Fetching:%s: Time:" + cal.getTime() + "\n" , stockName);
 
         while(fetcher.fetchClosingPrice(stockName, format) == null) {
             //TODO:check end
@@ -130,7 +130,7 @@ public class StockType implements Iterator{
 
     public BigDecimal fetchClosingPrice(SimpleDateFormat time) {
 
-        help.debug(this.getClass().getName(), "Fetching:%s: Time:%s\n", stockName, help.dateToString(time));
+        help.debug("StockType", "Fetching:%s: Time:%s\n", stockName, help.dateToString(time));
 
         return fetcher.fetchClosingPrice(stockName, time);
     }
@@ -145,7 +145,7 @@ public class StockType implements Iterator{
         SimpleDateFormat format = new SimpleDateFormat();
         format.setCalendar(cal);
 
-        help.debug(this.getClass().getName(), "Fetching:%s: Time:" + time + "\n" , stockName);
+        help.debug("StockType", "Fetching:%s: Time:" + time + "\n" , stockName);
 
         return fetcher.fetchClosingPrice(stockName, format);
     }

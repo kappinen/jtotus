@@ -54,7 +54,7 @@ public class StatisticsFreqPeriod implements MethodEntry{
     }
 
     public String getMethName() {
-        return this.getClass().getName();
+        return "StatisticsFreqPeriod";
     }
 
     private int normilize(double tmp) {

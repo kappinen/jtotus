@@ -1,11 +1,18 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- *
- *
- *
- *
- *
+    This file is part of jTotus.
+
+    jTotus is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    jTotus is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  *
  *
  * An example of fetcher.
@@ -30,7 +37,7 @@ import org.jsoup.select.Elements;
 
 /**
  *
- * @author kappiev
+ * @author Evgeni Kappinen
  */
 public class NetworkOP implements InterfaceDataBase {
     Helper help = Helper.getInstance();;
@@ -58,8 +65,8 @@ public class NetworkOP implements InterfaceDataBase {
         URL url;
 
         
-        help.debug(this.getClass().getName(), "fetchClosingPrice(%s,%s)\n",stockName, help.dateToString(time));
-        help.debug(this.getClass().getName(),
+        help.debug("NetworkOP", "fetchClosingPrice(%s,%s)\n",stockName, help.dateToString(time));
+        help.debug("NetworkOP",
                 "The value for Stock: %s is :%s\n",stockName,
                 new StockType(stockName).getHexName());
 
@@ -90,7 +97,7 @@ public class NetworkOP implements InterfaceDataBase {
                         data = elem.text();
                         String fdata = data.replace(',', '.');
 
-                        help.debug(this.getClass().getName(),
+                        help.debug("NetworkOP",
                                 "Closing Price:%f for:%s\n",
                                 Float.valueOf(fdata).floatValue(),
                                 help.dateToString(trueDate));
@@ -105,7 +112,7 @@ public class NetworkOP implements InterfaceDataBase {
                 //System.out.printf("The host title:%s found:%d\n", title, elems.size());
 
         } catch (IOException ex) {
-            //System.out.printf("Failed in :%s\n",this.getClass().getName());
+            //System.out.printf("Failed in :%s\n","NetworkOP");
             //Logger.getLogger(NetworkGoogle.class.getName()).log(Level.SEVERE, null, ex);
         }
 

@@ -102,14 +102,14 @@ public BigDecimal fetchValue(String stockName, SimpleDateFormat time, int row)
         String nameOfFile = listOfFiles[i].getName();
 
         if (nameOfFile.indexOf(stockName) != -1) {
-            help.debug(this.getClass().getName(),"Found File:%s\n", nameOfFile);
+            help.debug("FileSystemFromHex","Found File:%s\n", nameOfFile);
             result = omxNordicFile(nameOfFile, time, row);
             if (result != null) {
                return result;
             }
         }
     }
-    help.debug(this.getClass().getName(), "Not found value for:%s\n", stockName);
+    help.debug("FileSystemFromHex", "Not found value for:%s\n", stockName);
     return result;
 }
 
@@ -157,7 +157,7 @@ public BigDecimal fetchValue(String stockName, SimpleDateFormat time, int row)
                 }
               
 
-              //  help.debug(this.getClass().getName(),"Searching:%s from:%s\n", correctTime, temp);
+              //  help.debug("FileSystemFromHex","Searching:%s from:%s\n", correctTime, temp);
                 if (correctTime.compareTo(dateString) == 0)
                 {
                     HSSFCell closingPrice = rows.getCell(row);
@@ -165,7 +165,7 @@ public BigDecimal fetchValue(String stockName, SimpleDateFormat time, int row)
                         return null;
                     
                     float floatTemp = (float)closingPrice.getNumericCellValue();
-                    help.debug(this.getClass().getName(), 
+                    help.debug("FileSystemFromHex",
                             "Closing price at:%d f:%.4f Time:%s\n",
                             cell.getRowIndex(), floatTemp, correctTime);
                     
