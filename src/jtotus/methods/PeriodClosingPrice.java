@@ -41,7 +41,7 @@ public class PeriodClosingPrice {
     private Date endingDate = null;
     private boolean initDone = false;
     private Helper help = Helper.getInstance();
-
+    public int raises = 0,total_dates = 0; //TODO: implement
     //Helps to identify, which stock period
     private String stockName = null;
     public int period = 90;
@@ -130,11 +130,20 @@ public class PeriodClosingPrice {
 
         priceList = new ArrayList<BigDecimal>();
         BigDecimal closingPrice = null;
+        BigDecimal previous = null;
         while(iter.hasNext()) {
             closingPrice = stock.fetchClosingPrice(iter.next());
             if (closingPrice != null) {
                priceList.add(closingPrice);
+               total_dates++;
+               if (previous != null)
+                if (previous.compareTo(closingPrice) == 1){
+                    raises++;
+                }
+            previous = closingPrice;
             }
+
+            
         }
 
         sortedList = priceList;

@@ -43,7 +43,7 @@ public class StateIterator {
     public final static int COUNTINUE_STATE = 2;
 
 
-    private LinkedList <String>sequence = null;
+
     /*Represents Paramater for a given value*/
     private ArrayList <NumberRangeIter<Double>>numberParameter = null;
 
@@ -51,7 +51,6 @@ public class StateIterator {
 
 
     public StateIterator() {
-        sequence = new LinkedList<String>();
         numberParameter = new ArrayList<NumberRangeIter<Double>>();
     }
 
@@ -67,8 +66,6 @@ public class StateIterator {
         
         System.out.printf("Name:%s type:%s range:%s\n",
                           name, type, range);
-
-        sequence.add(name);
         
         if (type.compareTo("int") == 0||
             type.compareTo("Integer") == 0 ||
@@ -116,18 +113,24 @@ public class StateIterator {
 
 
    public int hasNext(){
-       
+
+
        if (!dateRange.hasNext()){
             dateRange.reset();
 
             //go to upper parameters
            int last_index = numberParameter.size()-1;
-           for (;!numberParameter.get(last_index).hasNext();last_index--) {
-               if (0>=last_index) {
-                   //Nothing to reset, states are consumed
-                   return this.END_STATE;
+           for (;last_index>=0;last_index--) {
+                NumberRangeIter<Double> iter = numberParameter.get(last_index);
+               if (!iter.hasNext()) {
+                   if(last_index == 0){
+                       return this.END_STATE;
+                   }
+                    iter.reset();
+               } else {
+                   iter.next();
+                   break;
                }
-               numberParameter.get(last_index).reset();
            }
 
            return this.DATES_CONSUMED;
@@ -151,15 +154,12 @@ public class StateIterator {
     }
 
     public Double nextDouble(String paramName) {
-        Iterator <NumberRangeIter<Double>> numIter = numberParameter.iterator();
+        Iterator <NumberRangeIter<Double>> numIter = numberParameter.listIterator();
          while(numIter.hasNext()) {
              NumberRangeIter<Double> val = numIter.next();
+             //System.out.printf("Parameters in array:%s\n", val.getName());
              if (paramName.compareTo(val.getName()) == 0) {
-                 if(val.hasNext()){
                     return val.getCurrent();
-                 }
-                 System.err.printf("BUG:should no happend\n");
-                 return new Double("-1");
              }
          }
 

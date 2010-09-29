@@ -169,6 +169,48 @@ public class PotentialWithIn implements MethodEntry, Callable<MethodResults>{
            }
         }
 
+       listOfPrices.clear();
+       //  Find out which Stock has most potentials
+       iterPer = periodList.iterator();
+       while(iterPer.hasNext()) {
+           PeriodClosingPrice stockPeriod = iterPer.next();
+           BigDecimal value = new BigDecimal(stockPeriod.raises);
+           listOfPrices.add(value);
+           help.debug("PotentialWithIn",
+                   "Assiging for:%s : %f\n",stockPeriod.getStockName(), value.doubleValue());
+        }
+
+       Collections.sort(listOfPrices);
+
+       iterPer = periodList.iterator();
+       while(iterPer.hasNext()) {
+           PeriodClosingPrice stockPer = iterPer.next();
+           BigDecimal max = new BigDecimal(stockPer.raises);
+           for(int i=0;i<listOfPrices.size();i++) {
+
+               help.debug("PotentialWithIn",
+                   "Value for(%s):%f == %f\n",
+                   stockPer.getStockName(),max.floatValue(), listOfPrices.get(i).floatValue());
+
+               if (max.doubleValue() == listOfPrices.get(i).doubleValue()) {
+                   Integer votes = voteCounter.get(stockPer.getStockName());
+                   if (votes == null) {
+                       voteCounter.put(stockPer.getStockName(), Integer.valueOf(i*i));
+                       System.out.printf(
+                               "Stock1:%s raises:%f votes:%d total dates:%d\n",
+                               stockPer.getStockName(), max.floatValue(), i, stockPer.total_dates);
+                   }
+                   else{
+                       votes+=Integer.valueOf(i*i);
+                       voteCounter.put(stockPer.getStockName(), votes);
+                       System.out.printf(
+                               "Stock2:%s raises:%f votes:%d total dates:%d\n",
+                               stockPer.getStockName(), max.floatValue(), i, stockPer.total_dates);
+                   }
+                   break;
+               }
+           }
+        }
       
            //Find out potentials and sort them
 

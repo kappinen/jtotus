@@ -28,7 +28,6 @@ public class NumberRangeIter <T extends Number> implements Iterator , Iterable{
     private Double step=null;
     private Double start=null;
     private Double end=null;
-
     private Double current=null;
 
 
@@ -37,9 +36,9 @@ public class NumberRangeIter <T extends Number> implements Iterator , Iterable{
     }
     
     public NumberRangeIter(String name, T starts, T ends) {
-        current = starts.doubleValue();
-        start = starts.doubleValue();
-        end = ends.doubleValue();
+        current = new Double(starts.doubleValue());
+        start = new Double(starts.doubleValue());
+        end = new Double(ends.doubleValue());
         paramName = name;
 
     }
@@ -66,9 +65,10 @@ public class NumberRangeIter <T extends Number> implements Iterator , Iterable{
             stepString="1";
         }
         
-        start = Double.valueOf(startString);
-        end = Double.valueOf(endString);
-        step = Double.valueOf(stepString);
+        start = new Double(startString);
+        current = new Double(startString);
+        end = new Double(endString);
+        step = new Double(stepString);
      }
 
     public void setName(String name) { paramName=name; }
@@ -83,7 +83,8 @@ public class NumberRangeIter <T extends Number> implements Iterator , Iterable{
 
     public boolean hasNext() {
 
-        if(end.doubleValue()<=(current+step.doubleValue())){
+       // System.out.printf("end:%f\n",end.floatValue());
+        if(end.doubleValue()>=(current.doubleValue()+step.doubleValue())){
             return true;
         }
         
@@ -92,7 +93,7 @@ public class NumberRangeIter <T extends Number> implements Iterator , Iterable{
 
     public Double next() {
         Double ret = current;
-        if(end.doubleValue()<=(current+step.doubleValue())){
+        if(end.doubleValue()>=(current+step.doubleValue())){
             current+=step.doubleValue();
         }
         

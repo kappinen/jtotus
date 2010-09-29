@@ -133,9 +133,9 @@ public class Engine {
     private void testRun() {
         StateIterator iter = new StateIterator();
 
-        iter.addParam("Param1","int[0-100]{1}");
-        iter.addParam("Param2","Float[100.00-200]{1}");
-        iter.addParam("Param3","Double[300-400]{1}");
+        iter.addParam("Param1","int[1-2]{1}");
+        iter.addParam("Param2","Float[200.00-202]{1}");
+        iter.addParam("Param3","Double[300-302]{1}");
         iter.addParam("DateParam", "Date[21.10.2010-27.10.2010]{1}");
 
         while(iter.hasNext() != iter.END_STATE) {
