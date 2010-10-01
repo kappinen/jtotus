@@ -30,6 +30,7 @@
  */
 package jtotus.threads;
 
+import jtotus.methods.MethodEntry;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.Callable;
@@ -39,15 +40,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.naming.spi.DirStateFactory.Result;
 
 import jtotus.common.Helper;
 import jtotus.common.MethodResults;
 import jtotus.config.MethodConfig;
+import jtotus.engine.Engine;
+import jtotus.gui.MethodResultsPrinter;
 
 /**
  *
- * @author kappiev
+ * @author Evgeni Kappinen
  */
 public class PortfolioDecision implements Runnable{
 
@@ -56,6 +58,9 @@ public class PortfolioDecision implements Runnable{
     private LinkedList<Future<MethodResults>> methodResults = null;
     private ExecutorService threadExecutor = null;
 
+
+
+    
     private void init() {
         if (help == null)
             help = Helper.getInstance();
@@ -117,7 +122,10 @@ public class PortfolioDecision implements Runnable{
 
     public void run() {
         Future<MethodResults> methodResult = null;
+        Engine engine = Engine.getInstance();
 
+
+        
         help.debug("PortfolioDecision", "Dispatcher started..\n");
         
         if (threadList == null ||
@@ -131,6 +139,8 @@ public class PortfolioDecision implements Runnable{
             MethodEntry tmp = iterator.next();
             if (tmp.isCallable()){
                 Callable<MethodResults> callableTmp = (Callable<MethodResults>)tmp;
+
+
                 methodResult = threadExecutor.submit(callableTmp);
                 methodResults.add(methodResult);
             }else {
@@ -163,6 +173,10 @@ public class PortfolioDecision implements Runnable{
                     }
 
                     result.printToConsole();
+                    MethodResultsPrinter printer = engine.getResultsPrinter();
+                    printer.drawResults(result);
+
+                    
                     //Remove task from the list
                     taskIter.remove();
                     Thread.yield();
@@ -177,9 +191,5 @@ public class PortfolioDecision implements Runnable{
         
     }
 
-
-
- 
-    
 
 }

@@ -18,8 +18,11 @@
 
 package jtotus.gui;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map.Entry;
+import java.util.Set;
 import javax.swing.JDesktopPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -27,15 +30,17 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 import jtotus.common.Helper;
+import jtotus.common.MethodResults;
 import jtotus.config.GUIConfig;
+import jtotus.engine.Engine;
 import jtotus.gui.graph.JtotusGraph;
-import jtotus.threads.MethodEntry;
+import jtotus.methods.MethodEntry;
 
 /**
  *
- * @author house
+ * @author Evgeni Kappinen
  */
-public class jtotusMethodView extends JTabbedPane{
+public class jtotusMethodView extends JTabbedPane implements MethodResultsPrinter{
     private JScrollPane  jScrollPane1 = null;
     private JDesktopPane drawDesktopPane = null;
     private JTable methodTable = null;
@@ -75,6 +80,7 @@ public class jtotusMethodView extends JTabbedPane{
 
         drawDesktopPane.add(tempFrameGraph, javax.swing.JLayeredPane.DEFAULT_LAYER);
         drawDesktopPane.setAutoscrolls(true);
+
         return bindPort;
     }
 
@@ -109,7 +115,7 @@ public class jtotusMethodView extends JTabbedPane{
         GUIConfig uiConfig = new GUIConfig();
         String listOfStocks[] = uiConfig.fetchStockName();
 
-        for (int i = 0;i<listOfStocks.length-1;i++) {
+        for (int i = 0;i<listOfStocks.length;i++) {
             methodModel.addColumn(listOfStocks[i]);
          }
         
@@ -117,7 +123,7 @@ public class jtotusMethodView extends JTabbedPane{
         Iterator <MethodEntry>methIter = methods.iterator();
         while(methIter.hasNext()) {
             MethodEntry next = methIter.next();
-            String rowsValues[] = new String[listOfStocks.length];
+            String rowsValues[] = new String[listOfStocks.length+1];
             rowsValues[0] = next.getMethName();
             methodModel.addRow(rowsValues);
         }
@@ -160,8 +166,70 @@ public class jtotusMethodView extends JTabbedPane{
         jScrollPane1 = new JScrollPane();
         drawDesktopPane = new JDesktopPane();
 
+        //Register Method Results printer
+        Engine engine = Engine.getInstance();
+        engine.registerResultsPrinter(this);
+
         configureMethodTab();
        
+    }
+
+    public void drawResults(MethodResults results) {
+          DefaultTableModel methodModel = (DefaultTableModel) methodTable.getModel();
+          int method_idx = this.getRowIndex(results.getMethodName());
+          
+          HashMap<String,Double> result = results.getResults();
+          Set<Entry<String, Double>> stockNameSet = result.entrySet();
+          Iterator <Entry<String,Double>>entryIter = stockNameSet.iterator();
+          int stock_idx = 0;
+          Double resultDoubleToString = null;
+        while(entryIter.hasNext()) {
+            Entry<String,Double> entry = entryIter.next();
+             stock_idx = this.getColumnIndex(entry.getKey());
+             resultDoubleToString = entry.getValue();
+            if (method_idx != -1 && stock_idx != -1){
+                methodModel.setValueAt(
+                            String.valueOf(resultDoubleToString.doubleValue()),
+                            method_idx,stock_idx);
+            }else {
+                 System.err.printf("Warning could not find %s in the method list", entry.getKey());
+            }
+
+        } 
+    }
+
+
+    private int getRowIndex(String methodName){
+        DefaultTableModel methodModel = (DefaultTableModel) methodTable.getModel();
+
+        for (int i = 0; i < methodModel.getRowCount()-1;i++) {
+            help.debug(this.getClass().getName(),
+                            "From columns Searching:%s:%s\n", methodName,
+                            (String)methodModel.getValueAt(i, 0));
+            
+            String method = (String) methodModel.getValueAt(i, 0);
+            if (method.compareTo(methodName) == 0) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+
+    private int getColumnIndex(String stockName){
+        DefaultTableModel methodModel = (DefaultTableModel) methodTable.getModel();
+
+        for (int i = 0; i < methodModel.getColumnCount();i++) {
+            help.debug(this.getClass().getName(),
+                            "From rows Searching:%s:%s\n", stockName,
+                            (String)methodModel.getColumnName(i));
+            
+            String stock =methodModel.getColumnName(i);
+            if (stockName.compareTo(stock) == 0) {
+                return i;
+            }
+        }
+        return -1;
     }
 
 }

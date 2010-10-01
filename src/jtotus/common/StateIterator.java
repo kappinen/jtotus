@@ -57,15 +57,21 @@ public class StateIterator {
 
 
     //Syntax Type[RangeStart-RangeEnd]{scale}
-   public void addParam(String name, String rangeAndType) {
-
-        String rangeType = rangeAndType.replace(" ", "");
-        String type = rangeType.substring(0,rangeType.lastIndexOf("["));
-        String range = rangeType.substring(rangeType.lastIndexOf("[")+1,
-                                           rangeType.lastIndexOf("]"));
+   public int addParam(String name, String rangeAndType) {
+        String type = null;
         
-        System.out.printf("Name:%s type:%s range:%s\n",
-                          name, type, range);
+        String rangeType = rangeAndType.replace(" ", "");
+
+        if (rangeType.lastIndexOf("[") != -1) {
+            type = rangeType.substring(0,rangeType.lastIndexOf("["));
+        } else {
+            type = "Double"; //Default type for paramater
+        }
+
+
+        
+        System.out.printf("Name:%s type:%s\n",
+                          name, type);
         
         if (type.compareTo("int") == 0||
             type.compareTo("Integer") == 0 ||
@@ -85,7 +91,8 @@ public class StateIterator {
             Date startDate=null;
             Date endDate=null;
             try {
-
+                String range = rangeType.substring(rangeType.lastIndexOf("[")+1,
+                                                   rangeType.lastIndexOf("]"));
                 String dateSplit[] = range.split("-");
                 System.out.printf("String date:%s ending date:%s\n", dateSplit[0], dateSplit[1]);
                 startDate = startingDate.parse(dateSplit[0]);
@@ -108,6 +115,8 @@ public class StateIterator {
         else {
             System.err.printf("Error: Unknown type %s for %s\n", type, name);
         }
+
+        return 1;
    }
 
 

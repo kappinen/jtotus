@@ -15,20 +15,12 @@
     along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-package jtotus.threads;
-
+package jtotus.methods.utils;
 
 /**
  *
  * @author Evgeni Kappinen
  */
-public interface MethodEntry extends Runnable {
-    
-    public String getMethName();
-
-    //If Method supports return value this
-    // method will return true
-    public boolean isCallable();
+public class NormBiggestBest {
 
 }

@@ -27,7 +27,6 @@ import java.math.BigDecimal;
 import jtotus.common.DateIterator;
 import jtotus.config.MethodConfig;
 import jtotus.common.StockType;
-import jtotus.threads.MethodEntry;
 
 /**
  *

@@ -19,6 +19,7 @@
 
 package jtotus.engine;
 
+import jtotus.methods.MethodEntry;
 import jtotus.methods.DecisionScript;
 import jtotus.methods.DummyMethod;
 import java.io.File;
@@ -34,6 +35,7 @@ import jtotus.common.Helper;
 import jtotus.common.StateIterator;
 import jtotus.config.MethodConfig;
 import jtotus.database.AutoUpdateStocks;
+import jtotus.gui.MethodResultsPrinter;
 import jtotus.methods.PotentialWithIn;
 import jtotus.threads.*;
 
@@ -52,7 +54,7 @@ public class Engine {
     private Helper help = null;
     private JtotusView mainWindow = null;
     private HashMap <String,Integer> graphAccessPoints = null;
-
+    private MethodResultsPrinter resultsPrinter = null;
 
 
 
@@ -131,19 +133,7 @@ public class Engine {
     }
 
     private void testRun() {
-        StateIterator iter = new StateIterator();
 
-        iter.addParam("Param1","int[1-2]{1}");
-        iter.addParam("Param2","Float[200.00-202]{1}");
-        iter.addParam("Param3","Double[300-302]{1}");
-        iter.addParam("DateParam", "Date[21.10.2010-27.10.2010]{1}");
-
-        while(iter.hasNext() != iter.END_STATE) {
-            System.out.printf("Param1: %d Param2:%f Param3:%f Date:"+iter.nextDate()+"\n",
-                    iter.nextInt("Param1"),
-                    iter.nextDouble("Param2").floatValue(),
-                    iter.nextDouble("Param3").floatValue());
-        }
         
     }
 
@@ -225,7 +215,18 @@ public class Engine {
         graphAccessPoints.put(reviewTarget, new Integer(acceccPoint));
 
     }
-    
+
+
+    public void registerResultsPrinter(MethodResultsPrinter printer) {
+        System.out.printf("Registering result printer\n");
+        resultsPrinter = printer;
+        
+        return;
+    }
+
+    public synchronized MethodResultsPrinter getResultsPrinter() {
+        return resultsPrinter;
+    }
 
     public int fetchGraph(String reviewTarget) {
         int accessPort = 0;

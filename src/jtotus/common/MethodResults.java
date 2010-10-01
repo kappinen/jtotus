@@ -28,13 +28,22 @@ import java.util.Set;
  * @author Evgeni Kappinen
  */
 public class MethodResults {
+    private String methodName = null;
     private HashMap<String,Double> results = null;
 
     public MethodResults() {
         results = new HashMap<String, Double>();
     }
 
+    public String getMethodName() {
+        return methodName;
+    }
 
+    public void setMethodName(String MethodName) {
+        methodName = MethodName;
+    }
+
+    
     public void putResult(String stockName, Double stockValue) {
         if (results != null) {
             results.put(stockName, stockValue);
@@ -48,12 +57,12 @@ public class MethodResults {
     }
 
     public HashMap<String,Double>getResults() {
-        return (HashMap<String, Double>) Collections.unmodifiableMap(results);
+        return results;
     }
 
 
     public String getName(){
-        String tmpName = "MethodResults";
+        String tmpName = this.getClass().getName();
         String trueName = tmpName.substring(tmpName.lastIndexOf(".")+1, tmpName.length());
         return trueName;
     }

@@ -19,7 +19,7 @@ package jtotus.config;
 
 import java.util.LinkedList;
 import jtotus.engine.Engine;
-import jtotus.threads.MethodEntry;
+import jtotus.methods.MethodEntry;
 
 /**
  *

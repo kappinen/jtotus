@@ -21,7 +21,6 @@ import jtotus.common.Helper;
 import jtotus.config.MethodConfig;
 import jtotus.common.StockType;
 import jtotus.threads.PortfolioDecision;
-import jtotus.threads.MethodEntry;
 import java.math.BigDecimal;
 /**
  *

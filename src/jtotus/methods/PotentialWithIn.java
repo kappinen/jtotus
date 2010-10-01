@@ -29,7 +29,6 @@ import jtotus.common.Helper;
 import jtotus.common.MethodResults;
 import jtotus.common.StockType;
 import jtotus.config.MethodConfig;
-import jtotus.threads.MethodEntry;
 
 /**
  *
@@ -107,14 +106,14 @@ public class PotentialWithIn implements MethodEntry, Callable<MethodResults>{
                    Integer votes = voteCounter.get(stockPer.getStockName());
                    if (votes == null) {
                        voteCounter.put(stockPer.getStockName(), Integer.valueOf(i*i));
-                       System.out.printf(
+                       help.debug(this.getClass().getName(),
                                "Stock:%s max:%f votes:%d\n",
                                stockPer.getStockName(), max.floatValue(), i);
                    }
                    else{
                        votes+=Integer.valueOf(i*i);
                        voteCounter.put(stockPer.getStockName(), votes);
-                       System.out.printf(
+                       help.debug(this.getClass().getName(),
                                "Stock:%s max:%f votes:%d\n",
                                stockPer.getStockName(), max.floatValue(), i);
                    }
@@ -196,12 +195,68 @@ public class PotentialWithIn implements MethodEntry, Callable<MethodResults>{
                    Integer votes = voteCounter.get(stockPer.getStockName());
                    if (votes == null) {
                        voteCounter.put(stockPer.getStockName(), Integer.valueOf(i*i));
-                       System.out.printf(
+                       help.debug(this.getClass().getName(),
                                "Stock1:%s raises:%f votes:%d total dates:%d\n",
                                stockPer.getStockName(), max.floatValue(), i, stockPer.total_dates);
                    }
                    else{
                        votes+=Integer.valueOf(i*i);
+                       voteCounter.put(stockPer.getStockName(), votes);
+                       help.debug(this.getClass().getName(),
+                               "Stock2:%s raises:%f votes:%d total dates:%d\n",
+                               stockPer.getStockName(), max.floatValue(), i, stockPer.total_dates);
+                   }
+                   break;
+               }
+           }
+        }
+
+
+
+
+
+
+
+
+
+
+        //Normilize
+
+       listOfPrices.clear();
+       //  Find out which Stock has most potentials
+       iterPer = periodList.iterator();
+       while(iterPer.hasNext()) {
+           PeriodClosingPrice stockPeriod = iterPer.next();
+           Integer votes = voteCounter.get(stockPeriod.getStockName());
+           BigDecimal value = new BigDecimal(votes.intValue());
+           listOfPrices.add(value);
+           help.debug("PotentialWithIn",
+                   "Assiging for:%s : %f\n",stockPeriod.getStockName(), value.doubleValue());
+        }
+
+       Collections.sort(listOfPrices);
+
+       iterPer = periodList.iterator();
+       while(iterPer.hasNext()) {
+           PeriodClosingPrice stockPer = iterPer.next();
+           Integer votesOrig = voteCounter.get(stockPer.getStockName());
+           BigDecimal max = new BigDecimal(votesOrig.intValue());
+           for(int i=0;i<listOfPrices.size();i++) {
+
+               help.debug("PotentialWithIn",
+                   "Value for(%s):%f == %f\n",
+                   stockPer.getStockName(),max.floatValue(), listOfPrices.get(i).floatValue());
+
+               if (max.doubleValue() == listOfPrices.get(i).doubleValue()) {
+                   Integer votes = voteCounter.get(stockPer.getStockName());
+                   if (votes == null) {
+                       voteCounter.put(stockPer.getStockName(), Integer.valueOf(i));
+                       System.out.printf(
+                               "Stock1:%s raises:%f votes:%d total dates:%d\n",
+                               stockPer.getStockName(), max.floatValue(), i, stockPer.total_dates);
+                   }
+                   else{
+                       votes=Integer.valueOf(i);
                        voteCounter.put(stockPer.getStockName(), votes);
                        System.out.printf(
                                "Stock2:%s raises:%f votes:%d total dates:%d\n",
@@ -211,6 +266,17 @@ public class PotentialWithIn implements MethodEntry, Callable<MethodResults>{
                }
            }
         }
+
+
+
+
+
+
+
+
+
+
+
       
            //Find out potentials and sort them
 
@@ -223,6 +289,8 @@ public class PotentialWithIn implements MethodEntry, Callable<MethodResults>{
 
     public MethodResults call() throws Exception {
         MethodResults results = new MethodResults();
+        
+        results.setMethodName(this.getMethName());
 
         System.out.printf("Callable calls run method\n");
         //Perform action
@@ -232,8 +300,6 @@ public class PotentialWithIn implements MethodEntry, Callable<MethodResults>{
         //FIXME:Normilize
         Set<Entry<String,Integer>> set = voteCounter.entrySet();
         Iterator <Entry<String,Integer>>entryIter = set.iterator();
-
-
         while(entryIter.hasNext()) {
             Entry<String,Integer> entry = entryIter.next();
 

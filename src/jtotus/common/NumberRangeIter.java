@@ -50,9 +50,10 @@ public class NumberRangeIter <T extends Number> implements Iterator , Iterable{
         end=ends.doubleValue();
     }
 
-    public void setRange(String range) {
-
+    public int setRange(String range) {
+    
      //   String range = rangeString.replaceAll("[|]", "");
+        
         String startString = range.substring(range.lastIndexOf("[")+1,
                                              range.lastIndexOf("-"));
 
@@ -69,6 +70,8 @@ public class NumberRangeIter <T extends Number> implements Iterator , Iterable{
         current = new Double(startString);
         end = new Double(endString);
         step = new Double(stepString);
+
+        return 1;
      }
 
     public void setName(String name) { paramName=name; }
