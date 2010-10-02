@@ -31,6 +31,11 @@ public class MethodResults {
     private String methodName = null;
     private HashMap<String,Double> results = null;
 
+    public MethodResults(String nameOfMethod) {
+        methodName = nameOfMethod;
+        results = new HashMap<String, Double>();
+    }
+    
     public MethodResults() {
         results = new HashMap<String, Double>();
     }

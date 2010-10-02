@@ -20,16 +20,20 @@ package jtotus.config;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
+import jtotus.common.Helper;
 
 /**
  *
  * @author Evgeni Kappinen
  */
+
+
 public class MethodConfig implements Iterable<String>, Iterator<String>{
     private int iterPoint = 0;
     private GUIConfig config = null;
     public String []StockNames = null;
     public int day_period = 5; /*Default value */
+    private Helper help = Helper.getInstance();
 
     public MethodConfig() {
         ConfigLoader<GUIConfig> loader = new ConfigLoader<GUIConfig>("GUIConfig");
@@ -41,6 +45,10 @@ public class MethodConfig implements Iterable<String>, Iterator<String>{
             config = new GUIConfig();
         }
         StockNames = config.fetchStockName();
+
+        help.debug(this.getClass().getName(),
+                "Totally stocks:%d\n", StockNames.length-1);
+
         day_period = config.day_period;
     }
 
@@ -69,12 +77,14 @@ public class MethodConfig implements Iterable<String>, Iterator<String>{
         if(iterPoint < StockNames.length) {
             return true;
         }
-        
+
         return false;
     }
 
     public String next() {
+         help.debug(this.getClass().getName(),"Totally iterpoint:%d\n", iterPoint);
         if (iterPoint < StockNames.length) {
+            help.debug(this.getClass().getName(), "Totally stocks3:%s\n", StockNames[iterPoint]);
             String ret = StockNames[iterPoint];
             iterPoint++;
             return ret;

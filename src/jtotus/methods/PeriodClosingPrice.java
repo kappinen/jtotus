@@ -29,6 +29,7 @@ import java.util.Date;
 import jtotus.common.DateIterator;
 import jtotus.common.Helper;
 import jtotus.common.StockType;
+import org.apache.commons.lang.ArrayUtils;
 
 /**
  *
@@ -48,17 +49,13 @@ public class PeriodClosingPrice {
     
     public PeriodClosingPrice(StockType stockTmp) {
         stock = stockTmp;
-        priceList = new ArrayList<BigDecimal>();
-    }
-
-    public PeriodClosingPrice(StockType stockTmp, String stockTemp) {
-        stock = stockTmp;
-        stockName = stockTemp;
+        stockName = stock.getName();
         priceList = new ArrayList<BigDecimal>();
     }
 
     public void setStockName(String stockTemp) {
         stockName = stockTemp;
+        stock = new StockType(stockName);
     }
 
     public String getStockName() {
@@ -72,6 +69,11 @@ public class PeriodClosingPrice {
         return stock;
     }
 
+    public int getPeriodLength() {
+        initList();
+        
+        return priceList.size();
+    }
     public BigDecimal getPotential() {
         initList();
         
@@ -90,7 +92,8 @@ public class PeriodClosingPrice {
 
     public BigDecimal getLowPotential(){
         initList();
-       
+
+        //FIXME; 
         BigDecimal current = stock.fetchCurrentClosingPrice();
         BigDecimal min = getMinValue();
         BigDecimal lowPot = min.subtract(current).abs();
@@ -166,6 +169,18 @@ public class PeriodClosingPrice {
             return sortedList.get(0);
         }
         return null;
+    }
+
+
+    public double [] toDoubleArray(){
+       initList();
+       
+       double[] retArray = new double[priceList.size()];
+       for(int i=0; i<priceList.size();i++) {
+           retArray[i] = priceList.get(i).doubleValue();
+       }
+
+       return retArray;
     }
     
 }

@@ -23,6 +23,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import jtotus.common.StockType;
 import jtotus.config.ConfigLoader;
 import jtotus.config.GUIConfig;
 
@@ -63,7 +64,7 @@ public class JtotusPortfolioView extends JTabbedPane {
                             {null, null, null, null}
                             },
                             new String [] {
-                                "Stock", "Title 2", "Title 3", "Title 4"
+                                "Stock", "Price", "Title 3", "Title 4"
                             });
 
 
@@ -78,6 +79,8 @@ public class JtotusPortfolioView extends JTabbedPane {
                  portfolioModel.addRow(new Object[] {null,null,null,null});
              }
              portfolioModel.setValueAt(listOfStocks[i], i, 0);
+             StockType stock = new StockType(listOfStocks[i]);
+             portfolioModel.setValueAt(stock.fetchCurrentClosingPrice().toString(), i, 1);
          }
 
 

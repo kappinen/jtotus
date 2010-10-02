@@ -37,6 +37,9 @@ import jtotus.config.MethodConfig;
 import jtotus.database.AutoUpdateStocks;
 import jtotus.gui.MethodResultsPrinter;
 import jtotus.methods.PotentialWithIn;
+import jtotus.methods.TaLibEMA;
+import jtotus.methods.TaLibMOM;
+import jtotus.methods.TaLibRSI;
 import jtotus.threads.*;
 
 
@@ -62,6 +65,9 @@ public class Engine {
         // Available methods
         methodList.add(new DummyMethod(portfolioDecision));
         methodList.add(new PotentialWithIn());
+        methodList.add(new TaLibRSI());
+        methodList.add(new TaLibEMA());
+        methodList.add(new TaLibMOM());
 
         File scriptDir = new File("./src/jtotus/methods/scripts/");
         if(!scriptDir.isDirectory()) {
@@ -133,8 +139,7 @@ public class Engine {
     }
 
     private void testRun() {
-
-        
+       
     }
 
     public void train(){
