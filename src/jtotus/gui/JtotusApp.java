@@ -21,6 +21,7 @@ package jtotus.gui;
 
 
 
+import javax.swing.UIManager;
 import jtotus.engine.Engine;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
@@ -36,6 +37,7 @@ public class JtotusApp extends SingleFrameApplication {
      */
     @Override protected void startup() {
         JtotusView mainWindow=new JtotusView(this);
+        
         Engine mainEngine=Engine.getInstance();
 
         mainWindow.setListener(mainEngine);

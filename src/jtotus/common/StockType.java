@@ -148,7 +148,7 @@ public class StockType implements Iterator{
             packet.day = cal.get(Calendar.DATE);
             packet.month = cal.get(Calendar.MONTH) + 1;
             packet.year = cal.get(Calendar.YEAR);
-            packet.result = tmp.floatValue();
+            packet.result = tmp.doubleValue();
         }
 
         return packet;
@@ -159,7 +159,6 @@ public class StockType implements Iterator{
        BigDecimal retVolume = null;
 
         help.debug("StockType", "Fetching:%s: Time:" + cal.getTime() + "\n" , stockName);
-        System.out.printf("!!!!STOCKTYPE Searching for volume:!\n");
         while((retVolume=fetcher.fetchVolumeForDate(stockName, cal)) == null) {
             //TODO:check end
             cal.add(Calendar.DATE, -1);

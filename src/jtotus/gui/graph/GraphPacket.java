@@ -33,5 +33,5 @@ public class // <editor-fold defaultstate="collapsed" desc="Packet for JtotusGra
     public int day;
     public int month;
     public int year;
-    public float result;
+    public double result;
 }

@@ -107,7 +107,7 @@ public class LocalJavaDB implements InterfaceDataBase {
 
             while (results.next()) {
                 BigDecimal tmpBigDecimal = results.getBigDecimal(data);
-                System.out.printf("Javadb got closing price %f for %s\n", tmpBigDecimal, stockName);
+                //System.out.printf("Javadb got closing price %f for %s\n", tmpBigDecimal, stockName);
                 closingPrice = tmpBigDecimal;
                 break;
             }

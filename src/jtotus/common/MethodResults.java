@@ -17,7 +17,6 @@
 
 package jtotus.common;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -27,9 +26,12 @@ import java.util.Set;
  *
  * @author Evgeni Kappinen
  */
-public class MethodResults {
+public class MethodResults implements Iterator, Iterable{
     private String methodName = null;
     private HashMap<String,Double> results = null;
+    private Iterator<Entry<String, Double>> iterator=null;
+
+    
 
     public MethodResults(String nameOfMethod) {
         methodName = nameOfMethod;
@@ -81,6 +83,26 @@ public class MethodResults {
             System.out.printf("%s : Stock:%s value:%.2f\n",
                     this.getName(),entry.getKey(),entry.getValue());
         }
+    }
+
+
+    public boolean hasNext() {
+        return iterator.hasNext();
+    }
+
+    public Object next() {
+        return iterator.next();
+    }
+
+    public void remove() {
+        iterator.remove();
+    }
+
+    public Iterator<Entry<String, Double>> iterator() {
+        Set<Entry<String, Double>> entrySet = results.entrySet();
+        iterator = entrySet.iterator();
+        return iterator;
+      
     }
 
 }

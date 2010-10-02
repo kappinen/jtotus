@@ -33,21 +33,27 @@ import jtotus.engine.Engine;
 
 /**
  *
- * @author kappiev
+ * @author Evgeni Kappinen
  */
 public class GraphSender {
     private Engine mainEngine = null;
     private int mainPort = 0;
     private DatagramSocket clientSock = null;
 
-    public GraphSender(Engine tmpEngine){
-        mainEngine = tmpEngine;
-    }
 
     public GraphSender(int port){
         mainPort = port;
     }
 
+    public GraphSender(String reviewTarget){
+        mainEngine = Engine.getInstance();
+        mainPort=mainEngine.fetchGraph(reviewTarget);
+        
+    }
+
+    public GraphSender() {
+        
+    }
 
     public boolean sentPacket(String reviewTarget, GraphPacket packetObj){
         int port=0;
@@ -68,7 +74,12 @@ public class GraphSender {
         } else if(mainPort != 0) {
             port = mainPort;
         } else {
-            return false;
+            mainEngine = Engine.getInstance();
+            port = mainEngine.fetchGraph(reviewTarget);
+            if (port <= 0) {
+                System.err.printf("Unable to fetch Graph port!\n");
+                return false;
+            }
         }
         
         try {
@@ -101,6 +112,4 @@ public class GraphSender {
         return true;
     }
 
-
-    
 }

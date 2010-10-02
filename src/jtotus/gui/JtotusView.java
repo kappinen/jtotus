@@ -22,6 +22,9 @@ package jtotus.gui;
 
 
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.UnsupportedLookAndFeelException;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.SingleFrameApplication;
@@ -32,6 +35,7 @@ import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import javax.swing.Timer;
 import javax.swing.Icon;
+import javax.swing.UIManager;
 import jtotus.engine.Engine;
 import jtotus.methods.StatisticsFreqPeriod;
 
@@ -119,11 +123,21 @@ public class JtotusView extends FrameView {
         });
 
         
-        
     }
 
     public void setListener(Engine engine)
     {
+        try {
+            UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(JtotusView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(JtotusView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(JtotusView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnsupportedLookAndFeelException ex) {
+            Logger.getLogger(JtotusView.class.getName()).log(Level.SEVERE, null, ex);
+        }
         mainEngine = engine;
     }
 

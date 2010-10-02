@@ -144,10 +144,7 @@ public class Engine {
     }
 
     private void testRun() {
-       Calendar cal = Calendar.getInstance();
-       SimpleDateFormat startingDate = new SimpleDateFormat("'&from_year='yyyy'&from_month='MM'&from_day='dd");
-       //SimpleDateFormat startingDate = new SimpleDateFormat("yyyy MM dd");
-       System.out.printf("------------->    Year;%s\n", startingDate.format(cal.getTime()));
+        
     }
 
     public void train(){

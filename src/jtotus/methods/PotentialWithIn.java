@@ -40,7 +40,7 @@ public class PotentialWithIn implements MethodEntry, Callable<MethodResults>{
     private Helper help = Helper.getInstance();
 
     public String getMethName() {
-        String tmp = "PotentialWithIn";
+        String tmp = this.getClass().getName();
         return tmp.substring(tmp.lastIndexOf(".")+1,tmp.length());
     }
 

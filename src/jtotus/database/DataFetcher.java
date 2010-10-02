@@ -108,8 +108,6 @@ public class DataFetcher{
        
         Iterator <InterfaceDataBase>resources = listOfResources.iterator();
     
-        System.err.printf("Searching for volume2\n");
-        
         result = javadb.fetchVolume(stockName, date);
         
         if(result == null) {

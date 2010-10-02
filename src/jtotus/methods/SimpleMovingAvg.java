@@ -23,28 +23,25 @@ import jtotus.common.StockType;
 import jtotus.threads.PortfolioDecision;
 import java.math.BigDecimal;
 import java.util.Calendar;
+import java.util.concurrent.Callable;
 /**
  *
  * @author Evgeni Kappinen
  */
-public class SimpleMovingAvg implements MethodEntry {
+public class SimpleMovingAvg implements Callable, MethodEntry {
 
-    private PortfolioDecision dispatch = null;
     private MethodConfig config = null;
-    private String methodName = "SimpleMovinAvg";
     private Helper help = Helper.getInstance();;
 
-    public SimpleMovingAvg(PortfolioDecision tmp) {
-        dispatch = tmp;
-    }
-
+    
     public String getMethName() {
-        return methodName;
+        String tmp = this.getClass().getName();
+        return tmp.substring(tmp.lastIndexOf(".")+1,tmp.length());
     }
 
     public void run() {
 
-        config = dispatch.fetchConfig(methodName);
+        config = new MethodConfig();
 
         analyzeFromNowToFrequency();
         return;
@@ -74,13 +71,20 @@ public class SimpleMovingAvg implements MethodEntry {
               calendar.add(Calendar.DATE, -1);
 
             }
+
             avr = avr.divide(BigDecimal.valueOf(count));
-            help.debug(methodName, "%s:%.2f for %d last days\n",
+            help.debug(this.getClass().getName(),
+                    "%s:%.2f for %d last days\n",
                     stocks[i], avr.floatValue(), count);
+
         }
     }
 
     public boolean isCallable() {
        return false;
+    }
+
+    public Object call() throws Exception {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

@@ -52,13 +52,16 @@ import com.tictactec.ta.lib.Core;
 import com.tictactec.ta.lib.MInteger;
 import com.tictactec.ta.lib.RetCode;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import jtotus.common.Helper;
 import jtotus.common.StockType;
 import jtotus.config.MethodConfig;
-import org.apache.commons.lang.ArrayUtils;
+import jtotus.gui.graph.GraphPacket;
+import jtotus.gui.graph.GraphSender;
 
 
 /**
@@ -68,16 +71,22 @@ import org.apache.commons.lang.ArrayUtils;
 public class TaLibRSI  implements MethodEntry, Callable<MethodResults>{
     private ArrayList<PeriodClosingPrice> periodList = null;
     private final StockType stockType = null;
+
     /*Stock list */
     private List<String> stockNames = null;
     private List<Date>resutlsForDates = null;
     private Helper help = Helper.getInstance();
+    private boolean printResults = true;
+    
 
     //TODO: staring date, ending date aka period
 
     //INPUTS TO METHOD:
     private int inputParam_rsiPeriod = 4;
+    private Calendar inputEndingDate = Calendar.getInstance();
 
+
+    
 
     public String getMethName() {
         String tmp = this.getClass().getName();
@@ -158,9 +167,26 @@ public class TaLibRSI  implements MethodEntry, Callable<MethodResults>{
     public MethodResults call() throws Exception {
 
         this.createPeriods();
+        
+        MethodResults results = this.performRSI(inputParam_rsiPeriod);
+        if (printResults) {
+            Iterator<Entry<String, Double>> iter = results.iterator();
+            while(iter.hasNext()){
+                Entry<String, Double> next = iter.next();
+                
+                GraphSender sender = new GraphSender();
+                GraphPacket packet = new GraphPacket();
+                
+                packet.seriesTitle = "TaLibRSI";
+                packet.result = next.getValue().doubleValue();
+                packet.day = inputEndingDate.get(Calendar.DATE);
+                packet.month = inputEndingDate.get(Calendar.MONTH) + 1;
+                packet.year = inputEndingDate.get(Calendar.YEAR);
 
-        return this.performRSI(inputParam_rsiPeriod);
-
+                sender.sentPacket(next.getKey(), packet);
+            }
+        }
+        return results;
     }
 
 
