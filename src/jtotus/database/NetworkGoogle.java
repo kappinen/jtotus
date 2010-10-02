@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.math.BigDecimal;
+import java.util.Calendar;
 import jtotus.common.Helper;
 
 
@@ -57,11 +58,11 @@ public class NetworkGoogle implements InterfaceDataBase {
     }
 
 
-    public BigDecimal fetchClosingPrice(String stockName, SimpleDateFormat time) {
+    public BigDecimal fetchClosingPrice(String stockName, Calendar calendar) {
         BigDecimal result = null;
         URL url;
 
-        help.debug("NetworkGoogle", "fetchClosingPrice(%s,%s)\n",stockName, help.dateToString(time));
+        help.debug("NetworkGoogle", "fetchClosingPrice(%s,%s)\n",stockName, calendar.toString());
 
         
         try {
@@ -76,8 +77,8 @@ public class NetworkGoogle implements InterfaceDataBase {
                     Element elem = iter.next();
                     String data = elem.html();
 
-                    SimpleDateFormat trueDate = (SimpleDateFormat) time.clone();
-                    trueDate.applyPattern(patternString);
+                    SimpleDateFormat trueDate = new SimpleDateFormat(patternString);
+                    trueDate.setCalendar(calendar);
                     
                     if(data.compareTo(help.dateToString(trueDate)) == 0)
                     {
@@ -107,9 +108,15 @@ public class NetworkGoogle implements InterfaceDataBase {
         return result;
     }
 
-    public BigDecimal fetchAveragePrice(String stockName, SimpleDateFormat time) {
-        return BigDecimal.valueOf(0.0);
+    public BigDecimal fetchAveragePrice(String stockName, Calendar time) {
+        return null;
     }
+
+    public BigDecimal fetchVolume(String stockName, Calendar date) {
+       return null;
+    }
+
+
 
 
 }

@@ -21,7 +21,7 @@
 package jtotus.database;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 /**
  *
@@ -29,10 +29,11 @@ import java.text.SimpleDateFormat;
  */
 public interface InterfaceDataBase {
 
-    public BigDecimal fetchClosingPrice(String stockName, SimpleDateFormat time);
+    public BigDecimal fetchClosingPrice(String stockName, Calendar date);
 
-    public BigDecimal fetchAveragePrice(String stockName, SimpleDateFormat time);
+    public BigDecimal fetchAveragePrice(String stockName, Calendar date);
 
+    public BigDecimal fetchVolume(String stockName, Calendar date);
 
     
 }

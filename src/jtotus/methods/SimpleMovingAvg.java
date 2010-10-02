@@ -22,6 +22,7 @@ import jtotus.config.MethodConfig;
 import jtotus.common.StockType;
 import jtotus.threads.PortfolioDecision;
 import java.math.BigDecimal;
+import java.util.Calendar;
 /**
  *
  * @author Evgeni Kappinen
@@ -53,6 +54,7 @@ public class SimpleMovingAvg implements MethodEntry {
         BigDecimal avr = new BigDecimal(0.0);
         BigDecimal tmp = null;
         long count = 0;
+        Calendar calendar = Calendar.getInstance();
 
         //FIXME:ensure that asked period will be fetched
         String[] stocks = config.StockNames;
@@ -62,11 +64,14 @@ public class SimpleMovingAvg implements MethodEntry {
             StockType stockType = new StockType(stocks[i]);
 
             for (int y = 0; count <= (config.day_period - 1) && count < Integer.MAX_VALUE-1; y++) {
-                tmp = stockType.fetchClosingPrice(help.dateReduction(help.getTimeNow(), y));
+
+                tmp = stockType.fetchClosingPrice(calendar);
                 if (tmp != null) {
                     avr = avr.add(tmp);
                     count++;
                 }
+                
+              calendar.add(Calendar.DATE, -1);
 
             }
             avr = avr.divide(BigDecimal.valueOf(count));

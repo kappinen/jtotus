@@ -25,6 +25,8 @@ import jtotus.methods.DummyMethod;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -32,7 +34,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jtotus.gui.JtotusView;
 import jtotus.common.Helper;
-import jtotus.common.StateIterator;
 import jtotus.config.MethodConfig;
 import jtotus.database.AutoUpdateStocks;
 import jtotus.gui.MethodResultsPrinter;
@@ -96,6 +97,8 @@ public class Engine {
         graphAccessPoints = new HashMap<String,Integer>();
         methodList = new LinkedList<MethodEntry>();
 
+        
+         
         prepareMethodsList();
     }
 
@@ -120,6 +123,8 @@ public class Engine {
 
     public void run(){
 
+       
+        
         if(portfolioDecision.setList(methodList)){
             help.debug(1, "Dispatcher is already full");
             return;
@@ -134,12 +139,15 @@ public class Engine {
             updateThread.start();
         }
 
+        
         testRun();
-       
     }
 
     private void testRun() {
-       
+       Calendar cal = Calendar.getInstance();
+       SimpleDateFormat startingDate = new SimpleDateFormat("'&from_year='yyyy'&from_month='MM'&from_day='dd");
+       //SimpleDateFormat startingDate = new SimpleDateFormat("yyyy MM dd");
+       System.out.printf("------------->    Year;%s\n", startingDate.format(cal.getTime()));
     }
 
     public void train(){

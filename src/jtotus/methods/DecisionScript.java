@@ -33,7 +33,7 @@ import org.codehaus.groovy.control.CompilationFailedException;
 
 /**
  *
- * @author kappiev
+ * @author Evgeni Kappinen
  */
 public class DecisionScript implements MethodEntry{
 

@@ -19,6 +19,7 @@
 package jtotus.gui;
 
 
+import java.util.Calendar;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
@@ -64,7 +65,7 @@ public class JtotusPortfolioView extends JTabbedPane {
                             {null, null, null, null}
                             },
                             new String [] {
-                                "Stock", "Price", "Title 3", "Title 4"
+                                "Stock", "Last", "Past", "Volume"
                             });
 
 
@@ -81,6 +82,8 @@ public class JtotusPortfolioView extends JTabbedPane {
              portfolioModel.setValueAt(listOfStocks[i], i, 0);
              StockType stock = new StockType(listOfStocks[i]);
              portfolioModel.setValueAt(stock.fetchCurrentClosingPrice().toString(), i, 1);
+             portfolioModel.setValueAt(stock.fetchPastDayClosingPrice(1).toString(), i, 2);
+             portfolioModel.setValueAt(stock.fetchCurrentVolume(), i, 3);
          }
 
 

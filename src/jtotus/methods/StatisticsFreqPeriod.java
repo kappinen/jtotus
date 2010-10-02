@@ -24,13 +24,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.math.BigDecimal;
+import java.util.Calendar;
 import jtotus.common.DateIterator;
 import jtotus.config.MethodConfig;
 import jtotus.common.StockType;
 
 /**
  *
- * @author house
+ * @author Evgeni Kappinen
  */
 public class StatisticsFreqPeriod implements MethodEntry{
     private String stockName = null;
@@ -117,12 +118,13 @@ private void StatisticsForFreqPeriod(ArrayList<String> stockList,
         Iterator<Date> dateIter = new DateIterator(startDate, endDate);
 
         System.err.print(startDate + ":"+ endDate + "\n");
-
+        Calendar calendar = Calendar.getInstance();
         while(dateIter.hasNext()) {
 
             if (previousDay == null) {
-                dayFormat.format(dateIter.next());
-                previousDay = stock.fetchClosingPrice(dayFormat);
+                Date nextDay = dateIter.next();
+                calendar.setTime(nextDay);
+                previousDay = stock.fetchClosingPrice(calendar);
                     if (previousDay == null) {
                     continue;
                     }
@@ -133,8 +135,10 @@ private void StatisticsForFreqPeriod(ArrayList<String> stockList,
 
             while(dateIter.hasNext()){
 
-                dayFormat.format(dateIter.next());
-                searchDady = stock.fetchClosingPrice(dayFormat);
+                Date nextDay = dateIter.next();
+                calendar.setTime(nextDay);
+                
+                searchDady = stock.fetchClosingPrice(calendar);
                 if (searchDady != null) {
                     total_days++;
                     break;

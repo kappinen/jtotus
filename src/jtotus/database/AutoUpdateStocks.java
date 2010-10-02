@@ -17,6 +17,7 @@
 
 package jtotus.database;
 
+import java.util.Calendar;
 import jtotus.common.Helper;
 import jtotus.common.StockType;
 
@@ -29,6 +30,7 @@ public class AutoUpdateStocks implements Runnable {
     private Helper help = Helper.getInstance();
     private int maxSearch = 30; //Maximum search of moth
     private LocalJavaDB javadb = null;
+    private int stepToRemove = 0;
 
     public AutoUpdateStocks(String tempName) {
         stockName = tempName;
@@ -39,19 +41,23 @@ public class AutoUpdateStocks implements Runnable {
 
     private int updateClosingPrice(StockType stock, LocalJavaDB javadb){
        int counter = 0;
+       
+       Calendar calendar = Calendar.getInstance();
 
        final int failureLimit = -8;
        final int foundLimit = 8;
         for (int i = 0;(failureLimit < i) && (i < foundLimit) ;i++) {
-            if (javadb.fetchClosingPrice(stockName,
-                    help.dateReduction(help.getTimeNow(), i)) != null){
+            calendar.add(Calendar.DATE, stepToRemove);
+            stepToRemove = -1;
+
+            if (javadb.fetchClosingPrice(stockName, calendar) != null){
                 // Found in database
                 counter++;
                 continue;
             }
             else {
-                if (stock.fetchClosingPrice(
-                        help.dateReduction(help.getTimeNow(), i)) != null){
+                calendar.add(Calendar.DATE, stepToRemove);
+                if (stock.fetchClosingPrice(calendar) != null){
                     // Found somewhere in resources..
                     // Database should be updated already.
                     counter = 0;

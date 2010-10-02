@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.math.BigDecimal;
+import java.util.Calendar;
 import jtotus.common.Helper;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
@@ -86,38 +87,36 @@ public class FileSystemFromHex implements InterfaceDataBase {
 
     
     
-public BigDecimal fetchHighestPrice(String stockName, SimpleDateFormat time){
-    return fetchValue(stockName, time, columnHighestPrice);
+public BigDecimal fetchHighestPrice(String stockName, Calendar calendar){
+    return this.fetchValue(stockName, calendar, columnHighestPrice);
 }
 
-public BigDecimal fetchLowestPrice(String stockName, SimpleDateFormat time){
-    return fetchValue(stockName, time, columnLowestPrice);
+public BigDecimal fetchLowestPrice(String stockName, Calendar calendar){
+    return this.fetchValue(stockName, calendar, columnLowestPrice);
 }
 
-public BigDecimal fetchClosingPrice(String stockName, SimpleDateFormat time){
-    return fetchValue(stockName, time, columnClosingPrice);
+public BigDecimal fetchClosingPrice(String stockName, Calendar calendar){
+    return this.fetchValue(stockName, calendar, columnClosingPrice);
 }
 
-public BigDecimal fetchAveragePrice(String stockName, SimpleDateFormat time){
-    return fetchValue(stockName, time, columnAvrPrice);
+public BigDecimal fetchAveragePrice(String stockName, Calendar calendar){
+    return this.fetchValue(stockName, calendar, columnAvrPrice);
 }
 
-public BigDecimal fetchTotalVolume(String stockName, SimpleDateFormat time){
-    return fetchValue(stockName, time, columnTotalVolume);
+public BigDecimal fetchTurnOver(String stockName, Calendar calendar){
+    return this.fetchValue(stockName, calendar, columnTurnOver);
 }
 
-public BigDecimal fetchTurnOver(String stockName, SimpleDateFormat time){
-    return fetchValue(stockName, time, columnTurnOver);
-}
-
-public BigDecimal fetchTrades(String stockName, SimpleDateFormat time){
-    return fetchValue(stockName, time, columnTrades);
+public BigDecimal fetchTrades(String stockName, Calendar calendar){
+    return this.fetchValue(stockName, calendar, columnTrades);
 }
 
 
-public BigDecimal fetchValue(String stockName, SimpleDateFormat time, int row)
+private BigDecimal fetchValue(String stockName, Calendar date, int row)
 {
     BigDecimal result = null;
+    
+    System.out.printf("Reading file system !:%d time:%s\n", row, date.getTime().toString());
 
     File dir = new File("./" + pathToDataBaseDir);
     FileFilter filter = filterForDir();
@@ -130,7 +129,7 @@ public BigDecimal fetchValue(String stockName, SimpleDateFormat time, int row)
 
         if (nameOfFile.indexOf(stockName) != -1) {
             help.debug("FileSystemFromHex","Found File:%s\n", nameOfFile);
-            result = omxNordicFile(nameOfFile, time, row);
+            result = this.omxNordicFile(nameOfFile, date, row);
             if (result != null) {
                return result;
             }
@@ -144,7 +143,7 @@ public BigDecimal fetchValue(String stockName, SimpleDateFormat time, int row)
 
 
 
-    public BigDecimal omxNordicFile(String fileName, SimpleDateFormat time,int row) {
+    public BigDecimal omxNordicFile(String fileName, Calendar calendar,int row) {
         BigDecimal result = null;
 
         try {
@@ -158,7 +157,8 @@ public BigDecimal fetchValue(String stockName, SimpleDateFormat time, int row)
             //HSSFRow row1 = worksheet.getRow(0);
 
             // Year-Mount-Data
-            time.applyPattern(filePattern);
+            SimpleDateFormat time =  new SimpleDateFormat(filePattern);
+            time.setCalendar(calendar);
 
             //System.out.printf("Class :%s : %s\n",this.getClass().toString(), this.toString());
             String correctTime = help.dateToString(time);
@@ -206,6 +206,10 @@ public BigDecimal fetchValue(String stockName, SimpleDateFormat time, int row)
         }
 
         return result;
+    }
+
+    public BigDecimal fetchVolume(String stockName, Calendar calendar) {
+        return this.fetchValue(stockName, calendar, columnTotalVolume);
     }
 
 }

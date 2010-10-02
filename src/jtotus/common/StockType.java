@@ -19,11 +19,8 @@
 package jtotus.common;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import jtotus.database.DataFetcher;
@@ -34,45 +31,21 @@ import jtotus.gui.graph.GraphPacket;
 
 /**
  *
- * @author kappiev
+ * @author Evgeni Kappinen
  */
 public class StockType implements Iterator{
     private String stockName=null;
-    private Map<String,String> stockMap = new HashMap<String,String>();
+    private StockNames stocks = new StockNames();
     private Iterator mapIter = null;
-    private DataFetcher fetcher = null;
+    private final DataFetcher fetcher = new DataFetcher();
     private Helper help=null;
 
 
     public StockType(String name) {
         stockName = name;
         help = Helper.getInstance();
-        fetcher = new DataFetcher();
 
-        //Aliases
-        stockMap.put("Fortum Oyj", "FUM1V.HE");
-        stockMap.put("Fortum Oyj", "FUM1V.HSE");
-        
-        stockMap.put("Nokia Oyj", "NOK1V.HSE");
-
-        stockMap.put("UPM-Kymmene Oyj","UPM1V.HSE");
-        stockMap.put("Rautaruukki Oyj","RTRKS.HSE");
-
-        stockMap.put("Sanoma Oyj","SAA1V.HSE");
-        stockMap.put("Tieto Oyj","TIE1V.HSE");
-        stockMap.put("Metso Oyj","MEO1V.HSE");
-
-        stockMap.put("KONE Oyj","KNEBV.HSE");
-        stockMap.put("Konecranes Oyj","KCR1V.HSE");
-        stockMap.put("Kemira Oyj","KRA1V.HSE");
-        stockMap.put("Uponor Oyj","UNR1V.HSE");
-        stockMap.put("Stora Enso Oyj A","STEAV.HSE");
-
-
-
-       Set entries = stockMap.entrySet();
-       mapIter = entries.iterator();
-        
+        mapIter = stocks.iterator();
     }
 
     public boolean hasNext() {
@@ -103,11 +76,11 @@ public class StockType implements Iterator{
 
 
     public String getHexName(String name) {
-        return stockMap.get(name);
+        return stocks.getHexName(name);
     }
 
     public String getHexName() {
-        return stockMap.get(stockName);
+        return stocks.getHexName(stockName);
     }
 
     public String getName() {
@@ -116,25 +89,24 @@ public class StockType implements Iterator{
 
     public BigDecimal fetchCurrentClosingPrice() {
         Calendar cal = Calendar.getInstance();
-        SimpleDateFormat format = new SimpleDateFormat();
-        format.setCalendar(cal);
 
         help.debug("StockType", "Fetching:%s: Time:" + cal.getTime() + "\n" , stockName);
 
-        while(fetcher.fetchClosingPrice(stockName, format) == null) {
+        while(fetcher.fetchClosingPrice(stockName, cal) == null) {
             //TODO:check end
             cal.add(Calendar.DATE, -1);
         }
 
-        return fetcher.fetchClosingPrice(stockName, format);
+        return fetcher.fetchClosingPrice(stockName, cal);
     }
 
-    public BigDecimal fetchClosingPrice(SimpleDateFormat time) {
+    public BigDecimal fetchClosingPrice(Calendar calendar) {
 
-        help.debug("StockType", "Fetching:%s: Time:%s\n", stockName, help.dateToString(time));
+        help.debug("StockType", "Fetching:%s: Time:%s\n", stockName, calendar.toString());
 
-        return fetcher.fetchClosingPrice(stockName, time);
+        return fetcher.fetchClosingPrice(stockName, calendar);
     }
+
     public BigDecimal fetchClosingPrice(Date time){
 
         if (time==null) {
@@ -143,41 +115,32 @@ public class StockType implements Iterator{
         
         Calendar cal = Calendar.getInstance();
         cal.setTime(time);
-        SimpleDateFormat format = new SimpleDateFormat();
-        format.setCalendar(cal);
 
         help.debug("StockType", "Fetching:%s: Time:" + time + "\n" , stockName);
 
-        return fetcher.fetchClosingPrice(stockName, format);
+        return fetcher.fetchClosingPrice(stockName, cal);
     }
 
     public BigDecimal fetchPastDayClosingPrice(int count){
         BigDecimal tmp = null;
 
         Calendar cal = Calendar.getInstance();
-        SimpleDateFormat date = new SimpleDateFormat("dd-MM-yyyy");
-
         cal.add(Calendar.DAY_OF_MONTH, count*-1);
 
-        date.setCalendar(cal);
-
-        tmp = fetcher.fetchClosingPrice(stockName, date);
+        tmp = fetcher.fetchClosingPrice(stockName, cal);
         
         return tmp;
     }
 
-        public GraphPacket fetchPastDayClosingPricePacket(int count){
+    public GraphPacket fetchPastDayClosingPricePacket(int count){
         GraphPacket packet = null;
         BigDecimal tmp = null;
 
         Calendar cal = Calendar.getInstance();
-        SimpleDateFormat date = new SimpleDateFormat("dd-MM-yyyy");
-
+        
         cal.add(Calendar.DAY_OF_MONTH, count*-1);
 
-        date.setCalendar(cal);
-
-        tmp = fetcher.fetchClosingPrice(stockName, date);
+        tmp = fetcher.fetchClosingPrice(stockName, cal);
 
         if (tmp != null) {
             packet = new GraphPacket();
@@ -190,5 +153,23 @@ public class StockType implements Iterator{
 
         return packet;
     }
-    
+
+    public BigDecimal fetchCurrentVolume(){
+       Calendar cal = Calendar.getInstance();
+       BigDecimal retVolume = null;
+
+        help.debug("StockType", "Fetching:%s: Time:" + cal.getTime() + "\n" , stockName);
+        System.out.printf("!!!!STOCKTYPE Searching for volume:!\n");
+        while((retVolume=fetcher.fetchVolumeForDate(stockName, cal)) == null) {
+            //TODO:check end
+            cal.add(Calendar.DATE, -1);
+        }
+
+        return retVolume;
+    }
+
+    public BigDecimal fetchVolume(Calendar calendar){
+
+        return fetcher.fetchVolumeForDate(stockName, calendar);
+    }
 }

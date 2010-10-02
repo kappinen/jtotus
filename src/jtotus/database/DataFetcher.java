@@ -17,7 +17,6 @@
 
 package jtotus.database;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -29,7 +28,7 @@ import jtotus.common.Helper;
  * @author Evgeni Kappinen
  */
 
-public class DataFetcher implements InterfaceDataBase {
+public class DataFetcher{
 
     private LinkedList<InterfaceDataBase> listOfResources = null;
     private LocalJavaDB javadb = null;
@@ -46,57 +45,94 @@ public class DataFetcher implements InterfaceDataBase {
 
     //TRUE  failuer
     //FALSE success
-    private boolean timeFailsSanityCheck(SimpleDateFormat time) {
+    private boolean timeFailsSanityCheck(Calendar date) {
         boolean result = false;
-        Calendar cal = null;
-
-        cal = time.getCalendar();
-        if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY ||
-           cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+        
+        if(date.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY ||
+           date.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
            result = true;
         }
 
-        cal = null;
         return result;
     }
 
     //TODO:generic fetcher with EnumFetcherCall
 
-    public BigDecimal fetchClosingPrice(String stockName, SimpleDateFormat time){
+    public BigDecimal fetchClosingPrice(String stockName, Calendar date){
         BigDecimal result = null;
         
 
-        if (timeFailsSanityCheck(time)) {
+        if (timeFailsSanityCheck(date)) {
             return result;
         }
 
         Iterator <InterfaceDataBase>resources = listOfResources.iterator();
 
-        result = javadb.fetchClosingPrice(stockName, time);
+        result = javadb.fetchClosingPrice(stockName, date);
         if(result == null) {
             help.debug("DataFetcher",
                     "Closing Price is not found int in javadb stock:%s time:%s\n",
-                    stockName,help.dateToString(time));
+                    date.toString());
             
             while(resources.hasNext()){
                 InterfaceDataBase res = resources.next();
-
                 
-                result = res.fetchClosingPrice(stockName, time);
+                System.out.printf("Searching for price\n");
+
+                result = res.fetchClosingPrice(stockName, date);
                 if (result != null) {
-                        javadb.storeClosingPrice(stockName, time, result);
+                        javadb.storeClosingPrice(stockName, date, result);
                     return result;
                 }
             }
         }
+        
         return result;
     }
 
-    public BigDecimal fetchAveragePrice(String stockName, SimpleDateFormat time) {
+    public BigDecimal fetchAveragePrice(String stockName, Calendar time) {
        BigDecimal result = null;
 
 
           return result;
     }
 
+    public BigDecimal fetchVolumeForDate(String stockName, Calendar date) {
+      BigDecimal result = null;
+
+
+        if (timeFailsSanityCheck(date)) {
+            return result;
+        }
+
+       
+        Iterator <InterfaceDataBase>resources = listOfResources.iterator();
+    
+        System.err.printf("Searching for volume2\n");
+        
+        result = javadb.fetchVolume(stockName, date);
+        
+        if(result == null) {
+            help.debug("DataFetcher",
+                    "Volume is not found int in javadb stock:%s time:%s\n",
+                    stockName,
+                    date.toString());
+                    
+            while(resources.hasNext()){
+                InterfaceDataBase res = resources.next();
+                
+                result = res.fetchVolume(stockName, date);
+                if (result != null) {
+                        System.out.printf("Searching for volume3\n");
+                        javadb.storeVolume(stockName, date, result);
+                    return result;
+                }
+            }
+        }
+
+        return result;
+    }
+
+
 }
+

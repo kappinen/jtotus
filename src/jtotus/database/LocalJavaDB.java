@@ -76,9 +76,15 @@ public class LocalJavaDB implements InterfaceDataBase {
 
 
 
-    
+    public BigDecimal fetchClosingPrice(String stockName, Calendar calendar) {
+        return this.fetchData(stockName, calendar, "CLOSINGPRICE");
+    }
 
-    public BigDecimal fetchClosingPrice(String stockName, SimpleDateFormat time) {
+    public BigDecimal fetchVolume(String stockName, Calendar calendar) {
+        return this.fetchData(stockName, calendar, "VOLUME");
+    }
+
+    private BigDecimal fetchData(String stockName, Calendar calendar, String data) {
         BigDecimal closingPrice = null;
         
         try {
@@ -88,23 +94,20 @@ public class LocalJavaDB implements InterfaceDataBase {
                 }
             }
 
-
             String query = "SELECT * FROM "+mainTable+" WHERE STOCKNAME=? AND DATE=?";
             PreparedStatement pstmt = conJavaDB.prepareStatement(query);
             pstmt.setString(1, stockName);
 
-            Calendar cal = time.getCalendar();
-            java.util.Date searchDay = cal.getTime();
-
+            java.util.Date searchDay = calendar.getTime();
             java.sql.Date sqlDate = new java.sql.Date(searchDay.getTime());
-            pstmt.setDate(2, sqlDate, time.getCalendar());
+            pstmt.setDate(2, sqlDate, calendar);
 
             //Perform query
             ResultSet results = pstmt.executeQuery();
 
             while (results.next()) {
-                BigDecimal tmpBigDecimal = results.getBigDecimal("CLOSINGPRICE");
-                help.debug("LocalJavaDB", "Javadb got closing price %f for %s\n", tmpBigDecimal, stockName);
+                BigDecimal tmpBigDecimal = results.getBigDecimal(data);
+                System.out.printf("Javadb got closing price %f for %s\n", tmpBigDecimal, stockName);
                 closingPrice = tmpBigDecimal;
                 break;
             }
@@ -120,11 +123,11 @@ public class LocalJavaDB implements InterfaceDataBase {
 
     }
 
-    public BigDecimal fetchAveragePrice(String stockName, SimpleDateFormat time) {
+    public BigDecimal fetchAveragePrice(String stockName, Calendar time) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public boolean stockNameExists(String stockName, SimpleDateFormat time){
+    public boolean stockNameExists(String stockName, Calendar date){
 
       boolean result = false;
 
@@ -140,12 +143,10 @@ public class LocalJavaDB implements InterfaceDataBase {
             PreparedStatement pstmt = conJavaDB.prepareStatement(query);
             pstmt.setString(1, stockName);
 
-            Calendar cal = time.getCalendar();
-            java.util.Date searchDay = cal.getTime();
-
+            java.util.Date searchDay = date.getTime();
 
             java.sql.Date sqlDate = new java.sql.Date(searchDay.getTime());
-            pstmt.setDate(2, sqlDate, time.getCalendar());
+            pstmt.setDate(2, sqlDate, date);
 
             ResultSet results = pstmt.executeQuery();
             if (results.next()) {
@@ -160,10 +161,27 @@ public class LocalJavaDB implements InterfaceDataBase {
       return result;
     }
 
-    //FIXME:add if failed store values to file in other database
-    public void storeClosingPrice(String stockName, 
-                                  SimpleDateFormat time,
+    public void storeClosingPrice(String stockName,
+                                  Calendar date,
                                   BigDecimal value) {
+
+        this.storeData(stockName, date, value, "CLOSINGPRICE");
+        
+    }
+
+    public void storeVolume(String stockName,
+                            Calendar date,
+                            BigDecimal value) {
+
+      this.storeData(stockName, date, value, "VOLUME");
+
+    }
+
+    //FIXME:add if failed store values to file in other database
+    public void storeData(String stockName,
+                          Calendar calendar,
+                          BigDecimal value,
+                          String param) {
         
         if (conJavaDB == null) {
             if (initialize() < 0) {
@@ -173,40 +191,37 @@ public class LocalJavaDB implements InterfaceDataBase {
 
         try {
 
-            if (stockNameExists(stockName, time)){
-                String query = "UPDATE "+mainTable+" SET STOCKNAME=? WHERE STOCKNAME=? AND DATE=?";
+            if (this.stockNameExists(stockName, calendar)){
+                String query = "UPDATE "+mainTable+" SET "+param+"=? WHERE STOCKNAME=? AND DATE=?";
                 PreparedStatement pstmt = conJavaDB.prepareStatement(query);
 
                 pstmt.setBigDecimal(1, value);
                 pstmt.setString(2, stockName);
-
-                Calendar cal = time.getCalendar();
-                java.util.Date searchDay = cal.getTime();
+                
+                java.util.Date searchDay = calendar.getTime();
                 java.sql.Date sqlDate = new java.sql.Date(searchDay.getTime());
-                pstmt.setDate(3, sqlDate, time.getCalendar());
+                pstmt.setDate(3, sqlDate, calendar);
+
+                System.out.printf("UPDATING; Stock:%s data: res:%d\n",stockName,value.intValue());
+                pstmt.executeUpdate();
 
             }else {
-                String query = "INSERT INTO "+mainTable+" (STOCKNAME,DATE,CLOSINGPRICE) VALUES (?,?,?)";
-
+                String query = "INSERT INTO "+mainTable+" (STOCKNAME,DATE,"+param+") VALUES (?,?,?)";
 
                 PreparedStatement pstmt = conJavaDB.prepareStatement(query);
 
                 pstmt.setString(1, stockName);
 
-
-                Calendar cal = time.getCalendar();
-                java.util.Date searchDay = cal.getTime();
-
-
+                java.util.Date searchDay = calendar.getTime();
                 java.sql.Date sqlDate = new java.sql.Date(searchDay.getTime());
-                pstmt.setDate(2, sqlDate, time.getCalendar());
+                pstmt.setDate(2, sqlDate, calendar);
 
 
                 pstmt.setBigDecimal(3, value);
 
                 int result = pstmt.executeUpdate();
 
-                System.out.printf("Stock:%s price:"+value+" res:%d\n", stockName, result);
+                System.out.printf("INSERTING; Stock:%s data:"+value+" res:%d\n", stockName, result);
 
                 pstmt.clearParameters();
                 pstmt.close();
@@ -262,7 +277,6 @@ public class LocalJavaDB implements InterfaceDataBase {
 
         return bCreatedTables;
     }
-
 
 
 }
