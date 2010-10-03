@@ -36,6 +36,7 @@ import jtotus.gui.JtotusView;
 import jtotus.common.Helper;
 import jtotus.config.MethodConfig;
 import jtotus.database.AutoUpdateStocks;
+import jtotus.database.CacheServer;
 import jtotus.gui.MethodResultsPrinter;
 import jtotus.methods.PotentialWithIn;
 import jtotus.methods.TaLibEMA;
@@ -122,8 +123,6 @@ public class Engine {
    }
 
     public void run(){
-
-       
         
         if(portfolioDecision.setList(methodList)){
             help.debug(1, "Dispatcher is already full");
@@ -144,7 +143,9 @@ public class Engine {
     }
 
     private void testRun() {
-        
+
+ 
+
     }
 
     public void train(){
@@ -216,7 +217,7 @@ public class Engine {
     public void registerGraph(String reviewTarget, int acceccPoint){
 
         if(graphAccessPoints.containsKey(reviewTarget)) {
-             System.err.printf("Warning FIXME!!\n");
+             System.err.printf("Warning BUG SHOULD NO HAPPEND!!\n");
             //FIXME:what to do when..
             return;
         }
@@ -238,7 +239,7 @@ public class Engine {
         return resultsPrinter;
     }
 
-    public int fetchGraph(String reviewTarget) {
+    public synchronized int fetchGraph(String reviewTarget) {
         int accessPort = 0;
         Integer tmp = graphAccessPoints.get(reviewTarget);
         if (tmp==null) {
@@ -247,6 +248,7 @@ public class Engine {
             if (accessPort <= 0) {
                 return accessPort;
             }
+            
             registerGraph(reviewTarget, accessPort);
             return accessPort;
         }

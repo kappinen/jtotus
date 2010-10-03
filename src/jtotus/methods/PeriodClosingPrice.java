@@ -26,6 +26,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.Set;
 import jtotus.common.DateIterator;
 import jtotus.common.Helper;
 import jtotus.common.StockType;
@@ -37,7 +41,7 @@ import org.apache.commons.lang.ArrayUtils;
  */
 public class PeriodClosingPrice {
     private StockType stock = null;
-    private ArrayList<BigDecimal> priceList = null;
+    private HashMap<Calendar, BigDecimal> priceList = null;
     private ArrayList<BigDecimal> sortedList = null;
     private Date endingDate = null;
     private boolean initDone = false;
@@ -50,12 +54,13 @@ public class PeriodClosingPrice {
     public PeriodClosingPrice(StockType stockTmp) {
         stock = stockTmp;
         stockName = stock.getName();
-        priceList = new ArrayList<BigDecimal>();
+        priceList = new HashMap<Calendar, BigDecimal>();
     }
 
-    public void setStockName(String stockTemp) {
+    public PeriodClosingPrice(String stockTemp) {
         stockName = stockTemp;
         stock = new StockType(stockName);
+        priceList = new HashMap<Calendar, BigDecimal>();
     }
 
     public String getStockName() {
@@ -72,7 +77,8 @@ public class PeriodClosingPrice {
     public int getPeriodLength() {
         initList();
         
-        return priceList.size();
+         System.out.printf("The size of period:%d\n",priceList.size()-1);
+        return priceList.size()-1;
     }
     public BigDecimal getPotential() {
         initList();
@@ -131,25 +137,34 @@ public class PeriodClosingPrice {
         DateIterator iter = new DateIterator(startCal.getTime(),
                                              endCal.getTime());
 
-        priceList = new ArrayList<BigDecimal>();
         BigDecimal closingPrice = null;
         BigDecimal previous = null;
+
         while(iter.hasNext()) {
-            closingPrice = stock.fetchClosingPrice(iter.next());
+
+            Date searchnigDate = iter.next();
+            closingPrice = stock.fetchClosingPrice(searchnigDate);
+
             if (closingPrice != null) {
-               priceList.add(closingPrice);
-               total_dates++;
-               if (previous != null)
-                if (previous.compareTo(closingPrice) == 1){
-                    raises++;
+
+                Calendar calDate = Calendar.getInstance();
+                calDate.setTime(searchnigDate);
+                
+                priceList.put(calDate, closingPrice);
+
+                total_dates++;
+                
+                if (previous != null) {
+                    if (previous.compareTo(closingPrice) == 1) {
+                        raises++;
+                    }
                 }
+                
             previous = closingPrice;
             }
-
-            
         }
 
-        sortedList = priceList;
+        sortedList = new ArrayList<BigDecimal>(priceList.values());
         Collections.sort(sortedList);
         initDone = true;
     }
@@ -174,11 +189,16 @@ public class PeriodClosingPrice {
 
     public double [] toDoubleArray(){
        initList();
+        
        
-       double[] retArray = new double[priceList.size()];
-       for(int i=0; i<priceList.size();i++) {
-           retArray[i] = priceList.get(i).doubleValue();
-       }
+       double[] retArray = new double[priceList.size()-1];
+       Set<Entry<Calendar, BigDecimal>> entrySet = priceList.entrySet();
+        Iterator<Entry<Calendar, BigDecimal>> iterator = entrySet.iterator();
+
+        for(int i = 0;iterator.hasNext();i++){
+            Entry<Calendar, BigDecimal> next = iterator.next();
+           retArray[i] = next.getValue().doubleValue();
+        }
 
        return retArray;
     }

@@ -81,9 +81,7 @@ public class DateIterator implements Iterator<Date>, Iterable<Date>
               rangeCheck.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
            rangeCheck.add(Calendar.DATE, 1);
         }
-           
        
-
 
         return !rangeCheck.after(end);
     }
@@ -92,6 +90,13 @@ public class DateIterator implements Iterator<Date>, Iterable<Date>
     public Date next()
     {
         current.add(Calendar.DATE, step);
+
+        //Skip weekends
+        while(current.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY ||
+              current.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+           current.add(Calendar.DATE, 1);
+        }
+
         return current.getTime();
     }
 

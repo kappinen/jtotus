@@ -62,17 +62,18 @@ public class SimpleMovingAvg implements Callable, MethodEntry {
         BigDecimal avr = new BigDecimal(0.0);
         BigDecimal tmp = null;
         long count = 0, failures=0;
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
+        Calendar calendar = null;
 
         //FIXME:ensure that asked period will be fetched
         String[] stocks = config.StockNames;
         for (int i = stocks.length - 1; i >= 0; i--) {
-            avr.valueOf(0.0);
+            calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            avr = new BigDecimal(0.0);
             count = 0;
             StockType stockType = new StockType(stocks[i]);
 
-            for (int y = 0; count <= (config.day_period - 1) && failures < 100 ; y++) {
+            for (int y = 0; count < config.day_period && failures < 100 ; y++) {
 
                 tmp = stockType.fetchClosingPrice(calendar);
                 if (tmp != null) {
@@ -82,8 +83,9 @@ public class SimpleMovingAvg implements Callable, MethodEntry {
                 } else { failures++; }
                 
               calendar.add(Calendar.DATE, -1);
-
             }
+
+            
 
             avr = avr.divide(BigDecimal.valueOf(count));
             help.debug(this.getClass().getName(),

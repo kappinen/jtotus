@@ -35,6 +35,7 @@ public class DataFetcher{
     private LocalJavaDB javadb = null;
     private Helper help = Helper.getInstance();
     private DayisHoliday holidays = null;
+    private CacheServer cache=null;
 
 
     public DataFetcher()
@@ -44,7 +45,12 @@ public class DataFetcher{
         listOfResources.add(new NetworkOP());
         javadb = new LocalJavaDB();
         holidays = new DayisHoliday();
+        cache = new CacheServer();
         // listOfResources.add(new NetworkGoogle());
+
+
+
+
     }
 
     //TRUE  failuer
@@ -72,10 +78,18 @@ public class DataFetcher{
             return result;
         }
 
-        Iterator <InterfaceDataBase>resources = listOfResources.iterator();
+
+        //Check with cache first
+        result=cache.getValue(stockName, date);
+        if (result!=null){
+          //  System.out.printf("FROM CACHE:%s %s %f\n",stockName, date.getTime().toString(), result.floatValue());
+            return result;
+        }
 
         result = javadb.fetchClosingPrice(stockName, date);
         if(result == null) {
+            Iterator <InterfaceDataBase>resources = listOfResources.iterator();
+
             help.debug("DataFetcher",
                     "Closing Price is not found int in javadb stock:%s time:%s\n",
                     date.toString());
@@ -88,9 +102,13 @@ public class DataFetcher{
                 result = res.fetchClosingPrice(stockName, date);
                 if (result != null) {
                         javadb.storeClosingPrice(stockName, date, result);
+                        cache.putValue(stockName, date, result);
                     return result;
                 }
             }
+        }else {
+            //put to cache
+            cache.putValue(stockName, date, result);
         }
         
         return result;
