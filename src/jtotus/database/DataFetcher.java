@@ -21,6 +21,7 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.math.BigDecimal;
+import jtotus.common.DayisHoliday;
 import jtotus.common.Helper;
 
 /**
@@ -33,6 +34,8 @@ public class DataFetcher{
     private LinkedList<InterfaceDataBase> listOfResources = null;
     private LocalJavaDB javadb = null;
     private Helper help = Helper.getInstance();
+    private DayisHoliday holidays = null;
+
 
     public DataFetcher()
     {
@@ -40,6 +43,7 @@ public class DataFetcher{
         listOfResources.add(new FileSystemFromHex());
         listOfResources.add(new NetworkOP());
         javadb = new LocalJavaDB();
+        holidays = new DayisHoliday();
         // listOfResources.add(new NetworkGoogle());
     }
 
@@ -51,6 +55,8 @@ public class DataFetcher{
         if(date.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY ||
            date.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
            result = true;
+        } else if(holidays.isHoliday(date)){
+            result = true;
         }
 
         return result;

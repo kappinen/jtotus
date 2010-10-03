@@ -71,8 +71,19 @@ public class DateIterator implements Iterator<Date>, Iterable<Date>
     public boolean hasNext()
     {
         Calendar rangeCheck = Calendar.getInstance();
+
         rangeCheck.setTime(current.getTime());
         rangeCheck.add(Calendar.DATE, step);
+
+
+        //Skip weekends
+        while(rangeCheck.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY ||
+              rangeCheck.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+           rangeCheck.add(Calendar.DATE, 1);
+        }
+           
+       
+
 
         return !rangeCheck.after(end);
     }

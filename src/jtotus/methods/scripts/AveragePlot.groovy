@@ -68,10 +68,8 @@ System.out.println(help)
 
 
 //Example 5
-Engine engine = Engine.getInstance()
-dispatcher = new PortfolioDecision()
-//logger = new jtotus.graph.GraphSender(engine);
-method = new jtotus.methods.SimpleMovingAvg(dispatcher)
+
+method = new jtotus.methods.SimpleMovingAvg()
 method.run()
 
 StockType stock = new StockType("Fortum Oyj")

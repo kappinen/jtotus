@@ -35,11 +35,10 @@ import jtotus.config.MethodConfig;
 
 def drawClosingPrice (String reviewTarget, int daysToSearch) {
 
-Engine engine = Engine.getInstance()
 
 stockType = new jtotus.common.StockType(reviewTarget)
 
-sender = new jtotus.gui.graph.GraphSender(engine);
+sender = new jtotus.gui.graph.GraphSender();
 packet = new jtotus.gui.graph.GraphPacket();
 packet.seriesTitle = stockType.getName()+"_ClosingPrice";
 

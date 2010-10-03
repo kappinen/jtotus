@@ -177,7 +177,7 @@ public class TaLibRSI  implements MethodEntry, Callable<MethodResults>{
                 GraphSender sender = new GraphSender();
                 GraphPacket packet = new GraphPacket();
                 
-                packet.seriesTitle = "TaLibRSI";
+                packet.seriesTitle = this.getMethName();
                 packet.result = next.getValue().doubleValue();
                 packet.day = inputEndingDate.get(Calendar.DATE);
                 packet.month = inputEndingDate.get(Calendar.MONTH) + 1;

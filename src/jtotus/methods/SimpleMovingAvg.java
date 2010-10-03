@@ -20,10 +20,13 @@ package jtotus.methods;
 import jtotus.common.Helper;
 import jtotus.config.MethodConfig;
 import jtotus.common.StockType;
-import jtotus.threads.PortfolioDecision;
 import java.math.BigDecimal;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.Callable;
+import jtotus.common.DateIterator;
+import jtotus.gui.graph.GraphPacket;
+import jtotus.gui.graph.GraphSender;
 /**
  *
  * @author Evgeni Kappinen
@@ -33,6 +36,8 @@ public class SimpleMovingAvg implements Callable, MethodEntry {
     private MethodConfig config = null;
     private Helper help = Helper.getInstance();;
 
+
+    private boolean printResults = true;
     
     public String getMethName() {
         String tmp = this.getClass().getName();
@@ -43,15 +48,22 @@ public class SimpleMovingAvg implements Callable, MethodEntry {
 
         config = new MethodConfig();
 
-        analyzeFromNowToFrequency();
+        Calendar startingDate = Calendar.getInstance();
+        startingDate.add(Calendar.DATE, -100);
+        DateIterator dateIterator = new DateIterator(startingDate.getTime());
+        while(dateIterator.hasNext()) {
+            analyzeFromNowToFrequency(dateIterator.next());
+        }
+
         return;
     }
 
-    private void analyzeFromNowToFrequency() {
+    private void analyzeFromNowToFrequency(Date date) {
         BigDecimal avr = new BigDecimal(0.0);
         BigDecimal tmp = null;
-        long count = 0;
+        long count = 0, failures=0;
         Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
 
         //FIXME:ensure that asked period will be fetched
         String[] stocks = config.StockNames;
@@ -60,13 +72,14 @@ public class SimpleMovingAvg implements Callable, MethodEntry {
             count = 0;
             StockType stockType = new StockType(stocks[i]);
 
-            for (int y = 0; count <= (config.day_period - 1) && count < Integer.MAX_VALUE-1; y++) {
+            for (int y = 0; count <= (config.day_period - 1) && failures < 100 ; y++) {
 
                 tmp = stockType.fetchClosingPrice(calendar);
                 if (tmp != null) {
                     avr = avr.add(tmp);
                     count++;
-                }
+
+                } else { failures++; }
                 
               calendar.add(Calendar.DATE, -1);
 
@@ -77,6 +90,18 @@ public class SimpleMovingAvg implements Callable, MethodEntry {
                     "%s:%.2f for %d last days\n",
                     stocks[i], avr.floatValue(), count);
 
+            if (printResults) {
+                GraphSender sender = new GraphSender();
+                GraphPacket packet = new GraphPacket();
+
+                packet.seriesTitle = this.getMethName();
+                packet.result = avr.doubleValue();
+                packet.day = calendar.get(Calendar.DATE);
+                packet.month = calendar.get(Calendar.MONTH) + 1;
+                packet.year = calendar.get(Calendar.YEAR);
+
+                sender.sentPacket(stockType.getName(), packet);
+             }
         }
     }
 
