@@ -91,7 +91,7 @@ public class DecisionScript implements MethodEntry{
     public String getMethName() {
       // return this.getClass().getName();
       int dot = path_to_script.lastIndexOf(".");
-      int sep = path_to_script.lastIndexOf("/");
+      int sep = path_to_script.lastIndexOf(File.separator);
       return path_to_script.substring(sep + 1, dot);
     }
 

@@ -19,12 +19,14 @@
 
 package jtotus.engine;
 
+import java.lang.annotation.Annotation;
 import jtotus.methods.MethodEntry;
 import jtotus.methods.DecisionScript;
 import jtotus.methods.DummyMethod;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -42,6 +44,7 @@ import jtotus.methods.PotentialWithIn;
 import jtotus.methods.TaLibEMA;
 import jtotus.methods.TaLibMOM;
 import jtotus.methods.TaLibRSI;
+import jtotus.methods.config.ConfTaLibRSI.ConfTaLibRSI;
 import jtotus.threads.*;
 
 
@@ -144,7 +147,24 @@ public class Engine {
 
     private void testRun() {
 
- 
+    ConfTaLibRSI config = new ConfTaLibRSI();
+    Field[] fields = config.getClass().getDeclaredFields();
+
+    for(int i = 0;i<fields.length;i++) {
+            try {
+                if (fields[i].getType() == String.class)
+                System.out.printf("Field:%s ; %s\n", fields[i].getName(), fields[i].get(config));
+                
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
+            }
+    }
+
+
+    System.out.printf("Cannonical name:%s\n",config.getClass().getCanonicalName());
+
 
     }
 

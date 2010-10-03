@@ -77,7 +77,7 @@ public class PeriodClosingPrice {
     public int getPeriodLength() {
         initList();
         
-         System.out.printf("The size of period:%d\n",priceList.size());
+//         System.out.printf("The size of period:%d\n",priceList.size());
         return priceList.size();
     }
     public BigDecimal getPotential() {

@@ -150,7 +150,15 @@ public class Helper {
         return Float.valueOf(tmp);
      }
 
-
+    private synchronized void dumpArray(double []array) {
+        for (int i = 0; i < array.length;i++){
+            System.out.printf("%.3f,", array[i]);
+            if ((i % 10) == 0) {
+               System.out.printf("\n");
+            }
+        }
+        System.out.printf("\n");
+    }
 
     
 }

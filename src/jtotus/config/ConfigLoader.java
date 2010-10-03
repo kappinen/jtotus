@@ -29,24 +29,24 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 import java.io.File;
 import java.io.FileInputStream;
+import java.lang.reflect.Field;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  *
- * @author house
+ * @author Evgeni Kappinen
  */
 public class ConfigLoader <T> {
     private XStream xstream = null;
     private String configName = null;
-    private String configDir = "config/";
+    private String configDir = "config" + File.separator;
 
     public ConfigLoader(String config) {
         configName = config;
         xstream = new XStream(new DomDriver());
 
     }
-
 
     public boolean configDirExists(){
 
@@ -116,6 +116,43 @@ public class ConfigLoader <T> {
         return readObj(configDir + configName + ".xml");
     }
 
+    public void applyInputsToObject(Object obj) {
+        T config = this.getConfig();
+
+
+        Field[] toObjectFields = obj.getClass().getDeclaredFields();
+        Field[] fromObjectFields = config.getClass().getDeclaredFields();
+
+
+        for(int i = 0;i<toObjectFields.length;i++) {
+            String inputToName = toObjectFields[i].getName();
+
+            //Only input starting fields are used in configuration file
+            if(inputToName.startsWith("input")) {
+
+                for(int y = 0;y<fromObjectFields.length;y++) {
+
+                    String inputFromName=fromObjectFields[i].getName();
+
+                    if(toObjectFields[i].getType() == fromObjectFields[i].getType() &&
+
+                        inputFromName.compareTo(inputToName)==0) {
+
+                        try {
+                            toObjectFields[i].set(obj, fromObjectFields[i]);
+                        } catch (IllegalArgumentException ex) {
+                            Logger.getLogger(ConfigLoader.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (IllegalAccessException ex) {
+                            Logger.getLogger(ConfigLoader.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+
+                    }
+                }
+            }
+        }
+        
+
+    }
     
 }
 

@@ -51,17 +51,18 @@ import jtotus.common.MethodResults;
 import com.tictactec.ta.lib.Core;
 import com.tictactec.ta.lib.MInteger;
 import com.tictactec.ta.lib.RetCode;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map.Entry;
 import jtotus.common.Helper;
 import jtotus.common.StockType;
+import jtotus.config.ConfigLoader;
 import jtotus.config.MethodConfig;
 import jtotus.gui.graph.GraphPacket;
 import jtotus.gui.graph.GraphSender;
+import jtotus.methods.config.ConfTaLibRSI.ConfTaLibRSI;
 
 
 /**
@@ -70,11 +71,8 @@ import jtotus.gui.graph.GraphSender;
  */
 public class TaLibRSI  implements MethodEntry, Callable<MethodResults>{
     private ArrayList<PeriodClosingPrice> periodList = null;
-    private final StockType stockType = null;
 
     /*Stock list */
-    private List<String> stockNames = null;
-    private List<Date>resutlsForDates = null;
     private Helper help = Helper.getInstance();
     private boolean printResults = true;
     
@@ -82,9 +80,11 @@ public class TaLibRSI  implements MethodEntry, Callable<MethodResults>{
     //TODO: staring date, ending date aka period
 
     //INPUTS TO METHOD:
-    private int inputParam_rsiPeriod = 4;
+    private String portfolio=null;
+    private int inputRSIPeriod = 9; //Default value
     private Calendar inputEndingDate = Calendar.getInstance();
-
+    private Calendar inputStartingDate = Calendar.getInstance();
+    private ConfTaLibRSI config = null;
 
     
 
@@ -95,6 +95,17 @@ public class TaLibRSI  implements MethodEntry, Callable<MethodResults>{
 
     public boolean isCallable() {
         return true;
+    }
+
+
+        public void loadInputs(){
+            ConfigLoader<ConfTaLibRSI> configFile =
+                    new ConfigLoader<ConfTaLibRSI>(portfolio+File.separator+this.getMethName());
+
+            ConfTaLibRSI config = configFile.getConfig();
+            this.inputEndingDate = config.inputEndingDate;
+            this.inputStartingDate = config.inputStartingDate;
+            this.inputRSIPeriod = config.inputRSIPeriod;
     }
 
     public void createPeriods() {
@@ -149,26 +160,16 @@ public class TaLibRSI  implements MethodEntry, Callable<MethodResults>{
        return results;
     }
 
-    private void dumpArray(double []array) {
-        for (int i = 0; i < array.length;i++){
-            System.out.printf("%.3f,", array[i]);
-            if ((i % 10) == 0) {
-               System.out.printf("\n");
-            }
-        }
-        System.out.printf("\n");
-    }
-
     public void run() {
         this.createPeriods();
-        this.performRSI(inputParam_rsiPeriod);
+        this.performRSI(this.inputRSIPeriod);
     }
 
     public MethodResults call() throws Exception {
 
         this.createPeriods();
         
-        MethodResults results = this.performRSI(inputParam_rsiPeriod);
+        MethodResults results = this.performRSI(this.inputRSIPeriod);
         if (printResults) {
             Iterator<Entry<String, Double>> iter = results.iterator();
             while(iter.hasNext()){
