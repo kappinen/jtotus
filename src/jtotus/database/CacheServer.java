@@ -33,11 +33,10 @@ public class CacheServer {
     private HashMap <String,JCS> cacheRegions=null;
     
     public CacheServer() {
-
         //FIXME:maker proper configuration file and replace Helper.debug()
         org.apache.log4j.Logger logger = org.apache.log4j.LogManager.getRootLogger();
         logger.setLevel(org.apache.log4j.Level.ERROR);
-
+        
         cacheRegions = new HashMap <String,JCS>();
 
     }
@@ -45,8 +44,10 @@ public class CacheServer {
     private boolean createRegion(String stockName) {
         try {
 
+
             if (cacheRegions.containsKey(stockName)==false) {
-             cacheRegions.put(stockName, JCS.getInstance(stockName));
+                //TODO:JCS.setConfigFilename(stockName)
+                cacheRegions.put(stockName, JCS.getInstance(stockName));
             }
 
         } catch (CacheException ex) {
@@ -66,7 +67,7 @@ public class CacheServer {
             if(this.createRegion(stockName)) {
                 this.getRegion(stockName).put(date.toString(), value);
             }else {
-                System.out.printf("Unable to find region:%s\n",stockName);
+                System.err.printf("Unable to find region:%s\n",stockName);
             }
         } catch (CacheException ex) {
             Logger.getLogger(CacheServer.class.getName()).log(Level.SEVERE, null, ex);

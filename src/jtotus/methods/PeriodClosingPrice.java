@@ -77,8 +77,8 @@ public class PeriodClosingPrice {
     public int getPeriodLength() {
         initList();
         
-         System.out.printf("The size of period:%d\n",priceList.size()-1);
-        return priceList.size()-1;
+         System.out.printf("The size of period:%d\n",priceList.size());
+        return priceList.size();
     }
     public BigDecimal getPotential() {
         initList();
@@ -191,7 +191,7 @@ public class PeriodClosingPrice {
        initList();
         
        
-       double[] retArray = new double[priceList.size()-1];
+       double[] retArray = new double[priceList.size()];
        Set<Entry<Calendar, BigDecimal>> entrySet = priceList.entrySet();
         Iterator<Entry<Calendar, BigDecimal>> iterator = entrySet.iterator();
 
