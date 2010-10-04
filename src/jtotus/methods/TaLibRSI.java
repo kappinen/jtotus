@@ -52,10 +52,14 @@ import com.tictactec.ta.lib.Core;
 import com.tictactec.ta.lib.MInteger;
 import com.tictactec.ta.lib.RetCode;
 import java.io.File;
+import java.math.BigDecimal;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import jtotus.common.DateIterator;
 import jtotus.common.Helper;
 import jtotus.common.StockType;
 import jtotus.config.ConfigLoader;
@@ -63,6 +67,7 @@ import jtotus.config.MethodConfig;
 import jtotus.gui.graph.GraphPacket;
 import jtotus.gui.graph.GraphSender;
 import jtotus.methods.config.ConfTaLibRSI.ConfTaLibRSI;
+import org.apache.commons.lang.ArrayUtils;
 
 
 /**
@@ -80,12 +85,13 @@ public class TaLibRSI  implements MethodEntry, Callable<MethodResults>{
     //TODO: staring date, ending date aka period
 
     //INPUTS TO METHOD:
-    private String portfolio=null;
-    private int inputRSIPeriod = 9; //Default value
-    private Calendar inputEndingDate = Calendar.getInstance();
-    private Calendar inputStartingDate = Calendar.getInstance();
-    private ConfTaLibRSI config = null;
-
+    public String portfolio=null;
+    public int inputRSIPeriod = 9; //Default value
+    public Calendar inputEndingDate = Calendar.getInstance();
+    public Calendar inputStartingDate = Calendar.getInstance();
+    public ConfTaLibRSI config = null;
+    public String[] inputListOfStocks;
+    public boolean inputPrintResults = true;
     
 
     public String getMethName() {
@@ -100,12 +106,15 @@ public class TaLibRSI  implements MethodEntry, Callable<MethodResults>{
 
         public void loadInputs(){
             ConfigLoader<ConfTaLibRSI> configFile =
-                    new ConfigLoader<ConfTaLibRSI>(portfolio+File.separator+this.getMethName());
+                    new ConfigLoader<ConfTaLibRSI>(this.getMethName());
+                   // new ConfigLoader<ConfTaLibRSI>(portfolio+File.separator+this.getMethName());
 
-            ConfTaLibRSI config = configFile.getConfig();
-            this.inputEndingDate = config.inputEndingDate;
-            this.inputStartingDate = config.inputStartingDate;
-            this.inputRSIPeriod = config.inputRSIPeriod;
+              if (configFile.getConfig() == null){
+                  //Load default values 
+                  config = new ConfTaLibRSI();
+                  configFile.storeConfig(config);
+              }
+            configFile.applyInputsToObject(this);
     }
 
     public void createPeriods() {
@@ -124,11 +133,77 @@ public class TaLibRSI  implements MethodEntry, Callable<MethodResults>{
     
     }
 
+        public MethodResults performRSIv2(int rsi_period) {
+           MethodResults results = new MethodResults(this.getMethName());
+           ArrayDeque <Double>dequePrice = new ArrayDeque<Double>();
+           final Core core = new Core();
+           DateIterator dateIter = new DateIterator(inputStartingDate.getTime(),
+                                                    inputEndingDate.getTime());
+           
+           
+           StockType stockType = new StockType(this.inputListOfStocks[0]);
+           while(dateIter.hasNext()) {
+               
+               
+               if(dequePrice.size() < this.inputRSIPeriod){
+                   BigDecimal stockValue = stockType.fetchClosingPrice(dateIter.next());
+                   if (stockValue != null) {
+                        Double addValue = Double.valueOf(stockValue.doubleValue());
+                        dequePrice.add(addValue);
+                    }
+                   
+                   if (dequePrice.size() != this.inputRSIPeriod) {
+                        continue;
+                   }
+                 } 
+
+               
+               final int allocationSize = dequePrice.size() - core.rsiLookback(this.inputRSIPeriod);
+               if (allocationSize <= 0) {
+                    System.err.printf("%s: No data for period allocationSize:%d deque:%d rsiPeriod:%d\n",
+                            stockType.getName(), allocationSize, dequePrice.size(),this.inputRSIPeriod);
+                    return null;
+                }
+
+               double[] output = new double[allocationSize];
+               MInteger outBegIdx = new MInteger();
+               MInteger outNbElement = new MInteger();
+               
+               double[] closingPrices = ArrayUtils.toPrimitive(dequePrice.toArray(new Double[0]));
+
+               RetCode code = core.rsi(0, dequePrice.size() - 1, closingPrices , this.inputRSIPeriod, outBegIdx, outNbElement, output);
+               //FIXME: if (code.code.Success){
+               results.putResult(stockType.getName(), output[outNbElement.value - 1]);
+               dequePrice.pop();
+               if (this.inputPrintResults) {
+                    Iterator<Entry<String, Double>> iter = results.iterator();
+                    while(iter.hasNext()){
+                        Entry<String, Double> next = iter.next();
+
+                        GraphSender sender = new GraphSender();
+                        GraphPacket packet = new GraphPacket();
+
+                        packet.seriesTitle = this.getClass().getCanonicalName();
+                        packet.result = next.getValue().doubleValue();
+                        packet.day = inputEndingDate.get(Calendar.DATE);
+                        packet.month = inputEndingDate.get(Calendar.MONTH) + 1;
+                        packet.year = inputEndingDate.get(Calendar.YEAR);
+
+                        sender.sentPacket(next.getKey(), packet);
+                    }
+              }
+
+           }
+            
+
+            return results;
+        }
+        
     //RSI
     public MethodResults performRSI(int rsi_period) {
        int period = 0;
        final Core core = new Core();
-       MethodResults results = new MethodResults("TaLibRSI");
+       MethodResults results = new MethodResults(this.getClass().getCanonicalName());
 
  
        Iterator<PeriodClosingPrice> periodsIter = periodList.iterator();
@@ -162,14 +237,15 @@ public class TaLibRSI  implements MethodEntry, Callable<MethodResults>{
 
     public void run() {
         this.createPeriods();
-        this.performRSI(this.inputRSIPeriod);
+        this.loadInputs();
+        this.performRSIv2(this.inputRSIPeriod);
     }
 
     public MethodResults call() throws Exception {
 
         this.createPeriods();
-        
-        MethodResults results = this.performRSI(this.inputRSIPeriod);
+        this.loadInputs();
+        MethodResults results = this.performRSIv2(this.inputRSIPeriod);
         if (printResults) {
             Iterator<Entry<String, Double>> iter = results.iterator();
             while(iter.hasNext()){

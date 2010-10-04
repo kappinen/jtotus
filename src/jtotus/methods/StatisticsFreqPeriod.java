@@ -78,11 +78,11 @@ public void run() {
 
 
     if (stockName == null) {//Stock Name is not provided, lets use config file
-        String []tempList = config.fetchStockName();
+        String []tempList = config.fetchStockNames();
 
         for (int i = 0; i < tempList.length;i++)
             stockList.add(tempList[i]);
-        String []stockNames = config.fetchStockName();
+        String []stockNames = config.fetchStockNames();
     }
     else {
         stockList.add(stockName);

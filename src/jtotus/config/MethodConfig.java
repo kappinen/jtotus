@@ -53,7 +53,7 @@ public class MethodConfig implements Iterable<String>, Iterator<String>{
     }
 
 
-    public String []fetchStockName() {
+    public String []fetchStockNames() {
         return StockNames;
     }
 

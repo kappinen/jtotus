@@ -18,16 +18,29 @@
 package jtotus.methods.config.ConfTaLibRSI;
 
 import java.util.Calendar;
+import jtotus.config.MethodConfig;
 
 /**
  *
  * @author Evgeni Kappinen
  */
 public class ConfTaLibRSI {
-    
+
+    public String[] inputListOfStocks;
     public Calendar inputStartingDate = null;
     public Calendar inputEndingDate = null;
-
+    public boolean inputPrintResults = true;
     public int inputRSIPeriod = 14;
-    public String test="testii";
+
+    public ConfTaLibRSI() {
+        inputEndingDate = Calendar.getInstance();
+        inputStartingDate = Calendar.getInstance();
+        inputStartingDate.add(Calendar.DATE, -90);
+
+
+        MethodConfig mainConfig = new MethodConfig();
+        inputListOfStocks = mainConfig.fetchStockNames();
+
+    }
+
 }

@@ -31,6 +31,7 @@ public class DateIterator implements Iterator<Date>, Iterable<Date>
     private Calendar end = Calendar.getInstance();
     private Calendar start = Calendar.getInstance();
     private Calendar current = Calendar.getInstance();
+    private DayisHoliday holidays = new DayisHoliday();
 
     public DateIterator(Date tmpStart, Date tmpEnd)
     {
@@ -78,7 +79,8 @@ public class DateIterator implements Iterator<Date>, Iterable<Date>
 
         //Skip weekends
         while(rangeCheck.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY ||
-              rangeCheck.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+              rangeCheck.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY ||
+              holidays.isHoliday(rangeCheck)) {
            rangeCheck.add(Calendar.DATE, 1);
         }
        
@@ -93,7 +95,8 @@ public class DateIterator implements Iterator<Date>, Iterable<Date>
 
         //Skip weekends
         while(current.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY ||
-              current.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+              current.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY ||
+              holidays.isHoliday(current)) {
            current.add(Calendar.DATE, 1);
         }
 

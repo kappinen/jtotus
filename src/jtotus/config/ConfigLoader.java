@@ -30,6 +30,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 import java.io.File;
 import java.io.FileInputStream;
 import java.lang.reflect.Field;
+import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -118,32 +119,37 @@ public class ConfigLoader <T> {
 
     public void applyInputsToObject(Object obj) {
         T config = this.getConfig();
-
+        if (config==null) {
+            return;
+        }
 
         Field[] toObjectFields = obj.getClass().getDeclaredFields();
         Field[] fromObjectFields = config.getClass().getDeclaredFields();
 
 
-        for(int i = 0;i<toObjectFields.length;i++) {
-            String inputToName = toObjectFields[i].getName();
+        for(int to = 0;to<toObjectFields.length;to++) {
+            String inputToName = toObjectFields[to].getName();
 
             //Only input starting fields are used in configuration file
             if(inputToName.startsWith("input")) {
 
-                for(int y = 0;y<fromObjectFields.length;y++) {
+                for(int from = 0;from<fromObjectFields.length;from++) {
 
-                    String inputFromName=fromObjectFields[i].getName();
+                    String inputFromName=fromObjectFields[from].getName();
+                    System.out.printf("--->Setting up:%d :%d: type:%s\n", to, from, toObjectFields[to].getType().toString());
 
-                    if(toObjectFields[i].getType() == fromObjectFields[i].getType() &&
-
+                    if(toObjectFields[to].getType() == fromObjectFields[from].getType() &&
                         inputFromName.compareTo(inputToName)==0) {
-
+                        System.out.printf("--->Setting up:%d :%d: type:%s\n", to, from, toObjectFields[to].getType().toString());
                         try {
-                            toObjectFields[i].set(obj, fromObjectFields[i]);
+                             toObjectFields[to].set(obj, fromObjectFields[from].get(config));
+
                         } catch (IllegalArgumentException ex) {
                             Logger.getLogger(ConfigLoader.class.getName()).log(Level.SEVERE, null, ex);
+                            return;
                         } catch (IllegalAccessException ex) {
                             Logger.getLogger(ConfigLoader.class.getName()).log(Level.SEVERE, null, ex);
+                            return;
                         }
 
                     }
