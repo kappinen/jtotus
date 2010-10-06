@@ -57,6 +57,7 @@ public class GraphPrinter {
         mainPanel.setMouseZoomable(true, false);
         mainPanel.setFillZoomRectangle(true);
         mainPanel.setMouseWheelEnabled(true);
+
     }
    
     
@@ -76,7 +77,11 @@ public class GraphPrinter {
             chart.setBackgroundPaint(Color.white);
             plot.setBackgroundPaint(Color.lightGray);
 
-
+            plot.setRangePannable(false);
+            plot.setDomainGridlinesVisible(true);
+            plot.setDomainCrosshairLockedOnData(true);
+            plot.setOutlineVisible(true);
+            
             //Set Render
             XYLineAndShapeRenderer renderer = getDefaultLine();
             plot.setRenderer(renderer);

@@ -56,8 +56,10 @@ import java.math.BigDecimal;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Deque;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 import jtotus.common.DateIterator;
 import jtotus.common.Helper;
@@ -122,7 +124,7 @@ public class TaLibRSI  implements MethodEntry, Callable<MethodResults>{
       MethodConfig listOfTasks = new MethodConfig();
       Iterator<String> iter = listOfTasks.iterator();
       periodList = new ArrayList<PeriodClosingPrice>();
-
+      
       
        //Build period history for stock
        while(iter.hasNext()) {
@@ -135,106 +137,79 @@ public class TaLibRSI  implements MethodEntry, Callable<MethodResults>{
 
         public MethodResults performRSIv2(int rsi_period) {
            MethodResults results = new MethodResults(this.getMethName());
-           ArrayDeque <Double>dequePrice = new ArrayDeque<Double>();
-           final Core core = new Core();
+           List <Double>closingPrices = new ArrayList<Double>();
+           GraphSender sender = new GraphSender();
+           GraphPacket packet = new GraphPacket();
+
+          
+
+
+          for(int stockCount=0;stockCount<this.inputListOfStocks.length;stockCount++) {
+           closingPrices.clear();
+           StockType stockType = new StockType(this.inputListOfStocks[stockCount]);
+           
            DateIterator dateIter = new DateIterator(inputStartingDate.getTime(),
-                                                    inputEndingDate.getTime());
-           
-           
-           StockType stockType = new StockType(this.inputListOfStocks[0]);
+                                                    inputEndingDate.getTime());      
+   
            while(dateIter.hasNext()) {
-               
-               
-               if(dequePrice.size() < this.inputRSIPeriod){
-                   BigDecimal stockValue = stockType.fetchClosingPrice(dateIter.next());
-                   if (stockValue != null) {
-                        Double addValue = Double.valueOf(stockValue.doubleValue());
-                        dequePrice.add(addValue);
-                    }
-                   
-                   if (dequePrice.size() != this.inputRSIPeriod) {
-                        continue;
-                   }
-                 } 
 
-               
-               final int allocationSize = dequePrice.size() - core.rsiLookback(this.inputRSIPeriod);
-               if (allocationSize <= 0) {
-                    System.err.printf("%s: No data for period allocationSize:%d deque:%d rsiPeriod:%d\n",
-                            stockType.getName(), allocationSize, dequePrice.size(),this.inputRSIPeriod);
-                    return null;
-                }
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(dateIter.next());
+                closingPrices.add(stockType.fetchClosingPrice(cal).doubleValue());
+            }
 
-               double[] output = new double[allocationSize];
-               MInteger outBegIdx = new MInteger();
-               MInteger outNbElement = new MInteger();
-               
-               double[] closingPrices = ArrayUtils.toPrimitive(dequePrice.toArray(new Double[0]));
 
-               RetCode code = core.rsi(0, dequePrice.size() - 1, closingPrices , this.inputRSIPeriod, outBegIdx, outNbElement, output);
-               //FIXME: if (code.code.Success){
-               results.putResult(stockType.getName(), output[outNbElement.value - 1]);
-               dequePrice.pop();
+            final Core core = new Core();
+            double []input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
+
+             int period = input.length-1;
+             final int allocationSize = period - core.rsiLookback(this.inputRSIPeriod);
+
+             if (allocationSize <= 0) {
+                 System.err.printf("No data for period (%d)\n", allocationSize);
+                 return null;
+             }
+
+             double[] output = new double[allocationSize];
+             MInteger outBegIdx = new MInteger();
+             MInteger outNbElement = new MInteger();
+
+             RetCode code = core.rsi(0, period - 1, input ,
+                                       this.inputRSIPeriod,
+                                       outBegIdx,
+                                       outNbElement, output);
+             //FIXME:code
+             results.putResult(stockType.getName(), output[output.length - 1]);
+           
                if (this.inputPrintResults) {
-                    Iterator<Entry<String, Double>> iter = results.iterator();
-                    while(iter.hasNext()){
-                        Entry<String, Double> next = iter.next();
+                   DateIterator dateIterator = new DateIterator(inputStartingDate.getTime(),
+                                                                inputEndingDate.getTime());
+                    dateIterator.move(outBegIdx.value);
+                    for(int i=0;i < outNbElement.value && dateIterator.hasNext();i++) {
+                        Date stockDate = dateIterator.next();
+                        System.out.printf("Date:"+stockDate+" Time:"+inputEndingDate.getTime()+"Time2:"+inputStartingDate.getTime()+"\n");
 
-                        GraphSender sender = new GraphSender();
-                        GraphPacket packet = new GraphPacket();
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.setTime(stockDate);
+                        
+                        packet.seriesTitle = this.getMethName();
+                        packet.result = output[i];
+                        packet.day = calendar.get(Calendar.DAY_OF_MONTH);
+                        packet.month = calendar.get(Calendar.MONTH) + 1;
+                        packet.year = calendar.get(Calendar.YEAR);
+                        
+                        System.out.printf("Year:%d : %d\n", packet.year, calendar.get(Calendar.YEAR));
 
-                        packet.seriesTitle = this.getClass().getCanonicalName();
-                        packet.result = next.getValue().doubleValue();
-                        packet.day = inputEndingDate.get(Calendar.DATE);
-                        packet.month = inputEndingDate.get(Calendar.MONTH) + 1;
-                        packet.year = inputEndingDate.get(Calendar.YEAR);
-
-                        sender.sentPacket(next.getKey(), packet);
+                        sender.sentPacket(stockType.getName(), packet);
                     }
               }
-
-           }
+  
+            }
             
 
             return results;
         }
         
-    //RSI
-    public MethodResults performRSI(int rsi_period) {
-       int period = 0;
-       final Core core = new Core();
-       MethodResults results = new MethodResults(this.getClass().getCanonicalName());
-
- 
-       Iterator<PeriodClosingPrice> periodsIter = periodList.iterator();
-       while(periodsIter.hasNext()) {
-
-           PeriodClosingPrice periodPrice = periodsIter.next();
-           period = periodPrice.getPeriodLength();
-
-           final int allocationSize = period - core.rsiLookback(rsi_period);
-            if (allocationSize <= 0) {
-                System.err.printf("%s: No data for period (%d)\n", periodPrice.getStockName(), allocationSize);
-                return null;
-            }
-
-           double[] output = new double[allocationSize];
-           MInteger outBegIdx = new MInteger();
-           MInteger outNbElement = new MInteger();
-           double[] values = periodPrice.toDoubleArray();
-           
-//           System.out.printf("Size:%d alloc:%d loop:%d\n", values.length, allocationSize, core.rsiLookback(rsi_period));
-//           this.dumpArray(values);
-           RetCode code = core.rsi(0, period - 1, values , rsi_period, outBegIdx, outNbElement, output);
-           System.out.printf("[TaLibRSI:%s] outBegIdx:%d outNbElement:%d outputLen:%d RSI:"+output[outNbElement.value - 1]+" Result:%s\n",
-                   periodPrice.getStockName(), outBegIdx.value, outNbElement.value, output.length, code.toString());
-           results.putResult(periodPrice.getStockName(), output[outNbElement.value - 1]);
-
-       }
-
-       return results;
-    }
-
     public void run() {
         this.createPeriods();
         this.loadInputs();

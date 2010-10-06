@@ -180,11 +180,6 @@ public class PortfolioDecision implements Runnable{
                     //Remove task from the list
                     taskIter.remove();
                     Thread.yield();
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(PortfolioDecision.class.getName()).log(Level.SEVERE, null, ex);
-                    }
                 }
             }
         }

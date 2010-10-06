@@ -33,13 +33,15 @@ public class DateIterator implements Iterator<Date>, Iterable<Date>
     private Calendar current = Calendar.getInstance();
     private DayisHoliday holidays = new DayisHoliday();
 
+
+    
     public DateIterator(Date tmpStart, Date tmpEnd)
     {
         end.setTime(tmpEnd);
-        end.add(Calendar.DATE, -1);
+      //  end.add(Calendar.DATE, -1);
 
         start.setTime(tmpStart);
-        start.add(Calendar.DATE, -1);
+        //start.add(Calendar.DATE, -1);
 
         if(!end.after(start)) {
             System.err.printf("Warning startin date is afte ending date! Reversing dates("+start.getTime()+":"+end.getTime()+"\n");
@@ -52,7 +54,6 @@ public class DateIterator implements Iterator<Date>, Iterable<Date>
         }
 
         current.setTime(start.getTime());
-        current.add(Calendar.DATE, -1);
 
 
     }
@@ -116,6 +117,12 @@ public class DateIterator implements Iterator<Date>, Iterable<Date>
     public Date getCurrent() {
         return current.getTime();
     }
+
+   public void move(int i) {
+       for(int jump=0; this.hasNext() && jump <= i;jump++) {
+            this.next();
+       }
+   }
 
    public Iterator<Date> iterator()
     {
