@@ -43,11 +43,9 @@ packet = new org.jtotus.gui.graph.GraphPacket();
 packet.seriesTitle = stockType.getName()+"_ClosingPrice";
 
 
-println packet.day + ":" +packet.month + ":" + packet.year
 for (int i=0; i<daysToSearch;i++) {
         sender.sentPacket(stockType.getName(), stockType.fetchPastDayClosingPricePacket(i))
     }
-
 
 }
 

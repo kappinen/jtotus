@@ -19,7 +19,6 @@
 
 package org.jtotus.engine;
 
-import java.lang.annotation.Annotation;
 import org.jtotus.methods.MethodEntry;
 import org.jtotus.methods.DecisionScript;
 import org.jtotus.methods.DummyMethod;
@@ -27,8 +26,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -38,13 +35,13 @@ import org.jtotus.gui.JtotusView;
 import org.jtotus.common.Helper;
 import org.jtotus.config.MethodConfig;
 import org.jtotus.database.AutoUpdateStocks;
-import org.jtotus.database.CacheServer;
 import org.jtotus.gui.MethodResultsPrinter;
 import org.jtotus.methods.PotentialWithIn;
 import org.jtotus.methods.TaLibEMA;
 import org.jtotus.methods.TaLibMOM;
 import org.jtotus.methods.TaLibRSI;
 import org.jtotus.config.ConfTaLibRSI;
+import org.jtotus.methods.TaLibSMA;
 import org.jtotus.threads.*;
 
 
@@ -71,10 +68,11 @@ public class Engine {
         methodList.add(new DummyMethod(portfolioDecision));
         methodList.add(new PotentialWithIn());
         methodList.add(new TaLibRSI());
+        methodList.add(new TaLibSMA());
         methodList.add(new TaLibEMA());
         methodList.add(new TaLibMOM());
 
-        File scriptDir = new File("./src/jtotus/methods/scripts/");
+        File scriptDir = new File("./src/org/jtotus/methods/scripts/");
         if(!scriptDir.isDirectory()) {
             return;
         }

@@ -20,7 +20,7 @@
 /*
  *
  https://www.nordnet.fi/mux/page/hjalp/ordHjalp.html?ord=diagram%20rsi
- * 
+ *
 RSI
 
 RSI on hintaa seuraava oskilaattori, joka saavuttaa 0-100 välisiä arvoja.
@@ -67,32 +67,39 @@ import org.jtotus.gui.graph.GraphSender;
 import org.jtotus.config.ConfTaLibRSI;
 import org.apache.commons.lang.ArrayUtils;
 import java.io.File;
+import org.jtotus.common.NumberRangeIter;
+import org.jtotus.common.StateIterator;
 import org.jtotus.config.ConfPortfolio;
+import org.jtotus.config.ConfTaLibSMA;
+import org.jtotus.methods.evaluators.EvaluateStock;
 
 /**
  *
  * @author Evgeni Kappinen
  */
-public class TaLibRSI  implements MethodEntry, Callable<MethodResults>{
+public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
     private ArrayList<PeriodClosingPrice> periodList = null;
 
     /*Stock list */
     private Helper help = Helper.getInstance();
     private boolean printResults = true;
-    
+
 
     //TODO: staring date, ending date aka period
 
     //INPUTS TO METHOD:
     public String inputPortofolio=null;
     public String intpuPortfolio=null;
-    public int inputRSIPeriod = 9; //Default value
+    public int inputSMAPeriod = 9; //Default value
     public Calendar inputEndingDate = Calendar.getInstance();
     public Calendar inputStartingDate = Calendar.getInstance();
-    public ConfTaLibRSI config = null;
+    public ConfTaLibSMA config = null;
     public String[] inputListOfStocks;
     public boolean inputPrintResults = true;
-    
+
+
+    public boolean inputPerfomDecision = true;
+    public String inputSMADecisionPeriod = null;
 
     public String getMethName() {
         String tmp = this.getClass().getName();
@@ -107,74 +114,73 @@ public class TaLibRSI  implements MethodEntry, Callable<MethodResults>{
                          //FIXME: set it in PortfolioDecision
             String portfolio = "OMXHelsinki";
 
-            System.out.printf("Jump - 1\n" );
             ConfigLoader<ConfPortfolio> configPortfolio =
                     new ConfigLoader<ConfPortfolio>(portfolio);
 
-            System.out.printf("Jump - 2\n" );
             if (configPortfolio.getConfig() == null){
                   //Load default values
                   ConfPortfolio newPortConfig = new ConfPortfolio();
                   configPortfolio.storeConfig(newPortConfig);
               }
-            System.out.printf("Jump - 3\n" );
 
             //Get stock names
             configPortfolio.applyInputsToObject(this);
-            System.out.printf("Jump - 4\n" );
             this.inputPortofolio = portfolio;
         }
 
-        
+
 
         public void loadInputs(String configStock){
-            
-            ConfigLoader<ConfTaLibRSI> configFile =
-                    new ConfigLoader<ConfTaLibRSI>(this.inputPortofolio + 
+
+            ConfigLoader<ConfTaLibSMA> configFile =
+                    new ConfigLoader<ConfTaLibSMA>(this.inputPortofolio +
                                                    File.separator +
                                                    configStock +
                                                    File.separator +
                                                    this.getMethName());
-            
-                   // new ConfigLoader<ConfTaLibRSI>(portfolio+File.separator+this.getMethName());
+
+                   // new ConfigLoader<ConfTaLibSMA>(portfolio+File.separator+this.getMethName());
 
               if (configFile.getConfig() == null){
-                  //Load default values 
-                  config = new ConfTaLibRSI();
+                  //Load default values
+                  config = new ConfTaLibSMA();
                   configFile.storeConfig(config);
               }
             configFile.applyInputsToObject(this);
         }
 
-        
+
     public void createPeriods() {
-        
+
       MethodConfig listOfTasks = new MethodConfig();
       Iterator<String> iter = listOfTasks.iterator();
       periodList = new ArrayList<PeriodClosingPrice>();
-      
-      
+
+
        //Build period history for stock
        while(iter.hasNext()) {
             StockType stock = new StockType(iter.next());
             periodList.add(new PeriodClosingPrice(stock));
             help.debug(this.getClass().getName(), "StockName for period:%s\n",stock.getName());
        }
-    
+
     }
 
-        public MethodResults performRSI(int rsi_period) {
-           MethodResults results = new MethodResults(this.getMethName());
-           List <Double>closingPrices = new ArrayList<Double>();
-           GraphSender sender = new GraphSender();
-           GraphPacket packet = new GraphPacket();
+        public MethodResults performSMA(int SMA_period) {
 
-          
+            MethodResults results = new MethodResults(this.getMethName());
+            List <Double>closingPrices = new ArrayList<Double>();
+            GraphSender sender = new GraphSender();
+            GraphPacket packet = new GraphPacket();
 
+            double[] output = null;
+            MInteger outBegIdx = null;
+            MInteger outNbElement = null;
+            int period = 0;
 
-          for(int stockCount=0;stockCount<this.inputListOfStocks.length;stockCount++) {
+            for(int stockCount=0;stockCount<this.inputListOfStocks.length;stockCount++) {
                closingPrices.clear();
-               
+
                this.loadInputs(this.inputListOfStocks[stockCount]);
 
                StockType stockType = new StockType(this.inputListOfStocks[stockCount]);
@@ -193,25 +199,26 @@ public class TaLibRSI  implements MethodEntry, Callable<MethodResults>{
                 final Core core = new Core();
                 double []input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
 
-                 int period = input.length-1;
-                 final int allocationSize = period - core.rsiLookback(this.inputRSIPeriod);
+                 period = input.length-1;
+                 final int allocationSize = period - core.smaLookback(this.inputSMAPeriod);
 
                  if (allocationSize <= 0) {
                      System.err.printf("No data for period (%d)\n", allocationSize);
                      return null;
                  }
 
-                 double[] output = new double[allocationSize];
-                 MInteger outBegIdx = new MInteger();
-                 MInteger outNbElement = new MInteger();
+                 output = new double[allocationSize];
+                 outBegIdx = new MInteger();
+                 outNbElement = new MInteger();
 
-                 RetCode code = core.rsi(0, period - 1, input ,
-                                           this.inputRSIPeriod,
+                 RetCode code = core.sma(0, period - 1, input ,
+                                           this.inputSMAPeriod,
                                            outBegIdx,
                                            outNbElement, output);
 
                  if (code.compareTo(RetCode.Success) != 0) {
                      //Error return empty method results
+                     System.err.printf("SMI failed!\n");
                      return new MethodResults(this.getMethName());
                  }
 
@@ -236,37 +243,99 @@ public class TaLibRSI  implements MethodEntry, Callable<MethodResults>{
                         }
                   }
 
+                if (this.inputPerfomDecision) {
+                    
+                    NumberRangeIter numberIter = new NumberRangeIter("SMARange");
+                    numberIter.setRange(this.inputSMADecisionPeriod);
+
+                    while(numberIter.hasNext()) {
+                        int decSMAPeriod = numberIter.next().intValue();
+                        
+                        final int allocationSizeDecision = period - core.smaLookback(decSMAPeriod);
+
+                        if (allocationSizeDecision <= 0) {
+                             System.err.printf("No data for period (%d)\n", allocationSize);
+                             return null;
+                         }
+
+                         double[] outputDec = new double[allocationSizeDecision];
+                         MInteger outBegIdxDec = new MInteger();
+                         MInteger outNbElementDec = new MInteger();
+
+                         RetCode decCode = core.sma(0, period - 1,
+                                                    input ,
+                                                    decSMAPeriod,
+                                                    outBegIdxDec,
+                                                    outNbElementDec, outputDec);
+                        
+                         if (decCode.compareTo(RetCode.Success) != 0) {
+                             //Error return empty method results
+                             System.err.printf("SMI failed in Decision!\n");
+                             return new MethodResults(this.getMethName());
+                         }
+                        //TODO: Evaluate and store best config
+                        //
+                        int direction=1;
+                        for (int elem=outBegIdxDec.value+1;elem < outNbElementDec.value;elem++){
+                            
+                            if (input[elem - 1] > input[elem]) {
+                                direction=-1;
+                            }else { direction = 1; }
 
 
+                            if ((input[elem] < outputDec[elem -1 ] &&
+                                input[elem] > outputDec[elem])) {
+                                 if (this.inputPrintResults) {
+                                    DateIterator dateIterator = new DateIterator(inputStartingDate.getTime(),
+                                                                                inputEndingDate.getTime());
+                                    dateIterator.move(elem);
+                                    
+                                    packet.seriesTitle = "CrossingPoint";
+                                    packet.result = (outputDec[elem] +input[elem])/2;
+                                    packet.date = dateIterator.getCurrent().getTime();
 
-  
+                                     System.err.printf("The dec period:%s:%s\n",dateIterator.getCurrent().toString(),stockType.getName());
+                                    sender.sentPacket(stockType.getName(), packet);
+                                }
+
+                            }
+
+                        }
+
+                        
+                        
+
+                    }
+
+                }
+
             }
-            
+
 
             return results;
         }
-        
+
     public void run() {
         this.loadPortofolioInputs();
 
         this.createPeriods();
-        this.performRSI(this.inputRSIPeriod);
+        this.performSMA(this.inputSMAPeriod);
     }
 
     public MethodResults call() throws Exception {
         this.loadPortofolioInputs();
 
-        
+
         this.createPeriods();
-        MethodResults results = this.performRSI(this.inputRSIPeriod);
+        MethodResults results = this.performSMA(this.inputSMAPeriod);
         if (printResults) {
             Iterator<Entry<String, Double>> iter = results.iterator();
             while(iter.hasNext()){
                 Entry<String, Double> next = iter.next();
-                
+
                 GraphSender sender = new GraphSender();
                 GraphPacket packet = new GraphPacket();
-                
+
                 packet.seriesTitle = this.getMethName();
                 packet.result = next.getValue().doubleValue();
                 packet.date = inputEndingDate.getTimeInMillis();

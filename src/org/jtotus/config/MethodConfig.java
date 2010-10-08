@@ -1,4 +1,4 @@
-/*
+ /*
     This file is part of jTotus.
 
     jTotus is free software: you can redistribute it and/or modify
@@ -43,7 +43,9 @@ public class MethodConfig implements Iterable<String>, Iterator<String>{
         //if config does not exists create new one
         if (config == null) {
             config = new GUIConfig();
+            loader.storeConfig(config);
         }
+
         StockNames = config.fetchStockName();
 
         help.debug(this.getClass().getName(),
