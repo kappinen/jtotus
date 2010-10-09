@@ -156,7 +156,6 @@ public class ConfigLoader <T> {
                         try {
                             if (toObjectFields[to].getType() == Calendar.class &&
                                 inputToName.compareTo("inputEndingDate") == 0) {
-                                System.out.printf("Setting ending date to current:\n");
                                 Calendar currentDate = Calendar.getInstance();
                                 toObjectFields[to].set(obj,currentDate);
                             }

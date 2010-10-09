@@ -67,6 +67,7 @@ import org.jtotus.gui.graph.GraphSender;
 import org.jtotus.config.ConfTaLibRSI;
 import org.apache.commons.lang.ArrayUtils;
 import java.io.File;
+import java.math.BigDecimal;
 import org.jtotus.common.NumberRangeIter;
 import org.jtotus.common.StateIterator;
 import org.jtotus.config.ConfPortfolio;
@@ -89,10 +90,10 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
 
     //INPUTS TO METHOD:
     public String inputPortofolio=null;
-    public String intpuPortfolio=null;
+    public String inpuPortfolio=null;
     public int inputSMAPeriod = 9; //Default value
-    public Calendar inputEndingDate = Calendar.getInstance();
-    public Calendar inputStartingDate = Calendar.getInstance();
+    public Calendar inputEndingDate = null;
+    public Calendar inputStartingDate = null;
     public ConfTaLibSMA config = null;
     public String[] inputListOfStocks;
     public boolean inputPrintResults = true;
@@ -100,6 +101,7 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
 
     public boolean inputPerfomDecision = true;
     public String inputSMADecisionPeriod = null;
+    public Double inputAssumedBudjet=null;
 
     public String getMethName() {
         String tmp = this.getClass().getName();
@@ -188,11 +190,15 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
                DateIterator dateIter = new DateIterator(inputStartingDate.getTime(),
                                                         inputEndingDate.getTime());
 
+                //Filling input data with Closing price for days
                while(dateIter.hasNext()) {
 
                     Calendar cal = Calendar.getInstance();
                     cal.setTime(dateIter.next());
-                    closingPrices.add(stockType.fetchClosingPrice(cal).doubleValue());
+                    BigDecimal closDay = stockType.fetchClosingPrice(cal);
+                    if (closDay!=null) {
+                        closingPrices.add(closDay.doubleValue());
+                   }
                 }
 
 
@@ -206,6 +212,8 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
                      System.err.printf("No data for period (%d)\n", allocationSize);
                      return null;
                  }
+
+
 
                  output = new double[allocationSize];
                  outBegIdx = new MInteger();
@@ -221,6 +229,11 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
                      System.err.printf("SMI failed!\n");
                      return new MethodResults(this.getMethName());
                  }
+
+
+
+                
+                 //System.out.printf("The original size: (%d:%d) alloc:%d\n", outBegIdx.value,outNbElement.value,allocationSize);
 
                  results.putResult(stockType.getName(), output[output.length - 1]);
 
@@ -243,18 +256,27 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
                         }
                   }
 
+                //************* DECISION TEST *************//
                 if (this.inputPerfomDecision) {
                     
+                    
+                    double amoutOfStocks = 0;
+                    double bestAssumedBudjet = 0;
+                    double bestPeriod = 0;
+                    double assumedBudjet = 0.0f;
+                    int decSMAPeriod = 0;
+
                     NumberRangeIter numberIter = new NumberRangeIter("SMARange");
                     numberIter.setRange(this.inputSMADecisionPeriod);
-
                     while(numberIter.hasNext()) {
-                        int decSMAPeriod = numberIter.next().intValue();
+                        amoutOfStocks = 0;
+                        assumedBudjet = this.inputAssumedBudjet.doubleValue();
+                        decSMAPeriod = numberIter.next().intValue();
                         
                         final int allocationSizeDecision = period - core.smaLookback(decSMAPeriod);
 
                         if (allocationSizeDecision <= 0) {
-                             System.err.printf("No data for period (%d)\n", allocationSize);
+                             System.err.printf("No data for period (%d)\n", allocationSizeDecision);
                              return null;
                          }
 
@@ -273,28 +295,54 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
                              System.err.printf("SMI failed in Decision!\n");
                              return new MethodResults(this.getMethName());
                          }
+
                         //TODO: Evaluate and store best config
-                        //
-                        int direction=1;
-                        for (int elem=outBegIdxDec.value+1;elem < outNbElementDec.value;elem++){
-                            
-                            if (input[elem - 1] > input[elem]) {
+                        int direction=0;
+                        boolean changed=true;
+                        
+                        for (int elem=1;elem < outNbElementDec.value;elem++) {
+
+
+                            double threshold = (outputDec[elem-1]+outputDec[elem])/2;
+                            changed=false;
+                            if (input[outBegIdxDec.value+elem] > threshold) { //above the line
+                                if (direction==-1) {
+                                    changed=true; //Price is going down
+                                    if (amoutOfStocks!=0) {
+                                        assumedBudjet=amoutOfStocks*input[elem+outBegIdxDec.value];
+                                        if(bestAssumedBudjet < assumedBudjet) {
+                                            bestAssumedBudjet = assumedBudjet;
+                                            bestPeriod = decSMAPeriod;
+                                        }
+                                    }
+                                }
+
+                                direction=1;
+                            } else {
+                                if (direction==1) {
+                                    changed=true; //Price is going up
+                                    amoutOfStocks = assumedBudjet / input[elem+outBegIdxDec.value];
+                                    
+                                }
+                                
                                 direction=-1;
-                            }else { direction = 1; }
+                            }
 
-
-                            if ((input[elem] < outputDec[elem -1 ] &&
-                                input[elem] > outputDec[elem])) {
-                                 if (this.inputPrintResults) {
+                            if(changed){
+                                 if (this.inputPrintResults && decSMAPeriod == this.inputSMAPeriod) {
                                     DateIterator dateIterator = new DateIterator(inputStartingDate.getTime(),
                                                                                 inputEndingDate.getTime());
-                                    dateIterator.move(elem);
+                                    dateIterator.move(elem + outBegIdxDec.value);
+
+
                                     
                                     packet.seriesTitle = "CrossingPoint";
-                                    packet.result = (outputDec[elem] +input[elem])/2;
+                                    packet.result = input[elem+outBegIdxDec.value]+0.1;
                                     packet.date = dateIterator.getCurrent().getTime();
 
-                                     System.err.printf("The dec period:%s:%s\n",dateIterator.getCurrent().toString(),stockType.getName());
+//                                     System.err.printf("The dec period:%s:%s (%d:%d) elem:%d\n",
+//                                             dateIterator.getCurrent().toString(),stockType.getName(),
+//                                             outBegIdxDec.value, outNbElementDec.value, elem);
                                     sender.sentPacket(stockType.getName(), packet);
                                 }
 
@@ -306,7 +354,9 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
                         
 
                     }
-
+                    System.out.printf("%s:The best period:%f best budjet:%f pros:%f\n",
+                            stockType.getName(),bestPeriod, bestAssumedBudjet,
+                            ((bestAssumedBudjet/this.inputAssumedBudjet)-1)*100);
                 }
 
             }

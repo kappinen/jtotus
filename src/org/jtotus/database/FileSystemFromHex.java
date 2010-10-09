@@ -116,7 +116,7 @@ private BigDecimal fetchValue(String stockName, Calendar date, int row)
 {
     BigDecimal result = null;
     
-    System.out.printf("Reading file system !:%d time:%s\n", row, date.getTime().toString());
+//    System.out.printf("Reading file system !:%d time:%s\n", row, date.getTime().toString());
 
     File dir = new File("./" + pathToDataBaseDir);
     FileFilter filter = filterForDir();

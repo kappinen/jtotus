@@ -33,7 +33,7 @@ public class ConfTaLibSMA {
     public Calendar inputStartingDate = null;
     public Calendar inputEndingDate = null;
     public boolean inputPrintResults = true;
-    public int inputSMAPeriod = 14;
+    public int inputSMAPeriod = 10;
 
 
     //Strategy Decision
@@ -44,11 +44,11 @@ public class ConfTaLibSMA {
         intpuPortfolio = new String("OMXHelsinki");
         inputEndingDate = Calendar.getInstance();
         inputStartingDate = Calendar.getInstance();
-        inputStartingDate.add(Calendar.DATE, -90);
+        inputStartingDate.add(Calendar.DATE, -300);
 
 
         //Decision
-        inputSMADecisionPeriod = "[8-12]{1}";
+        inputSMADecisionPeriod = "[10-11]{1}";
 
     }
 

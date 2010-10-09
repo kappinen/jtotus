@@ -23,12 +23,13 @@ package org.jtotus.config;
  */
 public class ConfPortfolio {
     public String[] inputListOfStocks;
+    public Double inputAssumedBudjet=null;
 
     public ConfPortfolio() {
 
         MethodConfig mainConfig = new MethodConfig();
         inputListOfStocks = mainConfig.fetchStockNames();
-        
+        inputAssumedBudjet=new Double(4000);
     }
 
     

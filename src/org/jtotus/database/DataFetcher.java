@@ -97,8 +97,6 @@ public class DataFetcher{
             while(resources.hasNext()){
                 InterfaceDataBase res = resources.next();
                 
-                System.out.printf("Searching for price\n");
-
                 result = res.fetchClosingPrice(stockName, date);
                 if (result != null) {
                         javadb.storeClosingPrice(stockName, date, result);
