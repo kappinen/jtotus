@@ -32,9 +32,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
@@ -87,11 +85,9 @@ public class JtotusGraph implements Runnable{
         mainFrame.setTitle(reviewTarget);
         mainFrame.setContentPane(lineChart.getContainer());
         mainFrame.setDefaultCloseOperation(JInternalFrame.EXIT_ON_CLOSE);
-
-        
-        
         
     }
+
 
     synchronized public int getBindPort(){
             if (serverSocket == null) {

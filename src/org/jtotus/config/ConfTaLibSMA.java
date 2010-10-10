@@ -18,7 +18,6 @@
 package org.jtotus.config;
 
 import java.util.Calendar;
-import org.jtotus.config.MethodConfig;
 
 /**
  *
@@ -44,11 +43,11 @@ public class ConfTaLibSMA {
         intpuPortfolio = new String("OMXHelsinki");
         inputEndingDate = Calendar.getInstance();
         inputStartingDate = Calendar.getInstance();
-        inputStartingDate.add(Calendar.DATE, -300);
+        inputStartingDate.add(Calendar.DATE, -600);
 
 
         //Decision
-        inputSMADecisionPeriod = "[10-11]{1}";
+        inputSMADecisionPeriod = "[3-30]{1}";
 
     }
 

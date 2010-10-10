@@ -23,11 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,14 +37,20 @@ public class DayisHoliday {
     public DayisHoliday() {
         DateFormat dayFormat = new SimpleDateFormat("dd.MM.yyyy");
 
-        try {
-            String[] holidayList = {"01.01.2010",
+        try {//Finnish Holidays
+            String[] holidayList = {
+                                    "01.01.2010",
                                     "06.01.2010",
                                     "02.04.2010",
                                     "05.04.2010",
                                     "13.05.2010",
                                     "06.12.2010",
                                     "25.06.2010",
+                                    //2009 Year
+                                    "10.04.2009",
+                                    "13.04.2009",
+                                    "01.05.2009",
+                                    "21.05.2009",
                                     "24.12.2009",
                                     "25.12.2009",
                                     "31.12.2009"

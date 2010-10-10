@@ -13,7 +13,36 @@
 
     You should have received a copy of the GNU General Public License
     along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
-*/
+
+ */
+
+
+/*
+ *
+ https://www.nordnet.fi/mux/page/hjalp/ordHjalp.html?ord=diagram%20rsi
+ *
+RSI
+
+RSI on hintaa seuraava oskilaattori, joka saavuttaa 0-100 välisiä arvoja.
+ Se vertaa viimeisten ylöspäin tapahtuneiden hintamuutosten voimakkuutta
+ alaspäin suuntautuneisiin hintamuutoksiin. Suosituimmat tarkasteluvälit
+ ovat 9, 14 ja 25 päivän RSI.
+
+Tulkinta:
+- RSI huipussa: korkea arvo (yli 70/noususuhdanteessa yleensä 80) indikoi yliostotilannetta
+- RSI pohjassa: matala arvo (alle 30/laskusuhdanteessa yleenäs 20) indikoi aliostotilannetta
+
+Signaalit:
+- Osta, kun RSI:n arvo leikkaa aliostorajan alapuolelta
+- Myy, kun RSI:n arvo leikkaa yliostorajan yläpuolelta
+
+Vaihtoehtoisesti:
+- Osta, kun RSI leikkaa keskilinjan (50) alapuolelta
+- Myy, kun RSI leikkaa keskilinjan (50) yläpuolelta
+
+
+
+ */
 
 package org.jtotus.methods;
 
@@ -23,13 +52,24 @@ import com.tictactec.ta.lib.Core;
 import com.tictactec.ta.lib.MInteger;
 import com.tictactec.ta.lib.RetCode;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
+import org.jtotus.common.DateIterator;
 import org.jtotus.common.Helper;
 import org.jtotus.common.StockType;
+import org.jtotus.config.ConfigLoader;
 import org.jtotus.config.MethodConfig;
-
+import org.jtotus.gui.graph.GraphPacket;
+import org.jtotus.gui.graph.GraphSender;
+import org.apache.commons.lang.ArrayUtils;
+import java.io.File;
+import java.math.BigDecimal;
+import org.jtotus.common.NumberRangeIter;
+import org.jtotus.config.ConfPortfolio;
+import org.jtotus.config.ConfTaLibEMA;
 
 /**
  *
@@ -37,16 +77,28 @@ import org.jtotus.config.MethodConfig;
  */
 public class TaLibEMA  implements MethodEntry, Callable<MethodResults>{
     private ArrayList<PeriodClosingPrice> periodList = null;
-    private final StockType stockType = null;
+
     /*Stock list */
-    private List<String> stockNames = null;
-    private List<Date>resutlsForDates = null;
     private Helper help = Helper.getInstance();
+    private boolean printResults = true;
+
+
     //TODO: staring date, ending date aka period
 
     //INPUTS TO METHOD:
-    private int inputParam_emaPeriod = 4;
+    public String inputPortofolio=null;
+    public String inpuPortfolio=null;
+    public int inputEMAPeriod = 9; //Default value
+    public Calendar inputEndingDate = null;
+    public Calendar inputStartingDate = null;
+    public ConfTaLibEMA config = null;
+    public String[] inputListOfStocks;
+    public boolean inputPrintResults = true;
+    ConfigLoader<ConfTaLibEMA> configFile = null;
 
+    public boolean inputPerfomDecision = true;
+    public String inputEMADecisionPeriod = null;
+    public Double inputAssumedBudjet=null;
 
     public String getMethName() {
         String tmp = this.getClass().getName();
@@ -56,6 +108,49 @@ public class TaLibEMA  implements MethodEntry, Callable<MethodResults>{
     public boolean isCallable() {
         return true;
     }
+
+        public void loadPortofolioInputs() {
+                         //FIXME: set it in PortfolioDecision
+            String portfolio = "OMXHelsinki";
+
+            ConfigLoader<ConfPortfolio> configPortfolio =
+                    new ConfigLoader<ConfPortfolio>(portfolio);
+
+            if (configPortfolio.getConfig() == null){
+                  //Load default values
+                  ConfPortfolio newPortConfig = new ConfPortfolio();
+                  configPortfolio.storeConfig(newPortConfig);
+              }
+
+            //Get stock names
+            configPortfolio.applyInputsToObject(this);
+            this.inputPortofolio = portfolio;
+        }
+
+
+
+        public void loadInputs(String configStock){
+
+             configFile= new ConfigLoader<ConfTaLibEMA>(this.inputPortofolio +
+                                                        File.separator +
+                                                        configStock +
+                                                        File.separator +
+                                                        this.getMethName());
+
+                   // new ConfigLoader<ConfTaLibEMA>(portfolio+File.separator+this.getMethName());
+
+              if (configFile.getConfig() == null){
+                  //Load default values
+                  config = new ConfTaLibEMA();
+                  configFile.storeConfig(config);
+              }else {
+                  config = configFile.getConfig();
+              }
+
+
+            configFile.applyInputsToObject(this);
+        }
+
 
     public void createPeriods() {
 
@@ -73,63 +168,232 @@ public class TaLibEMA  implements MethodEntry, Callable<MethodResults>{
 
     }
 
-    //MOM
-    public MethodResults performEMA(int ema_period) {
-       int period = 0;
-       final Core core = new Core();
-       MethodResults results = new MethodResults("TaLibEMA");
+        public MethodResults performEMA(int EMA_period) {
+
+            MethodResults results = new MethodResults(this.getMethName());
+            List <Double>closingPrices = new ArrayList<Double>();
+            GraphSender sender = new GraphSender();
+            GraphPacket packet = new GraphPacket();
+
+            double[] output = null;
+            MInteger outBegIdx = null;
+            MInteger outNbElement = null;
+            int period = 0;
+
+            for(int stockCount=0;stockCount<this.inputListOfStocks.length;stockCount++) {
+               closingPrices.clear();
+
+               this.loadInputs(this.inputListOfStocks[stockCount]);
+
+               StockType stockType = new StockType(this.inputListOfStocks[stockCount]);
+
+               DateIterator dateIter = new DateIterator(inputStartingDate.getTime(),
+                                                        inputEndingDate.getTime());
+
+                //Filling input data with Closing price for days
+               while(dateIter.hasNext()) {
+
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(dateIter.next());
+                    BigDecimal closDay = stockType.fetchClosingPrice(cal);
+                    if (closDay!=null) {
+                        closingPrices.add(closDay.doubleValue());
+                   }
+                }
 
 
-       Iterator<PeriodClosingPrice> periodsIter = periodList.iterator();
-       while(periodsIter.hasNext()) {
+                final Core core = new Core();
+                double []input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
 
-           PeriodClosingPrice periodPrice = periodsIter.next();
-           period = periodPrice.getPeriodLength();
+                 period = input.length-1;
+                 final int allocationSize = period - core.emaLookback(this.inputEMAPeriod);
 
-           final int allocationSize = period - core.emaLookback(ema_period);
-            if (allocationSize <= 0) {
-                System.err.printf("%s: No data for period (%d)\n", periodPrice.getStockName(), allocationSize);
-                return null;
+                 if (allocationSize <= 0) {
+                     System.err.printf("No data for period (%d)\n", allocationSize);
+                     return null;
+                 }
+
+
+
+                 output = new double[allocationSize];
+                 outBegIdx = new MInteger();
+                 outNbElement = new MInteger();
+
+                 RetCode code = core.ema(0, period - 1, input ,
+                                           this.inputEMAPeriod,
+                                           outBegIdx,
+                                           outNbElement, output);
+
+                 if (code.compareTo(RetCode.Success) != 0) {
+                     //Error return empty method results
+                     System.err.printf("SMI failed!\n");
+                     return new MethodResults(this.getMethName());
+                 }
+
+
+
+
+                 //System.out.printf("The original size: (%d:%d) alloc:%d\n", outBegIdx.value,outNbElement.value,allocationSize);
+
+                 results.putResult(stockType.getName(), output[output.length - 1]);
+
+                   if (this.inputPrintResults) {
+                       DateIterator dateIterator = new DateIterator(inputStartingDate.getTime(),
+                                                                    inputEndingDate.getTime());
+                        dateIterator.move(outBegIdx.value);
+                        for(int i=0;i < outNbElement.value && dateIterator.hasNext();i++) {
+                            Date stockDate = dateIterator.next();
+                            //System.out.printf("Date:"+stockDate+" Time:"+inputEndingDate.getTime()+"Time2:"+inputStartingDate.getTime()+"\n");
+
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.setTime(stockDate);
+
+                            packet.seriesTitle = this.getMethName();
+                            packet.result = output[i];
+                            packet.date = stockDate.getTime();
+
+                            sender.sentPacket(stockType.getName(), packet);
+                        }
+                  }
+
+                //************* DECISION TEST *************//
+                if (this.inputPerfomDecision) {
+
+
+                    double amoutOfStocks = 0;
+                    double bestAssumedBudjet = 0;
+                    double bestPeriod = 0;
+                    double assumedBudjet = 0.0f;
+                    int decEMAPeriod = 0;
+
+                    NumberRangeIter numberIter = new NumberRangeIter("EMARange");
+                    numberIter.setRange(this.inputEMADecisionPeriod);
+                    while(numberIter.hasNext()) {
+                        amoutOfStocks = 0;
+                        assumedBudjet = this.inputAssumedBudjet.doubleValue();
+                        decEMAPeriod = numberIter.next().intValue();
+
+                        final int allocationSizeDecision = period - core.emaLookback(decEMAPeriod);
+
+                        if (allocationSizeDecision <= 0) {
+                             System.err.printf("No data for period (%d)\n", allocationSizeDecision);
+                             return null;
+                         }
+
+                         double[] outputDec = new double[allocationSizeDecision];
+                         MInteger outBegIdxDec = new MInteger();
+                         MInteger outNbElementDec = new MInteger();
+
+                         RetCode decCode = core.ema(0, period - 1,
+                                                    input ,
+                                                    decEMAPeriod,
+                                                    outBegIdxDec,
+                                                    outNbElementDec, outputDec);
+
+                         if (decCode.compareTo(RetCode.Success) != 0) {
+                             //Error return empty method results
+                             System.err.printf("SMI failed in Decision!\n");
+                             return new MethodResults(this.getMethName());
+                         }
+
+                        //TODO: Evaluate and store best config
+                        int direction=0;
+                        boolean changed=true;
+
+                        for (int elem=1;elem < outNbElementDec.value;elem++) {
+
+
+                            double threshold = (outputDec[elem-1]+outputDec[elem])/2;
+                            changed=false;
+                            if (input[outBegIdxDec.value+elem] > threshold) { //above the line
+                                if (direction==-1) {
+                                    changed=true; //Price is going down
+                                    if (amoutOfStocks!=0) {
+                                        assumedBudjet=amoutOfStocks*input[elem+outBegIdxDec.value];
+                                        if(bestAssumedBudjet < assumedBudjet) {
+                                            bestAssumedBudjet = assumedBudjet;
+                                            bestPeriod = decEMAPeriod;
+                                        }
+                                    }
+                                }
+
+                                direction=1;
+                            } else {
+                                if (direction==1) {
+                                    changed=true; //Price is going up
+                                    amoutOfStocks = assumedBudjet / input[elem+outBegIdxDec.value];
+
+                                }
+
+                                direction=-1;
+                            }
+
+                            if(changed){
+                                 if (this.inputPrintResults && decEMAPeriod == this.inputEMAPeriod) {
+                                    DateIterator dateIterator = new DateIterator(inputStartingDate.getTime(),
+                                                                                inputEndingDate.getTime());
+                                    dateIterator.move(elem + outBegIdxDec.value);
+
+
+
+                                    packet.seriesTitle = "CrossingPoint";
+                                    packet.result = input[elem+outBegIdxDec.value]+0.1;
+                                    packet.date = dateIterator.getCurrent().getTime();
+
+//                                     System.err.printf("The dec period:%s:%s (%d:%d) elem:%d\n",
+//                                             dateIterator.getCurrent().toString(),stockType.getName(),
+//                                             outBegIdxDec.value, outNbElementDec.value, elem);
+                                    sender.sentPacket(stockType.getName(), packet);
+                                }
+
+                            }
+
+                        }
+
+                    }
+                    System.out.printf("%s:The best period:%f best budjet:%f pros:%f\n",
+                            stockType.getName(),bestPeriod, bestAssumedBudjet,
+                            ((bestAssumedBudjet/this.inputAssumedBudjet)-1)*100);
+
+                    this.config.inputEMAPeriod = (int) bestPeriod;
+                    this.configFile.storeConfig(config);
+                }
+
             }
 
-           double[] output = new double[allocationSize];
-           MInteger outBegIdx = new MInteger();
-           MInteger outNbElement = new MInteger();
-           double[] values = periodPrice.toDoubleArray();
 
-//           System.out.printf("Size:%d alloc:%d loop:%d\n", values.length, allocationSize, core.rsiLookback(rsi_period));
-//           this.dumpArray(values);
-           RetCode code = core.ema(0, period - 1, values , ema_period, outBegIdx, outNbElement, output);
-           System.out.printf("[TaLibEMA:%s] outBegIdx:%d outNbElement:%d outputLen:%d RSI:"+output[outNbElement.value - 1]+" Result:%s\n",
-                   periodPrice.getStockName(), outBegIdx.value, outNbElement.value, output.length, code.toString());
-           results.putResult(periodPrice.getStockName(), output[outNbElement.value - 1]);
-
-       }
-
-       return results;
-    }
-
-    private void dumpArray(double []array) {
-        for (int i = 0; i < array.length;i++){
-            System.out.printf("%.3f,", array[i]);
-            if ((i % 10) == 0) {
-               System.out.printf("\n");
-            }
+            return results;
         }
-        System.out.printf("\n");
-    }
 
     public void run() {
+        this.loadPortofolioInputs();
+
         this.createPeriods();
-        this.performEMA(inputParam_emaPeriod);
+        this.performEMA(this.inputEMAPeriod);
     }
 
     public MethodResults call() throws Exception {
+        this.loadPortofolioInputs();
+
 
         this.createPeriods();
+        MethodResults results = this.performEMA(this.inputEMAPeriod);
+        if (printResults) {
+            Iterator<Entry<String, Double>> iter = results.iterator();
+            while(iter.hasNext()){
+                Entry<String, Double> next = iter.next();
 
-        return this.performEMA(inputParam_emaPeriod);
+                GraphSender sender = new GraphSender();
+                GraphPacket packet = new GraphPacket();
 
+                packet.seriesTitle = this.getMethName();
+                packet.result = next.getValue().doubleValue();
+                packet.date = inputEndingDate.getTimeInMillis();
+
+                sender.sentPacket(next.getKey(), packet);
+            }
+        }
+        return results;
     }
 
 

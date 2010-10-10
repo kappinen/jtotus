@@ -64,15 +64,12 @@ import org.jtotus.config.ConfigLoader;
 import org.jtotus.config.MethodConfig;
 import org.jtotus.gui.graph.GraphPacket;
 import org.jtotus.gui.graph.GraphSender;
-import org.jtotus.config.ConfTaLibRSI;
 import org.apache.commons.lang.ArrayUtils;
 import java.io.File;
 import java.math.BigDecimal;
 import org.jtotus.common.NumberRangeIter;
-import org.jtotus.common.StateIterator;
 import org.jtotus.config.ConfPortfolio;
 import org.jtotus.config.ConfTaLibSMA;
-import org.jtotus.methods.evaluators.EvaluateStock;
 
 /**
  *
@@ -97,7 +94,7 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
     public ConfTaLibSMA config = null;
     public String[] inputListOfStocks;
     public boolean inputPrintResults = true;
-
+    ConfigLoader<ConfTaLibSMA> configFile = null;
 
     public boolean inputPerfomDecision = true;
     public String inputSMADecisionPeriod = null;
@@ -134,12 +131,11 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
 
         public void loadInputs(String configStock){
 
-            ConfigLoader<ConfTaLibSMA> configFile =
-                    new ConfigLoader<ConfTaLibSMA>(this.inputPortofolio +
-                                                   File.separator +
-                                                   configStock +
-                                                   File.separator +
-                                                   this.getMethName());
+             configFile= new ConfigLoader<ConfTaLibSMA>(this.inputPortofolio +
+                                                        File.separator +
+                                                        configStock +
+                                                        File.separator +
+                                                        this.getMethName());
 
                    // new ConfigLoader<ConfTaLibSMA>(portfolio+File.separator+this.getMethName());
 
@@ -147,7 +143,11 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
                   //Load default values
                   config = new ConfTaLibSMA();
                   configFile.storeConfig(config);
+              }else {
+                  config = configFile.getConfig();
               }
+
+             
             configFile.applyInputsToObject(this);
         }
 
@@ -350,13 +350,13 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
 
                         }
 
-                        
-                        
-
                     }
                     System.out.printf("%s:The best period:%f best budjet:%f pros:%f\n",
                             stockType.getName(),bestPeriod, bestAssumedBudjet,
                             ((bestAssumedBudjet/this.inputAssumedBudjet)-1)*100);
+
+                    this.config.inputSMAPeriod = (int) bestPeriod;
+                    this.configFile.storeConfig(config);
                 }
 
             }
