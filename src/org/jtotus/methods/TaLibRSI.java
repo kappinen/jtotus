@@ -1,32 +1,30 @@
 /*
-    This file is part of jTotus.
+This file is part of jTotus.
 
-    jTotus is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+jTotus is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    jTotus is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+jTotus is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 
  */
-
-
 /*
  *
- https://www.nordnet.fi/mux/page/hjalp/ordHjalp.html?ord=diagram%20rsi
- * 
+https://www.nordnet.fi/mux/page/hjalp/ordHjalp.html?ord=diagram%20rsi
+ *
 RSI
 
 RSI on hintaa seuraava oskilaattori, joka saavuttaa 0-100 välisiä arvoja.
- Se vertaa viimeisten ylöspäin tapahtuneiden hintamuutosten voimakkuutta
- alaspäin suuntautuneisiin hintamuutoksiin. Suosituimmat tarkasteluvälit
- ovat 9, 14 ja 25 päivän RSI.
+Se vertaa viimeisten ylöspäin tapahtuneiden hintamuutosten voimakkuutta
+alaspäin suuntautuneisiin hintamuutoksiin. Suosituimmat tarkasteluvälit
+ovat 9, 14 ja 25 päivän RSI.
 
 Tulkinta:
 - RSI huipussa: korkea arvo (yli 70/noususuhdanteessa yleensä 80) indikoi yliostotilannetta
@@ -43,7 +41,6 @@ Vaihtoehtoisesti:
 
 
  */
-
 package org.jtotus.methods;
 
 import java.util.concurrent.Callable;
@@ -51,231 +48,136 @@ import org.jtotus.common.MethodResults;
 import com.tictactec.ta.lib.Core;
 import com.tictactec.ta.lib.MInteger;
 import com.tictactec.ta.lib.RetCode;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import org.jtotus.common.DateIterator;
-import org.jtotus.common.Helper;
 import org.jtotus.common.StockType;
-import org.jtotus.config.ConfigLoader;
-import org.jtotus.config.MethodConfig;
-import org.jtotus.gui.graph.GraphPacket;
 import org.jtotus.gui.graph.GraphSender;
 import org.jtotus.config.ConfTaLibRSI;
 import org.apache.commons.lang.ArrayUtils;
-import java.io.File;
-import org.jtotus.config.ConfPortfolio;
+import org.jtotus.config.ConfigLoader;
 
 /**
  *
  * @author Evgeni Kappinen
  */
-public class TaLibRSI  implements MethodEntry, Callable<MethodResults>{
-    private ArrayList<PeriodClosingPrice> periodList = null;
-
+public class TaLibRSI extends TaLibAbstract implements MethodEntry, Callable<MethodResults> {
     /*Stock list */
-    private Helper help = Helper.getInstance();
-    private boolean printResults = true;
-    
 
     //TODO: staring date, ending date aka period
-
     //INPUTS TO METHOD:
-    public String inputPortofolio=null;
-    public String intpuPortfolio=null;
-    public int inputRSIPeriod = 9; //Default value
-    public Calendar inputEndingDate = Calendar.getInstance();
-    public Calendar inputStartingDate = Calendar.getInstance();
+    public int inputRSIPeriod = 1; //Default value
+    //public Calendar inputEndingDate = Calendar.getInstance();
+    public Calendar inputStartingDate = null;
     public ConfTaLibRSI config = null;
-    public String[] inputListOfStocks;
-    public boolean inputPrintResults = true;
+    public ConfigLoader<ConfTaLibRSI> configFile = null;
+
     
-
-    public String getMethName() {
-        String tmp = this.getClass().getName();
-        return tmp.substring(tmp.lastIndexOf(".")+1,tmp.length());
+    public TaLibRSI() {
+        super();
     }
 
-    public boolean isCallable() {
-        return true;
-    }
+    public void loadInputs(String configStock) {
 
-        public void loadPortofolioInputs() {
-                         //FIXME: set it in PortfolioDecision
-            String portfolio = "OMXHelsinki";
+        configFile = new ConfigLoader<ConfTaLibRSI>(super.inputPortofolio
+                                                + File.separator
+                                                + configStock
+                                                + File.separator
+                                                + this.getMethName());
 
-            System.out.printf("Jump - 1\n" );
-            ConfigLoader<ConfPortfolio> configPortfolio =
-                    new ConfigLoader<ConfPortfolio>(portfolio);
-
-            System.out.printf("Jump - 2\n" );
-            if (configPortfolio.getConfig() == null){
-                  //Load default values
-                  ConfPortfolio newPortConfig = new ConfPortfolio();
-                  configPortfolio.storeConfig(newPortConfig);
-              }
-            System.out.printf("Jump - 3\n" );
-
-            //Get stock names
-            configPortfolio.applyInputsToObject(this);
-            System.out.printf("Jump - 4\n" );
-            this.inputPortofolio = portfolio;
+        if (configFile.getConfig() == null) {
+            //Load default values
+            config = new ConfTaLibRSI();
+            configFile.storeConfig(config);
+        } else {
+            config = (ConfTaLibRSI)configFile.getConfig();
         }
 
-        
-
-        public void loadInputs(String configStock){
-            
-            ConfigLoader<ConfTaLibRSI> configFile =
-                    new ConfigLoader<ConfTaLibRSI>(this.inputPortofolio + 
-                                                   File.separator +
-                                                   configStock +
-                                                   File.separator +
-                                                   this.getMethName());
-            
-                   // new ConfigLoader<ConfTaLibRSI>(portfolio+File.separator+this.getMethName());
-
-              if (configFile.getConfig() == null){
-                  //Load default values 
-                  config = new ConfTaLibRSI();
-                  configFile.storeConfig(config);
-              }
-            configFile.applyInputsToObject(this);
-        }
-
-        
-    public void createPeriods() {
-        
-      MethodConfig listOfTasks = new MethodConfig();
-      Iterator<String> iter = listOfTasks.iterator();
-      periodList = new ArrayList<PeriodClosingPrice>();
-      
-      
-       //Build period history for stock
-       while(iter.hasNext()) {
-            StockType stock = new StockType(iter.next());
-            periodList.add(new PeriodClosingPrice(stock));
-            help.debug(this.getClass().getName(), "StockName for period:%s\n",stock.getName());
-       }
-    
+        configFile.applyInputsToObject(this);
     }
 
-        public MethodResults performRSI(int rsi_period) {
-           MethodResults results = new MethodResults(this.getMethName());
-           List <Double>closingPrices = new ArrayList<Double>();
-           GraphSender sender = new GraphSender();
-           GraphPacket packet = new GraphPacket();
+    public MethodResults performRSI(int rsi_period) {
+        MethodResults results = new MethodResults(this.getMethName());
+        List<Double> closingPrices = new ArrayList<Double>();
+        GraphSender sender = new GraphSender();
+        
 
-          
+        for (int stockCount = 0; stockCount < inputListOfStocks.length; stockCount++) {
+            closingPrices.clear();
+
+            this.loadInputs(super.inputListOfStocks[stockCount]);
+
+            System.out.printf("period:%d\n", inputRSIPeriod);
+            StockType stockType = new StockType(super.inputListOfStocks[stockCount]);
+
+            DateIterator dateIter = new DateIterator(inputStartingDate.getTime(),
+                    inputEndingDate.getTime());
+
+            while (dateIter.hasNext()) {
+
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(dateIter.next());
+                closingPrices.add(stockType.fetchClosingPrice(cal).doubleValue());
+            }
 
 
-          for(int stockCount=0;stockCount<this.inputListOfStocks.length;stockCount++) {
-               closingPrices.clear();
-               
-               this.loadInputs(this.inputListOfStocks[stockCount]);
+            final Core core = new Core();
+            double[] input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
 
-               StockType stockType = new StockType(this.inputListOfStocks[stockCount]);
+            int period = input.length - 1;
+            final int allocationSize = period - core.rsiLookback(this.inputRSIPeriod);
 
-               DateIterator dateIter = new DateIterator(inputStartingDate.getTime(),
-                                                        inputEndingDate.getTime());
+            if (allocationSize <= 0) {
+                System.err.printf("No data for period (%d)\n", allocationSize);
+                return null;
+            }
 
-               while(dateIter.hasNext()) {
+            double[] output = new double[allocationSize];
+            MInteger outBegIdx = new MInteger();
+            MInteger outNbElement = new MInteger();
 
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTime(dateIter.next());
-                    closingPrices.add(stockType.fetchClosingPrice(cal).doubleValue());
+            RetCode code = core.rsi(0, period - 1, input,
+                    this.inputRSIPeriod,
+                    outBegIdx,
+                    outNbElement, output);
+
+            if (code.compareTo(RetCode.Success) != 0) {
+                //Error return empty method results
+                return new MethodResults(super.getMethName());
+            }
+
+            results.putResult(stockType.getName(), output[output.length - 1]);
+
+            if (super.inputPrintResults) {
+                DateIterator dateIterator = new DateIterator(inputStartingDate.getTime(),
+                        inputEndingDate.getTime());
+                dateIterator.move(outBegIdx.value);
+                for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
+                    Date stockDate = dateIterator.next();
+                    //System.out.printf("Date:"+stockDate+" Time:"+inputEndingDate.getTime()+"Time2:"+inputStartingDate.getTime()+"\n");
+
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(stockDate);
+
+                    packet.seriesTitle = super.getMethName();
+                    packet.result = output[i];
+                    packet.date = stockDate.getTime();
+
+                    sender.sentPacket(stockType.getName(), packet);
                 }
-
-
-                final Core core = new Core();
-                double []input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
-
-                 int period = input.length-1;
-                 final int allocationSize = period - core.rsiLookback(this.inputRSIPeriod);
-
-                 if (allocationSize <= 0) {
-                     System.err.printf("No data for period (%d)\n", allocationSize);
-                     return null;
-                 }
-
-                 double[] output = new double[allocationSize];
-                 MInteger outBegIdx = new MInteger();
-                 MInteger outNbElement = new MInteger();
-
-                 RetCode code = core.rsi(0, period - 1, input ,
-                                           this.inputRSIPeriod,
-                                           outBegIdx,
-                                           outNbElement, output);
-
-                 if (code.compareTo(RetCode.Success) != 0) {
-                     //Error return empty method results
-                     return new MethodResults(this.getMethName());
-                 }
-
-                 results.putResult(stockType.getName(), output[output.length - 1]);
-
-                   if (this.inputPrintResults) {
-                       DateIterator dateIterator = new DateIterator(inputStartingDate.getTime(),
-                                                                    inputEndingDate.getTime());
-                        dateIterator.move(outBegIdx.value);
-                        for(int i=0;i < outNbElement.value && dateIterator.hasNext();i++) {
-                            Date stockDate = dateIterator.next();
-                            //System.out.printf("Date:"+stockDate+" Time:"+inputEndingDate.getTime()+"Time2:"+inputStartingDate.getTime()+"\n");
-
-                            Calendar calendar = Calendar.getInstance();
-                            calendar.setTime(stockDate);
-
-                            packet.seriesTitle = this.getMethName();
-                            packet.result = output[i];
-                            packet.date = stockDate.getTime();
-
-                            sender.sentPacket(stockType.getName(), packet);
-                        }
-                  }
-
-
-
-
-  
             }
-            
 
-            return results;
         }
-        
-    public void run() {
-        this.loadPortofolioInputs();
 
-        this.createPeriods();
-        this.performRSI(this.inputRSIPeriod);
-    }
 
-    public MethodResults call() throws Exception {
-        this.loadPortofolioInputs();
-
-        
-        this.createPeriods();
-        MethodResults results = this.performRSI(this.inputRSIPeriod);
-        if (printResults) {
-            Iterator<Entry<String, Double>> iter = results.iterator();
-            while(iter.hasNext()){
-                Entry<String, Double> next = iter.next();
-                
-                GraphSender sender = new GraphSender();
-                GraphPacket packet = new GraphPacket();
-                
-                packet.seriesTitle = this.getMethName();
-                packet.result = next.getValue().doubleValue();
-                packet.date = inputEndingDate.getTimeInMillis();
-
-                sender.sentPacket(next.getKey(), packet);
-            }
-        }
         return results;
     }
 
-
+    @Override
+    public MethodResults performMethod() {
+        return this.performRSI(this.inputRSIPeriod);
+    }
 }

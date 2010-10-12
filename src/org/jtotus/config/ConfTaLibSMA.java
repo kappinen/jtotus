@@ -34,6 +34,9 @@ public class ConfTaLibSMA {
     public boolean inputPrintResults = true;
     public int inputSMAPeriod = 10;
 
+    //Methods sets, if available. 
+    //Should be represented in procents.
+    public Double outputSuccessRate=null;
 
     //Strategy Decision
     public boolean inputPerfomDecision = true;

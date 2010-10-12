@@ -66,7 +66,8 @@ public class JtotusView extends FrameView {
     public JtotusView(SingleFrameApplication app) {
         super(app);
         mainFrame=app.getMainFrame();
-
+        
+        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         initComponents();
 

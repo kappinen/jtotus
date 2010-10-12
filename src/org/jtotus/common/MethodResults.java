@@ -30,7 +30,7 @@ public class MethodResults implements Iterator, Iterable{
     private String methodName = null;
     private HashMap<String,Double> results = null;
     private Iterator<Entry<String, Double>> iterator=null;
-
+    private Double avrSuccessRate=null;
     
 
     public MethodResults(String nameOfMethod) {
@@ -103,6 +103,20 @@ public class MethodResults implements Iterator, Iterable{
         iterator = entrySet.iterator();
         return iterator;
       
+    }
+
+    /**
+     * @return the avrSuccessRate
+     */
+    public Double getAvrSuccessRate() {
+        return avrSuccessRate;
+    }
+
+    /**
+     * @param avrSuccessRate the avrSuccessRate to set
+     */
+    public void setAvrSuccessRate(Double avrSuccessRate) {
+        this.avrSuccessRate = avrSuccessRate;
     }
 
 }

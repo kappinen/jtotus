@@ -33,6 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jtotus.gui.JtotusView;
 import org.jtotus.common.Helper;
+import org.jtotus.common.StateIterator;
 import org.jtotus.config.MethodConfig;
 import org.jtotus.database.AutoUpdateStocks;
 import org.jtotus.gui.MethodResultsPrinter;
@@ -41,6 +42,7 @@ import org.jtotus.methods.TaLibEMA;
 import org.jtotus.methods.TaLibMOM;
 import org.jtotus.methods.TaLibRSI;
 import org.jtotus.config.ConfTaLibRSI;
+import org.jtotus.methods.TaLibRSI;
 import org.jtotus.methods.TaLibSMA;
 import org.jtotus.threads.*;
 
@@ -67,6 +69,7 @@ public class Engine {
         // Available methods
         methodList.add(new DummyMethod(portfolioDecision));
         methodList.add(new PotentialWithIn());
+        methodList.add(new TaLibRSI());
         methodList.add(new TaLibRSI());
         methodList.add(new TaLibSMA());
         methodList.add(new TaLibEMA());
@@ -145,6 +148,12 @@ public class Engine {
 
     private void testRun() {
 
+//        StateIterator iter = new StateIterator();
+//        iter.addParam("Param1", "int[2-5]");
+//        iter.addParam("Param2", "int[6-8]");
+//        while(iter.hasNext() != ) {
+//            System.out.printf("Param1:%d Param2: %d\n", iter.nextInt("Param1"), iter.nextInt("Param2"));
+//        }
     }
 
     public void train(){

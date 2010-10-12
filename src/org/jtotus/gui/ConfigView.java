@@ -248,7 +248,6 @@ public class ConfigView extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
 
-
         FileTreeModel model = new FileTreeModel(new File("config"));
         
         configTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);

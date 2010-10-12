@@ -76,12 +76,12 @@ import org.jtotus.config.ConfTaLibSMA;
  * @author Evgeni Kappinen
  */
 public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
-    private ArrayList<PeriodClosingPrice> periodList = null;
 
     /*Stock list */
     private Helper help = Helper.getInstance();
     private boolean printResults = true;
-
+    private Double avgSuccessRate = null;
+    private int totalStocksAnalyzed = 0;
 
     //TODO: staring date, ending date aka period
 
@@ -151,22 +151,6 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
             configFile.applyInputsToObject(this);
         }
 
-
-    public void createPeriods() {
-
-      MethodConfig listOfTasks = new MethodConfig();
-      Iterator<String> iter = listOfTasks.iterator();
-      periodList = new ArrayList<PeriodClosingPrice>();
-
-
-       //Build period history for stock
-       while(iter.hasNext()) {
-            StockType stock = new StockType(iter.next());
-            periodList.add(new PeriodClosingPrice(stock));
-            help.debug(this.getClass().getName(), "StockName for period:%s\n",stock.getName());
-       }
-
-    }
 
         public MethodResults performSMA(int SMA_period) {
 
@@ -351,10 +335,15 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
                         }
 
                     }
+
+                    Double successRate=((bestAssumedBudjet/this.inputAssumedBudjet)-1)*100;
                     System.out.printf("%s:The best period:%f best budjet:%f pros:%f\n",
                             stockType.getName(),bestPeriod, bestAssumedBudjet,
-                            ((bestAssumedBudjet/this.inputAssumedBudjet)-1)*100);
+                            successRate.doubleValue());
 
+                    totalStocksAnalyzed++;
+                    this.avgSuccessRate += successRate;
+                    this.config.outputSuccessRate = successRate;
                     this.config.inputSMAPeriod = (int) bestPeriod;
                     this.configFile.storeConfig(config);
                 }
@@ -362,21 +351,27 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
             }
 
 
+            results.setAvrSuccessRate(avgSuccessRate/totalStocksAnalyzed);
+            System.out.printf("%s has %d successrate\n", this.getMethName(), results.getAvrSuccessRate().intValue());
             return results;
         }
 
+        
     public void run() {
         this.loadPortofolioInputs();
+        avgSuccessRate = new Double(0.0f);
+        
 
-        this.createPeriods();
         this.performSMA(this.inputSMAPeriod);
     }
 
     public MethodResults call() throws Exception {
+
+        //Load Protfolio settings
         this.loadPortofolioInputs();
+        avgSuccessRate = new Double(0.0f);
 
-
-        this.createPeriods();
+        //Pre-fetch closing prices
         MethodResults results = this.performSMA(this.inputSMAPeriod);
         if (printResults) {
             Iterator<Entry<String, Double>> iter = results.iterator();
@@ -395,6 +390,5 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
         }
         return results;
     }
-
 
 }

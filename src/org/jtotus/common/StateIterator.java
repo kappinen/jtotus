@@ -88,6 +88,7 @@ public class StateIterator {
 
             Date startDate=null;
             Date endDate=null;
+            
             try {
                 String range = rangeType.substring(rangeType.lastIndexOf("[")+1,
                                                    rangeType.lastIndexOf("]"));
