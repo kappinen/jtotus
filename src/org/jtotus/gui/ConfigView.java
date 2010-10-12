@@ -1,6 +1,19 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+    This file is part of jTotus.
+
+    jTotus is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    jTotus is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
+
  */
 
 /*
@@ -11,27 +24,36 @@
 
 package org.jtotus.gui;
 
+import java.awt.Component;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Iterator;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.AbstractCellEditor;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerDateModel;
+import javax.swing.SpinnerModel;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-import org.apache.commons.io.FileUtils;
+import net.sf.nachocalendar.CalendarFactory;
+import net.sf.nachocalendar.components.DateField;
+import net.sf.nachocalendar.table.DateFieldTableEditor;
+import net.sf.nachocalendar.table.JTableCustomizer;
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
 import org.dom4j.io.XMLWriter;
-import org.xml.sax.helpers.XMLReaderFactory;
+import org.jtotus.config.ConfigLoader;
 
 /**
  *
@@ -40,6 +62,59 @@ import org.xml.sax.helpers.XMLReaderFactory;
 public class ConfigView extends javax.swing.JDialog {
     private Document currentDocument = null;
     private String currentDocumentName = null;
+
+//http://www.javaworld.com/javaworld/javatips/jw-javatip102.html
+//http://forums.devshed.com/java-help-9/datepicker-inside-a-jtable-536152.html
+ class DateCellEditor extends AbstractCellEditor implements TableCellEditor {
+    private Date currentDate;
+    private JSpinner spinner;
+
+    protected static final String EDIT = "edit";
+
+    
+    public DateCellEditor() {
+
+        Calendar calendar = Calendar.getInstance();
+        Date initDate = calendar.getTime();
+        calendar.add(Calendar.YEAR, -100);
+        Date earliestDate = calendar.getTime();
+        calendar.add(Calendar.YEAR, 200);
+        Date latestDate = calendar.getTime();
+        SpinnerModel dateModel = new SpinnerDateModel(initDate,
+                                                    earliestDate,
+                                                    latestDate,
+                                                    Calendar.YEAR);//ignored for user input
+        spinner = new JSpinner(dateModel);
+        spinner.setEditor(new JSpinner.DateEditor(spinner, "dd.MM.yyyy"));
+    }
+
+
+    // Implement the one CellEditor method that AbstractCellEditor doesn't.
+    public Object getCellEditorValue() {
+        currentDate = ((SpinnerDateModel)spinner.getModel()).getDate();
+        return ((SpinnerDateModel)spinner.getModel()).getDate();
+
+    }
+
+
+    // Implement the one method defined by TableCellEditor.
+    public Component getTableCellEditorComponent(javax.swing.JTable table, Object value,
+            boolean isSelected, int row, int column) {
+        DateFieldTableEditor editor = new DateFieldTableEditor();
+        if(value.getClass() == Date.class)
+            ;
+        
+        currentDate = (Date)value;
+        spinner.setValue(value);
+        return spinner;
+
+    }
+
+}
+
+
+
+
 
    // http://docstore.mik.ua/orelly/java-ent/jfc/ch03_19.htm
     class FileTreeModel implements TreeModel {
@@ -93,6 +168,7 @@ public class ConfigView extends javax.swing.JDialog {
 
 
     class FileSelectionlListener implements TreeSelectionListener {
+       private Object config = null;
 
         public void valueChanged(TreeSelectionEvent e) {
 
@@ -102,44 +178,66 @@ public class ConfigView extends javax.swing.JDialog {
             
            Object obj = e.getNewLeadSelectionPath().getLastPathComponent();
 
+           ConfigLoader<Object> configLoader = new ConfigLoader<Object>(null);
+
            String fileName = obj.toString();
+
+
            if (fileName.endsWith(".xml")){
-               currentDocumentName = fileName;
-               File confFile = new File(currentDocumentName);
-               if(confFile.isFile()){
+
+               SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+                DefaultTableModel model = (DefaultTableModel) confTable.getModel();
+                config = configLoader.readObj(fileName);
+                
+                model.setNumRows(0);
+                Object toInsert = null;
+                Field [] fields = getConfig().getClass().getDeclaredFields();
+                for (int i=0;i < fields.length;i++) {
                     try {
-                        confLabel.setText(currentDocumentName);
-                        String content = FileUtils.readFileToString(confFile);
-                        Document document = DocumentHelper.parseText(content);
-                        Element root = document.getRootElement();
 
+                        if (fields[i].getType() == Calendar.class){
+                            Calendar cal = (Calendar)fields[i].get(getConfig());
 
-                        //clean table model
-                        DefaultTableModel model = (DefaultTableModel) confTable.getModel();
-                        model.setNumRows(0);
-                        for ( Iterator i = root.elementIterator(); i.hasNext(); ) {
-                            Element element = (Element) i.next();
+                            //DateCellEditor editor = new DateCellEditor();
+//                            confTable.getEditorComponent();
+//                            confTable.setDefaultEditor(confTable.getColumnClass(1), editor);
+                            JTableCustomizer.setDefaultEditor(confTable);
+                            //DateField datefield = CalendarFactory.createDateField();
+                            //datefield.setValue(cal.getTime());
+                            //JTableCustomizer.setEditorForRow(confTable, 1);
+                            model.addRow(new Object[]{fields[i].getName(), cal.getTime()});
 
-
-                            Object vo = element.getData();
-                            System.out.printf("Got from xml:%s:type:%s\n", element.getName(), vo.getClass().getName());
-
-                            model.addRow(new Object[] {element.getName(), element.getData()});
-
-
-
+                            continue;
+                        }else {
+                            toInsert = fields[i].get(getConfig());
                         }
-                    } catch (DocumentException ex) {
+
+                        model.addRow(new Object[]{fields[i].getName(), toInsert});
+                    } catch (IllegalArgumentException ex) {
                         Logger.getLogger(ConfigView.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (IOException ex) {
+                    } catch (IllegalAccessException ex) {
                         Logger.getLogger(ConfigView.class.getName()).log(Level.SEVERE, null, ex);
                     }
-               }
+                }
+
+                confLabel.setText(fileName);
             }
          
         }
 
+        /**
+         * @return the config
+         */
+        public Object getConfig() {
+            return config;
+        }
 
+        /**
+         * @param config the config to set
+         */
+        public void setConfig(Object config) {
+            this.config = config;
+        }
 
    }
 
@@ -154,7 +252,6 @@ public class ConfigView extends javax.swing.JDialog {
         FileTreeModel model = new FileTreeModel(new File("config"));
         
         configTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-
         configTree.addTreeSelectionListener(new FileSelectionlListener());
         configTree.setModel(model);
 
@@ -279,16 +376,45 @@ public class ConfigView extends javax.swing.JDialog {
     }//GEN-LAST:event_cancelButtonMouseClicked1
 
     private void saveButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_saveButtonMouseClicked
-        try {
+
             DefaultTableModel model = (DefaultTableModel) confTable.getModel();
-            //Write document to XML
-            File doc = new File(currentDocumentName);
-            XMLWriter writer = new XMLWriter(new FileWriter(doc));
-            writer.write(currentDocument);
-            writer.close();
-        } catch (IOException ex) {
-            Logger.getLogger(ConfigView.class.getName()).log(Level.SEVERE, null, ex);
-        }
+
+            String currentFile = confLabel.getText();
+
+            ConfigLoader<Object> loader = new ConfigLoader<Object>(null);
+            Object config = loader.readObj(currentFile);
+
+            Field [] fields = config.getClass().getDeclaredFields();
+            for(int i = 0;i<model.getRowCount();i++){
+                Object param = model.getValueAt(i, 0);
+                String paramName = param.toString();
+                for(int y=0;y<fields.length;y++) {   
+                    System.out.printf("Param name:%s fields:%s\n",paramName, fields[y].getName());
+                    if(paramName.compareTo(fields[y].getName())==0){
+                        try {
+                            Object newValue = model.getValueAt(i, 1);
+                            System.out.printf("Type name:%s fields:%s\n",fields[y].getType().getName(), newValue.getClass().getName());
+                            
+                            if(fields[y].getType() == newValue.getClass()){
+                                 System.out.printf("Writtign name:%s fields:%s\n",fields[y].getType().getName(), newValue.getClass().getName());
+                                fields[y].set(config, newValue);
+                            }else if (fields[y].getType() == int.class){
+                                fields[y].setInt(config, Integer.parseInt(newValue.toString()));
+                            }else if(fields[y].getType() == boolean.class){
+                                fields[y].setBoolean(config, Boolean.parseBoolean(newValue.toString()));
+                            }
+                        } catch (IllegalArgumentException ex) {
+                            Logger.getLogger(ConfigView.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (IllegalAccessException ex) {
+                            Logger.getLogger(ConfigView.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                }
+            }
+
+            loader.writeObj(config, currentFile);
+            
+       
     }//GEN-LAST:event_saveButtonMouseClicked
 
     /**

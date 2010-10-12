@@ -44,6 +44,7 @@ public class JtotusApp extends SingleFrameApplication {
 
         mainEngine.run();
         show(mainWindow);
+        
     }
 
 

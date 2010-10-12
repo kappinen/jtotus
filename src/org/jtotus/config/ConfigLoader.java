@@ -29,6 +29,7 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Calendar;
 import java.util.logging.Level;
@@ -47,7 +48,7 @@ public class ConfigLoader <T> {
         configName = configDir + config;
 
 
-        if (configName.lastIndexOf(File.separator) != -1) {
+        if (config != null && configName.lastIndexOf(File.separator) != -1) {
             File dir = new File(configName.substring(0, configName.lastIndexOf(File.separator)));
 
             if (!dir.exists()) {
@@ -66,6 +67,7 @@ public class ConfigLoader <T> {
 
         if (!dir.exists()) {
             dir.mkdirs();
+            System.err.printf("directory %s does not exists\n", configDir);
             return true;
         }
 
@@ -82,15 +84,17 @@ public class ConfigLoader <T> {
     public boolean writeObj(Object obj, String path)  {
 
         FileOutputStream fos = null;
-
-        if (!configDirExists()) {
+        System.out.printf("Writting to ;%s", path);
+        if (!this.configDirExists()) {
             return false;
         }
         
         try {
-            fos = new FileOutputStream(path);
+            fos = new FileOutputStream(path, false);
+
             xstream.toXML(obj, fos);
-        } catch (FileNotFoundException ex) {
+            fos.flush();
+        } catch (IOException ex) {
             Logger.getLogger(ConfigLoader.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
@@ -123,6 +127,7 @@ public class ConfigLoader <T> {
     public boolean storeConfig(T saveObj){
         return writeObj(saveObj, configName + ".xml");
     }
+
     
     public T getConfig(){
         return readObj(configName + ".xml");
@@ -150,9 +155,7 @@ public class ConfigLoader <T> {
 
                     if(toObjectFields[to].getType() == fromObjectFields[from].getType() &&
                         inputFromName.compareTo(inputToName)==0) {
-                        
-              
-
+          
                         try {
                             if (toObjectFields[to].getType() == Calendar.class &&
                                 inputToName.compareTo("inputEndingDate") == 0) {

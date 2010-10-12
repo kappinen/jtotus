@@ -28,7 +28,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import org.jtotus.common.Helper;
 import org.jtotus.common.MethodResults;
 import org.jtotus.config.GUIConfig;
@@ -46,7 +49,56 @@ public class jtotusMethodView extends JTabbedPane implements MethodResultsPrinte
     private JTable methodTable = null;
     private Helper help = Helper.getInstance();
 
-    
+
+    class methodTableListener implements TableModelListener {
+
+        public void tableChanged(TableModelEvent event) {
+                DefaultTableModel source = (DefaultTableModel)event.getSource();
+
+                if (event.getType() == TableModelEvent.UPDATE ||
+                    event.getType() == TableModelEvent.INSERT )
+                {
+                    String type = (String) source.getValueAt(source.getRowCount()-1, 0);
+
+                    //If sum column does not exists create one
+                    if(type.compareTo("Sum") != 0 && source.getRowCount() != 0) {
+                        String []data = new String [source.getColumnCount()];
+                        data[0] = new String("Sum");
+                        source.addRow(data);
+                    }
+                   
+                   //TODO: calculate sum, TableModelEvent.ALL_COLUMNS
+                   //TODO: summ only when Normilizer is used.
+                   int col = event.getColumn();
+                   if (col == TableModelEvent.ALL_COLUMNS) {
+                        System.err.printf("TODO: all columns\n");
+                        return;
+                   }
+
+
+                   Double sum = new Double(0.0f);
+                   int count=0;
+                   for(int row=source.getRowCount()-2;row > 0;row--) {
+                        String rowValue = (String) source.getValueAt(row, col);
+                        if (rowValue != null) {
+                            sum+=Double.valueOf(rowValue);
+                            count++;
+                        }
+                   }
+                         
+                  sum /= Double.valueOf(count);
+                  String sumValue = sum.toString();
+                  String value = (String) source.getValueAt(source.getRowCount()-1, col);
+                  if (value == null || value.compareTo(sumValue) != 0){
+                    source.setValueAt(sumValue, source.getRowCount()-1, col);
+                  }
+                    
+                }
+                
+        }
+        
+    }
+
        public int createIntFrame(String reviewTarget) {
         int bindPort=-1;
 
@@ -130,6 +182,9 @@ public class jtotusMethodView extends JTabbedPane implements MethodResultsPrinte
             rowsValues[0] = next.getMethName();
             methodModel.addRow(rowsValues);
         }
+
+        methodTableListener methTableLister = new methodTableListener();
+        methodModel.addTableModelListener(methTableLister);
         
         retValue.setModel(methodModel);
         retValue.setUpdateSelectionOnSort(true);
@@ -162,6 +217,9 @@ public class jtotusMethodView extends JTabbedPane implements MethodResultsPrinte
 
         drawDesktopPane.setAutoscrolls(true);
         drawDesktopPane.setName("drawDesktopPane");
+        methodTable.setShowGrid(true);
+
+
 
     }
 
@@ -173,7 +231,9 @@ public class jtotusMethodView extends JTabbedPane implements MethodResultsPrinte
         Engine engine = Engine.getInstance();
         engine.registerResultsPrinter(this);
 
-        configureMethodTab();
+        this.configureMethodTab();
+
+
        
     }
 

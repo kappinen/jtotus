@@ -145,25 +145,6 @@ public class Engine {
 
     private void testRun() {
 
-    ConfTaLibRSI config = new ConfTaLibRSI();
-    Field[] fields = config.getClass().getDeclaredFields();
-
-    for(int i = 0;i<fields.length;i++) {
-            try {
-                if (fields[i].getType() == String.class)
-                System.out.printf("Field:%s ; %s\n", fields[i].getName(), fields[i].get(config));
-                
-            } catch (IllegalArgumentException ex) {
-                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IllegalAccessException ex) {
-                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
-            }
-    }
-
-
-    System.out.printf("Cannonical name:%s\n",config.getClass().getCanonicalName());
-
-
     }
 
     public void train(){

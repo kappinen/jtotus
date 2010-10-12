@@ -43,7 +43,7 @@ public class LocalJavaDB implements InterfaceDataBase {
                                        "hex", "hex"};
     public String mainTable = "APP.OMXHELSINKI";
     private Helper help = Helper.getInstance();
-
+    private PreparedStatement priceStmt = null;
 
     public LocalJavaDB() {
         
@@ -85,6 +85,7 @@ public class LocalJavaDB implements InterfaceDataBase {
 
     private BigDecimal fetchData(String stockName, Calendar calendar, String data) {
         BigDecimal closingPrice = null;
+
         
         try {
             if (conJavaDB == null) {
@@ -93,16 +94,20 @@ public class LocalJavaDB implements InterfaceDataBase {
                 }
             }
 
-            String query = "SELECT * FROM "+mainTable+" WHERE STOCKNAME=? AND DATE=?";
-            PreparedStatement pstmt = conJavaDB.prepareStatement(query);
-            pstmt.setString(1, stockName);
+            
+            if(priceStmt==null){
+                String query = "SELECT * FROM "+mainTable+" WHERE STOCKNAME=? AND DATE=?";
+                priceStmt = conJavaDB.prepareStatement(query);
+            }
+
+            priceStmt.setString(1, stockName);
 
             java.util.Date searchDay = calendar.getTime();
             java.sql.Date sqlDate = new java.sql.Date(searchDay.getTime());
-            pstmt.setDate(2, sqlDate, calendar);
+            priceStmt.setDate(2, sqlDate, calendar);
 
             //Perform query
-            ResultSet results = pstmt.executeQuery();
+            ResultSet results = priceStmt.executeQuery();
 
             while (results.next()) {
                 BigDecimal tmpBigDecimal = results.getBigDecimal(data);
@@ -111,8 +116,8 @@ public class LocalJavaDB implements InterfaceDataBase {
                 break;
             }
 
-            pstmt.clearParameters();
-            pstmt.close();
+            priceStmt.clearParameters();
+            //pstmt.close();
             
         } catch (SQLException ex) {
             Logger.getLogger(LocalJavaDB.class.getName()).log(Level.SEVERE, null, ex);
