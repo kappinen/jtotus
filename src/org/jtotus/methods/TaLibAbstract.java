@@ -39,7 +39,7 @@ public abstract class TaLibAbstract {
     private Double avgSuccessRate = null;
     private int totalStocksAnalyzed = 0;
     GraphPacket packet = null;
-
+    GraphSender sender = null;
     //TODO: staring date, ending date aka period
     //INPUTS TO METHOD:
     //Portofolio
@@ -109,12 +109,16 @@ public abstract class TaLibAbstract {
         System.out.printf("inputListOfStocks len:%d\n", inputListOfStocks.length);
 
         MethodResults results = this.performMethod();
+
         if (this.inputPrintResults) {
+           
+            if(sender==null){
+               sender  = new GraphSender();
+            }
             Iterator<Entry<String, Double>> iter = results.iterator();
+            
             while (iter.hasNext()) {
                 Entry<String, Double> next = iter.next();
-
-                GraphSender sender = new GraphSender();
 
                 packet.seriesTitle = this.getMethName();
                 packet.result = next.getValue().doubleValue();

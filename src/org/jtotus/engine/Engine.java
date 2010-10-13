@@ -70,7 +70,6 @@ public class Engine {
         methodList.add(new DummyMethod(portfolioDecision));
         methodList.add(new PotentialWithIn());
         methodList.add(new TaLibRSI());
-        methodList.add(new TaLibRSI());
         methodList.add(new TaLibSMA());
         methodList.add(new TaLibEMA());
         methodList.add(new TaLibMOM());

@@ -58,6 +58,7 @@ import org.jtotus.common.StockType;
 import org.jtotus.gui.graph.GraphSender;
 import org.jtotus.config.ConfTaLibRSI;
 import org.apache.commons.lang.ArrayUtils;
+import org.jtotus.common.NumberRangeIter;
 import org.jtotus.config.ConfigLoader;
 
 /**
@@ -69,9 +70,9 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry, Callable<Met
 
     //TODO: staring date, ending date aka period
     //INPUTS TO METHOD:
-    public int inputRSIPeriod = 1; //Default value
+    private double avgSuccessRate = 0.0f;
+    private int totalStocksAnalyzed = 0;
     //public Calendar inputEndingDate = Calendar.getInstance();
-    public Calendar inputStartingDate = null;
     public ConfTaLibRSI config = null;
     public ConfigLoader<ConfTaLibRSI> configFile = null;
 
@@ -99,21 +100,19 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry, Callable<Met
         configFile.applyInputsToObject(this);
     }
 
-    public MethodResults performRSI(int rsi_period) {
+    public MethodResults performRSI() {
         MethodResults results = new MethodResults(this.getMethName());
         List<Double> closingPrices = new ArrayList<Double>();
-        GraphSender sender = new GraphSender();
-        
 
-        for (int stockCount = 0; stockCount < inputListOfStocks.length; stockCount++) {
+        for (int stockCount = 0; stockCount < super.inputListOfStocks.length; stockCount++) {
             closingPrices.clear();
 
             this.loadInputs(super.inputListOfStocks[stockCount]);
 
-            System.out.printf("period:%d\n", inputRSIPeriod);
+            System.out.printf("period:%d\n", config.inputRSIPeriod);
             StockType stockType = new StockType(super.inputListOfStocks[stockCount]);
 
-            DateIterator dateIter = new DateIterator(inputStartingDate.getTime(),
+            DateIterator dateIter = new DateIterator(config.inputStartingDate.getTime(),
                     inputEndingDate.getTime());
 
             while (dateIter.hasNext()) {
@@ -128,7 +127,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry, Callable<Met
             double[] input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
 
             int period = input.length - 1;
-            final int allocationSize = period - core.rsiLookback(this.inputRSIPeriod);
+            final int allocationSize = period - core.rsiLookback(config.inputRSIPeriod);
 
             if (allocationSize <= 0) {
                 System.err.printf("No data for period (%d)\n", allocationSize);
@@ -140,7 +139,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry, Callable<Met
             MInteger outNbElement = new MInteger();
 
             RetCode code = core.rsi(0, period - 1, input,
-                    this.inputRSIPeriod,
+                    config.inputRSIPeriod,
                     outBegIdx,
                     outNbElement, output);
 
@@ -152,8 +151,10 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry, Callable<Met
             results.putResult(stockType.getName(), output[output.length - 1]);
 
             if (super.inputPrintResults) {
-                DateIterator dateIterator = new DateIterator(inputStartingDate.getTime(),
-                        inputEndingDate.getTime());
+                sender = new GraphSender(this.getMethName());
+                
+                DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
+                                                             config.inputEndingDate.getTime());
                 dateIterator.move(outBegIdx.value);
                 for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
                     Date stockDate = dateIterator.next();
@@ -166,11 +167,13 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry, Callable<Met
                     packet.result = output[i];
                     packet.date = stockDate.getTime();
 
-                    sender.sentPacket(stockType.getName(), packet);
+                    super.sender.sentPacket(stockType.getName(), packet);
                 }
             }
 
-        }
+            //************* DECISION TEST *************//
+
+            }
 
 
         return results;
@@ -178,6 +181,6 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry, Callable<Met
 
     @Override
     public MethodResults performMethod() {
-        return this.performRSI(this.inputRSIPeriod);
+        return this.performRSI();
     }
 }

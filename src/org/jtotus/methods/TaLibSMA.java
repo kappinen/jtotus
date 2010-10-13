@@ -54,79 +54,32 @@ import com.tictactec.ta.lib.RetCode;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import org.jtotus.common.DateIterator;
-import org.jtotus.common.Helper;
 import org.jtotus.common.StockType;
 import org.jtotus.config.ConfigLoader;
-import org.jtotus.config.MethodConfig;
-import org.jtotus.gui.graph.GraphPacket;
 import org.jtotus.gui.graph.GraphSender;
 import org.apache.commons.lang.ArrayUtils;
 import java.io.File;
 import java.math.BigDecimal;
 import org.jtotus.common.NumberRangeIter;
-import org.jtotus.config.ConfPortfolio;
 import org.jtotus.config.ConfTaLibSMA;
 
 /**
  *
  * @author Evgeni Kappinen
  */
-public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
+public class TaLibSMA  extends TaLibAbstract implements MethodEntry, Callable<MethodResults>{
 
     /*Stock list */
-    private Helper help = Helper.getInstance();
-    private boolean printResults = true;
-    private Double avgSuccessRate = null;
+    private double avgSuccessRate = 0.0f;
     private int totalStocksAnalyzed = 0;
 
-    //TODO: staring date, ending date aka period
-
     //INPUTS TO METHOD:
-    public String inputPortofolio=null;
-    public String inpuPortfolio=null;
-    public int inputSMAPeriod = 9; //Default value
     public Calendar inputEndingDate = null;
     public Calendar inputStartingDate = null;
     public ConfTaLibSMA config = null;
-    public String[] inputListOfStocks;
-    public boolean inputPrintResults = true;
     ConfigLoader<ConfTaLibSMA> configFile = null;
-
-    public boolean inputPerfomDecision = true;
-    public String inputSMADecisionPeriod = null;
-    public Double inputAssumedBudjet=null;
-
-    public String getMethName() {
-        String tmp = this.getClass().getName();
-        return tmp.substring(tmp.lastIndexOf(".")+1,tmp.length());
-    }
-
-    public boolean isCallable() {
-        return true;
-    }
-
-        public void loadPortofolioInputs() {
-                         //FIXME: set it in PortfolioDecision
-            String portfolio = "OMXHelsinki";
-
-            ConfigLoader<ConfPortfolio> configPortfolio =
-                    new ConfigLoader<ConfPortfolio>(portfolio);
-
-            if (configPortfolio.getConfig() == null){
-                  //Load default values
-                  ConfPortfolio newPortConfig = new ConfPortfolio();
-                  configPortfolio.storeConfig(newPortConfig);
-              }
-
-            //Get stock names
-            configPortfolio.applyInputsToObject(this);
-            this.inputPortofolio = portfolio;
-        }
-
 
 
         public void loadInputs(String configStock){
@@ -152,19 +105,17 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
         }
 
 
-        public MethodResults performSMA(int SMA_period) {
+        public MethodResults performSMA() {
 
             MethodResults results = new MethodResults(this.getMethName());
             List <Double>closingPrices = new ArrayList<Double>();
-            GraphSender sender = new GraphSender();
-            GraphPacket packet = new GraphPacket();
 
             double[] output = null;
             MInteger outBegIdx = null;
             MInteger outNbElement = null;
             int period = 0;
 
-            for(int stockCount=0;stockCount<this.inputListOfStocks.length;stockCount++) {
+            for(int stockCount=0;stockCount<super.inputListOfStocks.length;stockCount++) {
                closingPrices.clear();
 
                this.loadInputs(this.inputListOfStocks[stockCount]);
@@ -190,7 +141,7 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
                 double []input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
 
                  period = input.length-1;
-                 final int allocationSize = period - core.smaLookback(this.inputSMAPeriod);
+                 final int allocationSize = period - core.smaLookback(config.inputSMAPeriod);
 
                  if (allocationSize <= 0) {
                      System.err.printf("No data for period (%d)\n", allocationSize);
@@ -204,7 +155,7 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
                  outNbElement = new MInteger();
 
                  RetCode code = core.sma(0, period - 1, input ,
-                                           this.inputSMAPeriod,
+                                           config.inputSMAPeriod,
                                            outBegIdx,
                                            outNbElement, output);
 
@@ -222,6 +173,7 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
                  results.putResult(stockType.getName(), output[output.length - 1]);
 
                    if (this.inputPrintResults) {
+                       sender = new GraphSender(this.getMethName());
                        DateIterator dateIterator = new DateIterator(inputStartingDate.getTime(),
                                                                     inputEndingDate.getTime());
                         dateIterator.move(outBegIdx.value);
@@ -251,7 +203,7 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
                     int decSMAPeriod = 0;
 
                     NumberRangeIter numberIter = new NumberRangeIter("SMARange");
-                    numberIter.setRange(this.inputSMADecisionPeriod);
+                    numberIter.setRange(config.inputSMADecisionPeriod);
                     while(numberIter.hasNext()) {
                         amoutOfStocks = 0;
                         assumedBudjet = this.inputAssumedBudjet.doubleValue();
@@ -313,7 +265,7 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
                             }
 
                             if(changed){
-                                 if (this.inputPrintResults && decSMAPeriod == this.inputSMAPeriod) {
+                                 if (this.inputPrintResults && decSMAPeriod == config.inputSMAPeriod) {
                                     DateIterator dateIterator = new DateIterator(inputStartingDate.getTime(),
                                                                                 inputEndingDate.getTime());
                                     dateIterator.move(elem + outBegIdxDec.value);
@@ -356,39 +308,8 @@ public class TaLibSMA  implements MethodEntry, Callable<MethodResults>{
             return results;
         }
 
-        
-    public void run() {
-        this.loadPortofolioInputs();
-        avgSuccessRate = new Double(0.0f);
-        
-
-        this.performSMA(this.inputSMAPeriod);
-    }
-
-    public MethodResults call() throws Exception {
-
-        //Load Protfolio settings
-        this.loadPortofolioInputs();
-        avgSuccessRate = new Double(0.0f);
-
-        //Pre-fetch closing prices
-        MethodResults results = this.performSMA(this.inputSMAPeriod);
-        if (printResults) {
-            Iterator<Entry<String, Double>> iter = results.iterator();
-            while(iter.hasNext()){
-                Entry<String, Double> next = iter.next();
-
-                GraphSender sender = new GraphSender();
-                GraphPacket packet = new GraphPacket();
-
-                packet.seriesTitle = this.getMethName();
-                packet.result = next.getValue().doubleValue();
-                packet.date = inputEndingDate.getTimeInMillis();
-
-                sender.sentPacket(next.getKey(), packet);
-            }
-        }
-        return results;
+     public MethodResults performMethod() {
+        return this.performSMA();
     }
 
 }

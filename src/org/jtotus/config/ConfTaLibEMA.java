@@ -33,7 +33,7 @@ public class ConfTaLibEMA {
     public Calendar inputEndingDate = null;
     public boolean inputPrintResults = true;
     public int inputEMAPeriod = 10;
-
+    public Double outputSuccessRate = null;
 
     //Strategy Decision
     public boolean inputPerfomDecision = true;
@@ -47,7 +47,7 @@ public class ConfTaLibEMA {
 
         //Decision
         inputEMADecisionPeriod = "[3-30]{1}";
-
+        outputSuccessRate = new Double(0.0f);
     }
 
 }

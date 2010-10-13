@@ -41,9 +41,12 @@ public class DataFetcher{
     public DataFetcher()
     {
         listOfResources = new LinkedList<InterfaceDataBase>();
+
+        //Supported resource
         listOfResources.add(new FileSystemFromHex());
         listOfResources.add(new NetworkOP());
-        javadb = new LocalJavaDB();
+
+        javadb = LocalJavaDB.getInstance();
         holidays = new DayisHoliday();
         cache = new CacheServer();
         // listOfResources.add(new NetworkGoogle());
@@ -143,7 +146,7 @@ public class DataFetcher{
                 
                 result = res.fetchVolume(stockName, date);
                 if (result != null) {
-                        System.out.printf("Searching for volume3\n");
+                      //  System.out.printf("Searching for volume3\n");
                         javadb.storeVolume(stockName, date, result);
                     return result;
                 }

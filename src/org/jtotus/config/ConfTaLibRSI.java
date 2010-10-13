@@ -33,13 +33,24 @@ public class ConfTaLibRSI {
     public boolean inputPrintResults = true;
     public int inputRSIPeriod = 14;
 
+
+
+    public Double outputSuccessRate=null;
+    public boolean inputPerfomDecision = true;
+    public String inputRSIDecisionPeriod = null;
+    public Double inputRSILowestThreshold=null;
+    public Double inputRSIHigestThreshold=null;
+
     public ConfTaLibRSI() {
         intpuPortfolio = new String("OMXHelsinki");
         inputEndingDate = Calendar.getInstance();
         inputStartingDate = Calendar.getInstance();
         inputStartingDate.add(Calendar.DATE, -90);
 
-
+         //Decision
+        inputRSIDecisionPeriod = "[6-15]{1}";
+        inputRSILowestThreshold = new Double(30);
+        inputRSIHigestThreshold = new Double(70);
     }
 
 }

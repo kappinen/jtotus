@@ -176,10 +176,10 @@ public class ConfigLoader<T> {
 
         toObjectFields = obj.getClass().getDeclaredFields();
         fromObjectFields = config.getClass().getDeclaredFields();
-        for (int to = 0; to < toObjectFields.length; to++) {
-            System.out.printf("Found in class obj:%s type:%s\n",
-                    toObjectFields[to].getName(), toObjectFields[to].getType().getName());
-        }
+//        for (int to = 0; to < toObjectFields.length; to++) {
+//            System.out.printf("Found in class obj:%s type:%s\n",
+//                    toObjectFields[to].getName(), toObjectFields[to].getType().getName());
+//        }
         for (int to = 0; to < toObjectFields.length; to++) {
             String inputToName = toObjectFields[to].getName();
             //Only input starting fields are used in configuration file
