@@ -51,7 +51,7 @@ import org.jtotus.config.MethodConfig;
  *
  * @author Evgeni Kappinen
  */
-public class TaLibMOM  implements MethodEntry, Callable<MethodResults>{
+public class TaLibMOM  implements MethodEntry{
     private ArrayList<PeriodClosingPrice> periodList = null;
     private final StockType stockType = null;
     /*Stock list */

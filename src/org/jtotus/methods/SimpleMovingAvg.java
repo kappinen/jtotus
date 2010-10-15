@@ -18,12 +18,12 @@
 package org.jtotus.methods;
 
 import org.jtotus.common.Helper;
+import org.jtotus.common.MethodResults;
 import org.jtotus.config.MethodConfig;
 import org.jtotus.common.StockType;
 import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.concurrent.Callable;
 import org.jtotus.common.DateIterator;
 import org.jtotus.gui.graph.GraphPacket;
 import org.jtotus.gui.graph.GraphSender;
@@ -31,7 +31,7 @@ import org.jtotus.gui.graph.GraphSender;
  *
  * @author Evgeni Kappinen
  */
-public class SimpleMovingAvg implements Callable, MethodEntry {
+public class SimpleMovingAvg implements MethodEntry {
 
     private MethodConfig config = null;
     private Helper help = Helper.getInstance();;
@@ -109,7 +109,8 @@ public class SimpleMovingAvg implements Callable, MethodEntry {
        return false;
     }
 
-    public Object call() throws Exception {
+
+    public MethodResults call() throws Exception {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

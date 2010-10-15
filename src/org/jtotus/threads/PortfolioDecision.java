@@ -1,19 +1,19 @@
 /*
 
-    This file is part of jTotus.
+This file is part of jTotus.
 
-    jTotus is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+jTotus is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    jTotus is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+jTotus is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 
 
  *
@@ -33,44 +33,32 @@ package org.jtotus.threads;
 import org.jtotus.methods.MethodEntry;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.jtotus.common.Helper;
 import org.jtotus.common.MethodResults;
 import org.jtotus.config.MethodConfig;
-import org.jtotus.engine.Engine;
-import org.jtotus.gui.MethodResultsPrinter;
 
 /**
  *
  * @author Evgeni Kappinen
  */
-public class PortfolioDecision implements Runnable{
+public class PortfolioDecision implements Runnable {
 
     private Helper help = null;
     private LinkedList<MethodEntry> threadList;
-    private LinkedList<Future<MethodResults>> methodResults = null;
     private ExecutorService threadExecutor = null;
 
-
-
-    
     private void init() {
-        if (help == null)
+        if (help == null) {
             help = Helper.getInstance();
-        if(threadList == null)
+        }
+        if (threadList == null) {
             threadList = new LinkedList<MethodEntry>();
-        if (threadExecutor == null)
+        }
+        if (threadExecutor == null) {
             threadExecutor = Executors.newCachedThreadPool();
-        if (methodResults == null)
-            methodResults = new LinkedList<Future<MethodResults>>();
-
+        }
     }
 
     public PortfolioDecision() {
@@ -81,7 +69,6 @@ public class PortfolioDecision implements Runnable{
     public PortfolioDecision(LinkedList<MethodEntry> threads) {
 
         init();
-
 
         Iterator<MethodEntry> iterator = threadList.iterator();
         while (iterator.hasNext()) {
@@ -99,7 +86,7 @@ public class PortfolioDecision implements Runnable{
 
         help.debug("PortfolioDecision", "setting list with size:%d\n",
                 threads.size());
-        
+
         if (!threadList.isEmpty()) {
             threadList.clear();
         }
@@ -121,70 +108,34 @@ public class PortfolioDecision implements Runnable{
     }
 
     public void run() {
-        Future<MethodResults> methodResult = null;
-        Engine engine = Engine.getInstance();
 
-
-        
         help.debug("PortfolioDecision", "Dispatcher started..\n");
-        
-        if (threadList == null ||
-            threadList.isEmpty()) {
+
+        if (threadList == null
+                || threadList.isEmpty()) {
             System.err.printf("Not tasks for Portfolio Decision\n");
         }
 
+
         //Start threads       
         Iterator<MethodEntry> iterator = threadList.iterator();
+        MethodFuture<MethodResults> futureTask = null;
+        InterfaceMethodListner methodListener = null;
         while (iterator.hasNext()) {
-            MethodEntry tmp = iterator.next();
-            if (tmp.isCallable()){
-                Callable<MethodResults> callableTmp = (Callable<MethodResults>)tmp;
+            MethodEntry task = iterator.next();
 
+            if (task.isCallable()) {
+                //Callable<MethodResults> callableTmp = task;
+                futureTask = new MethodFuture<MethodResults>(task);
+                methodListener = new org.jtotus.threads.MethodListener();
+                futureTask.addListener(methodListener);
 
-                methodResult = threadExecutor.submit(callableTmp);
-                methodResults.add(methodResult);
-            }else {
+                threadExecutor.execute(futureTask);
+            } else {
                 //Lets support Runnable for now.
-                threadExecutor.execute(tmp);
+                threadExecutor.execute(task);
             }
         }
-        help.debug("PortfolioDecision", "Dispatcher ended.. List:%d:%d\n",
-                    threadList.size(),methodResults.size());
 
-        //All tasks are executing.. lets wait for results
-        while(!methodResults.isEmpty()) {
-            Iterator<Future<MethodResults>> taskIter = methodResults.iterator();
-            while (taskIter.hasNext()) {
-                Future<MethodResults> task = taskIter.next();
-                MethodResults result = null;
-                if(task.isDone()) {
-                     System.out.printf("Run all tasks: the size:"+task.isDone()+"\n");
-                    try {
-                        result = task.get();
-
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(PortfolioDecision.class.getName()).log(Level.SEVERE, null, ex);
-                        taskIter.remove();
-                        continue;
-                    } catch (ExecutionException ex) {
-                        Logger.getLogger(PortfolioDecision.class.getName()).log(Level.SEVERE, null, ex);
-                        taskIter.remove();
-                        continue;
-                    }
-
-                    result.printToConsole();
-                    MethodResultsPrinter printer = engine.getResultsPrinter();
-                    printer.drawResults(result);
-
-                    
-                    //Remove task from the list
-                    taskIter.remove();
-                    Thread.yield();
-                }
-            }
-        }
-        
     }
-
-
 }

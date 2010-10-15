@@ -43,7 +43,6 @@ Vaihtoehtoisesti:
  */
 package org.jtotus.methods;
 
-import java.util.concurrent.Callable;
 import org.jtotus.common.MethodResults;
 import com.tictactec.ta.lib.Core;
 import com.tictactec.ta.lib.MInteger;
@@ -51,21 +50,19 @@ import com.tictactec.ta.lib.RetCode;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import org.jtotus.common.DateIterator;
 import org.jtotus.common.StockType;
 import org.jtotus.gui.graph.GraphSender;
 import org.jtotus.config.ConfTaLibRSI;
 import org.apache.commons.lang.ArrayUtils;
-import org.jtotus.common.NumberRangeIter;
 import org.jtotus.config.ConfigLoader;
 
 /**
  *
  * @author Evgeni Kappinen
  */
-public class TaLibRSI extends TaLibAbstract implements MethodEntry, Callable<MethodResults> {
+public class TaLibRSI extends TaLibAbstract implements MethodEntry {
     /*Stock list */
 
     //TODO: staring date, ending date aka period
@@ -152,23 +149,12 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry, Callable<Met
 
             if (super.inputPrintResults) {
                 sender = new GraphSender(this.getMethName());
-                
-                DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                                                             config.inputEndingDate.getTime());
-                dateIterator.move(outBegIdx.value);
-                for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
-                    Date stockDate = dateIterator.next();
-                    //System.out.printf("Date:"+stockDate+" Time:"+inputEndingDate.getTime()+"Time2:"+inputStartingDate.getTime()+"\n");
 
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(stockDate);
-
-                    packet.seriesTitle = super.getMethName();
-                    packet.result = output[i];
-                    packet.date = stockDate.getTime();
-
-                    super.sender.sentPacket(stockType.getName(), packet);
-                }
+                sender.executeTask(super.getMethName(),
+                                   output, outBegIdx.value,
+                                   outNbElement.value,
+                                   config.inputStartingDate,
+                                   config.inputEndingDate);
             }
 
             //************* DECISION TEST *************//

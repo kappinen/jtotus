@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.math.BigDecimal;
 import java.util.Calendar;
 import org.jtotus.common.DateIterator;
+import org.jtotus.common.MethodResults;
 import org.jtotus.config.MethodConfig;
 import org.jtotus.common.StockType;
 
@@ -238,6 +239,11 @@ private void printResultsToOur()
 
     public boolean isCallable() {
         return false;
+    }
+
+
+    public MethodResults call() throws Exception {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }

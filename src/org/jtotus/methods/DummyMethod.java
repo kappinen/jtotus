@@ -22,13 +22,14 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jtotus.common.Helper;
+import org.jtotus.common.MethodResults;
 import org.jtotus.threads.PortfolioDecision;
 
 /**
  *
  * @author kappiev
  */
-public class DummyMethod implements Runnable,MethodEntry {
+public class DummyMethod implements MethodEntry {
 
     private Helper help = Helper.getInstance();
     private static Random genNum = new Random();
@@ -61,6 +62,9 @@ public class DummyMethod implements Runnable,MethodEntry {
        return false;
     }
 
-    
+    public MethodResults call() throws Exception {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 
 }

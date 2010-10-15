@@ -69,7 +69,7 @@ import org.jtotus.config.ConfTaLibSMA;
  *
  * @author Evgeni Kappinen
  */
-public class TaLibSMA  extends TaLibAbstract implements MethodEntry, Callable<MethodResults>{
+public class TaLibSMA  extends TaLibAbstract implements MethodEntry{
 
     /*Stock list */
     private double avgSuccessRate = 0.0f;

@@ -34,7 +34,7 @@ import org.jtotus.config.MethodConfig;
  *
  * @author Evgeni Kappinen
  */
-public class PotentialWithIn implements MethodEntry, Callable<MethodResults>{
+public class PotentialWithIn implements MethodEntry {
     private HashMap<String,Integer> voteCounter = null;
     private ArrayList<PeriodClosingPrice> periodList = null;
     private Helper help = Helper.getInstance();

@@ -15,23 +15,16 @@
     along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+package org.jtotus.threads;
 
-package org.jtotus.methods;
-
-import java.util.concurrent.Callable;
 import org.jtotus.common.MethodResults;
-
 
 /**
  *
  * @author Evgeni Kappinen
  */
-public interface MethodEntry extends Runnable, Callable<MethodResults> {
-    
-    public String getMethName();
+public interface InterfaceMethodListner {
 
-    //If Method supports return value this
-    // method will return true
-    public boolean isCallable();
+    public void putResults(MethodResults results);
 
 }

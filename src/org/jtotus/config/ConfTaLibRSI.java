@@ -30,13 +30,13 @@ public class ConfTaLibRSI {
    
     public Calendar inputStartingDate = null;
     public Calendar inputEndingDate = null;
-    public boolean inputPrintResults = true;
+    public boolean inputPrintResults = false;
     public int inputRSIPeriod = 14;
 
 
 
     public Double outputSuccessRate=null;
-    public boolean inputPerfomDecision = true;
+    public boolean inputPerfomDecision = false;
     public String inputRSIDecisionPeriod = null;
     public Double inputRSILowestThreshold=null;
     public Double inputRSIHigestThreshold=null;

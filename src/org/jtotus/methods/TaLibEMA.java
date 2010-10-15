@@ -69,7 +69,7 @@ import org.jtotus.config.ConfTaLibEMA;
  *
  * @author Evgeni Kappinen
  */
-public class TaLibEMA  extends TaLibAbstract implements MethodEntry, Callable<MethodResults>{
+public class TaLibEMA  extends TaLibAbstract implements MethodEntry{
 
     /*Stock list */
     private double avgSuccessRate = 0.0f;

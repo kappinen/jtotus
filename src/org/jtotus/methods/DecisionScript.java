@@ -29,13 +29,14 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.codehaus.groovy.control.CompilationFailedException;
+import org.jtotus.common.MethodResults;
 
 
 /**
  *
  * @author Evgeni Kappinen
  */
-public class DecisionScript implements MethodEntry{
+public class DecisionScript implements MethodEntry {
 
     private String path_to_script = null;
     
@@ -98,6 +99,12 @@ public class DecisionScript implements MethodEntry{
     public boolean isCallable() {
         return false;
     }
+
+    public MethodResults call() throws Exception {
+        //TOD:implement
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 
 
 
