@@ -19,6 +19,7 @@ package org.jtotus.gui.graph;
 
 import java.io.Serializable;
 
+
 /**
  *
  * @author Evgeni Kappinen
@@ -27,8 +28,9 @@ public class // <editor-fold defaultstate="collapsed" desc="Packet for JtotusGra
         GraphPacket// </editor-fold>
  implements Serializable{
     private static final long serialVersionUID = 1L;
-    
+
     public String seriesTitle;
     public double result;
     public long date;
+    public GraphSeriesType type;
 }

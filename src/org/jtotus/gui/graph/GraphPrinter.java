@@ -28,6 +28,8 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYBubbleRenderer;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
@@ -39,12 +41,14 @@ import org.jfree.data.xy.XYDataset;
  */
 public class GraphPrinter {
     // Create a chart
+
     private JFreeChart mainChart = null;
     private ChartPanel mainPanel = null;
     private TimeSeriesCollection mainDataset = null;
+    private XYPlot mainPlot = null;
 
 
-    
+
     public GraphPrinter(String reviewTarget) {
         XYDataset dataset = createDataset();
 
@@ -61,7 +65,7 @@ public class GraphPrinter {
    
     
     private JFreeChart createTimeLine(XYDataset dataset,
-                                        String title)
+                                      String title)
       {
             JFreeChart chart = ChartFactory.createTimeSeriesChart(title,
                                                                   "Date",
@@ -71,21 +75,21 @@ public class GraphPrinter {
                                                                   true,
                                                                   false);
 
-            XYPlot plot = chart.getXYPlot();
+            mainPlot = chart.getXYPlot();
 
             chart.setBackgroundPaint(Color.white);
-            plot.setBackgroundPaint(Color.lightGray);
+            mainPlot.setBackgroundPaint(Color.lightGray);
 
-            plot.setRangePannable(false);
-            plot.setDomainGridlinesVisible(true);
-            plot.setDomainCrosshairLockedOnData(true);
-            plot.setOutlineVisible(true);
+            mainPlot.setRangePannable(false);
+            mainPlot.setDomainGridlinesVisible(true);
+            mainPlot.setDomainCrosshairLockedOnData(true);
+            mainPlot.setOutlineVisible(true);
             
             //Set Render
-            XYLineAndShapeRenderer renderer = getDefaultLine();
-            plot.setRenderer(renderer);
+            XYItemRenderer renderer = this.getDefaultLine();
+            mainPlot.setRenderer(renderer);
 
-            DateAxis axis = (DateAxis) plot.getDomainAxis();
+            DateAxis axis = (DateAxis) mainPlot.getDomainAxis();
 
             axis.setDateFormatOverride(new SimpleDateFormat("dd-MM-yyyy"));
 
@@ -95,12 +99,17 @@ public class GraphPrinter {
          }
     
 
-    private XYLineAndShapeRenderer getDefaultLine(){
+    private XYItemRenderer getDefaultLine(){
             XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
 
-            renderer.setSeriesLinesVisible(1, true);
-            renderer.setSeriesShapesVisible(1, false);
-
+            //renderer.setSeriesLinesVisible(1, true);
+            //renderer.setSeriesShapesVisible(1, true);
+            return renderer;
+      }
+    
+    private XYItemRenderer getdDefualtBuble(){
+            XYBubbleRenderer renderer = new XYBubbleRenderer();
+            renderer.setAutoPopulateSeriesOutlineStroke(false);
             return renderer;
       }
 
@@ -110,12 +119,28 @@ public class GraphPrinter {
         if (mainDataset == null) {
             mainDataset = new TimeSeriesCollection();
         }
-
         return mainDataset;
-
     }
     
+    public void setRenderer(int series, GraphSeriesType type) {
 
+        if (type == null) {
+            return;
+        }
+        
+        switch(type) {
+            case SIMPLELINE:
+                mainPlot.setRenderer(series, this.getDefaultLine());
+                break;
+            case SIMPLEBUBLE:
+                mainPlot.setRenderer(series, this.getdDefualtBuble());
+                break;
+            default:
+                mainPlot.setRenderer(series, this.getDefaultLine());
+                break;
+        }
+
+    }
 
     public Container getContainer() {
         return mainPanel;
@@ -132,10 +157,5 @@ public class GraphPrinter {
         //mainDataset.removeAllSeries();
         return;
     }
-
-
-
-
-
 
 }

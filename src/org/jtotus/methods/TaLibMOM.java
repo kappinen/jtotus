@@ -47,7 +47,9 @@ import org.jtotus.common.NumberRangeIter;
 import org.jtotus.common.StockType;
 import org.jtotus.config.ConfTaLibMOM;
 import org.jtotus.config.ConfigLoader;
+import org.jtotus.gui.graph.GraphPrinter;
 import org.jtotus.gui.graph.GraphSender;
+import org.jtotus.gui.graph.GraphSeriesType;
 import org.jtotus.methods.utils.Normalizer;
 
 /**
@@ -215,12 +217,11 @@ public class TaLibMOM extends TaLibAbstract implements MethodEntry {
                     for (int elem = 1; elem < outNbElementDec.value; elem++) {
                         // [elem-1] > [elem] => ln([elem-1]/[elem]) > 0)
                         if (outputDec[elem - 1] > outputDec[elem]) { //stock is falling
-                            if (direction == 1) {
+                            if (direction == 1 && amoutOfStocks != 0) {
                                 //selling, Price went to the top and starts to fall
                                 changed = true; //Price is going down
-                                if (amoutOfStocks != 0) {
                                     assumedBudjet = amoutOfStocks * input[elem + outBegIdxDec.value];
-
+                                    amoutOfStocks=0;
                                     System.out.printf("%s selling for:" + input[elem + outBegIdxDec.value] + " budjet:%f per:%d bestper:%f\n",
                                             stockType.getName(), assumedBudjet, decMOMPeriod, bestPeriod);
 
@@ -228,16 +229,15 @@ public class TaLibMOM extends TaLibAbstract implements MethodEntry {
                                         bestAssumedBudjet = assumedBudjet;
                                         bestPeriod = decMOMPeriod;
                                     }
-                                }
                             }
                             direction = -1;
                         } else {
                             //buying, Price went to the buttom and raising
-                            if (direction == -1) {
-                                    changed = true; //Price is going up
-                                    amoutOfStocks = assumedBudjet / input[elem + outBegIdxDec.value];
-                                    System.out.printf("%s buying for:" + input[elem + outBegIdxDec.value] + " budjet:%f period:%d bestper:%f\n",
-                                            stockType.getName(), assumedBudjet, decMOMPeriod, bestPeriod);
+                            if (direction == -1 && amoutOfStocks == 0) {
+                                changed = true; //Price is going up
+                                amoutOfStocks = assumedBudjet / input[elem + outBegIdxDec.value];
+                                System.out.printf("%s buying for:" + input[elem + outBegIdxDec.value] + " budjet:%f period:%d bestper:%f\n",
+                                        stockType.getName(), assumedBudjet, decMOMPeriod, bestPeriod);
                             }
                             direction = 1;
                         }
@@ -248,9 +248,9 @@ public class TaLibMOM extends TaLibAbstract implements MethodEntry {
                                         config.inputEndingDate.getTime());
                                 dateIterator.move(elem + outBegIdxDec.value);
 
-
-
                                 packet.seriesTitle = "Sell/Buy signals";
+                                packet.type = GraphSeriesType.SIMPLEBUBLE;
+                                
                                 packet.result = input[elem + outBegIdxDec.value] + 0.1;
                                 packet.date = dateIterator.getCurrent().getTime();
 

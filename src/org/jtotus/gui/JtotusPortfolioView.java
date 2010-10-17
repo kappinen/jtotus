@@ -19,7 +19,6 @@
 package org.jtotus.gui;
 
 
-import java.util.Calendar;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;

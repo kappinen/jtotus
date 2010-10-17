@@ -36,7 +36,6 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JInternalFrame;
-import org.jdesktop.jxlayer.JXLayer;
 import org.jtotus.common.Helper;
 import org.jfree.data.time.Day;
 import org.jfree.data.time.TimeSeries;
@@ -48,7 +47,6 @@ import org.jfree.data.time.TimeSeries;
 public class JtotusGraph implements Runnable {
 
     private JInternalFrame mainFrame = null;
-    //  GraphPrinter lineChart = null;
     protected LinkedBlockingDeque<GraphPacket> queue = null;
     private Helper help = Helper.getInstance();
     public final Object seriesMap_lock = new Object();
@@ -66,9 +64,7 @@ public class JtotusGraph implements Runnable {
 
 
         //Initialize Graph
-        //lineChart = new GraphPrinter(reviewTarget);
         mainReviewTarget = reviewTarget;
-        // mainFrame.setContentPane(lineChart.getContainer());
         lineChart = new GraphPrinter(reviewTarget);
 
         mainFrame.setName(reviewTarget);
@@ -106,7 +102,7 @@ public class JtotusGraph implements Runnable {
     public void run() {
 
         GraphPacket packet = null;
-        
+
         if (serverThread == null) {
             if (initialize() == false) {
                 return;
@@ -129,8 +125,8 @@ public class JtotusGraph implements Runnable {
             cal.setTimeInMillis(packet.date);
 
             Day tmpDay = new Day(cal.get(Calendar.DATE),
-                                 cal.get(Calendar.MONTH) + 1,
-                                 cal.get(Calendar.YEAR));
+                    cal.get(Calendar.MONTH) + 1,
+                    cal.get(Calendar.YEAR));
 
 
             // add point to seriesMap
@@ -147,6 +143,7 @@ public class JtotusGraph implements Runnable {
                 TimeSeries newSeries = new TimeSeries(packet.seriesTitle);
                 newSeries.add(tmpDay, packet.result);
                 seriesMap.put(packet.seriesTitle, newSeries);
+                lineChart.setRenderer(seriesMap.size(), packet.type);
                 lineChart.drawSeries(newSeries);
             }
 
@@ -219,8 +216,10 @@ public class JtotusGraph implements Runnable {
 
                     GraphPacket obj = (GraphPacket) is.readObject();
 
-                    // add it to blocking queue
-                    queue.putFirst(obj);
+                    if (obj.type == GraphSeriesType.SIMPLEBUBLE) // add it to blocking queue
+                    {
+                        queue.putFirst(obj);
+                    }
                     byteStream.reset();
 
 //                    if(parent.getState() == Thread.State.TIMED_WAITING) {
