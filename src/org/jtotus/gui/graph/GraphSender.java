@@ -26,6 +26,8 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
@@ -37,12 +39,16 @@ import org.jtotus.engine.Engine;
  *
  * @author Evgeni Kappinen
  */
-public class GraphSender {
+public final class GraphSender {
 
-    private Engine mainEngine = null;
-    private int mainPort = 0;
-    private DatagramSocket clientSock = null;
+    protected Engine mainEngine = null;
+    protected int mainPort = 0;
+    protected DatagramSocket clientSock = null;
+    protected InetAddress address = null;
+    protected ByteArrayOutputStream byteStream = null;
 
+
+    
     class ThreadSender implements Runnable {
 
         private int startingPoint = 0;
@@ -89,14 +95,15 @@ public class GraphSender {
                 packet.seriesTitle = methodName;
                 packet.result = dataToSend[i];
                 packet.date = stockDate.getTime();
+                sentPacket(methodName, packet);
             }
         }
     }
 
     public void executeTask(String methName,
-            double data[],
-            int start, int end,
-            Calendar startDate, Calendar endDate) {
+                            double data[],
+                            int start, int end,
+                            Calendar startDate, Calendar endDate) {
 
         ThreadSender task = new ThreadSender(methName, mainPort);
         task.executeTask(data, start, end, startDate, endDate);
@@ -104,17 +111,28 @@ public class GraphSender {
         thread.start();
     }
 
-    public GraphSender(int port) {
-        mainPort = port;
+    protected void initialize() {
+                try {
+             address = InetAddress.getByName("127.0.0.1");
+
+             clientSock = new DatagramSocket();
+             byteStream = new ByteArrayOutputStream(1024 * 4);
+
+        } catch (SocketException ex) {
+            Logger.getLogger(GraphSender.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(GraphSender.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public GraphSender(String reviewTarget) {
         mainEngine = Engine.getInstance();
         mainPort = mainEngine.fetchGraph(reviewTarget);
-
+        initialize();
     }
 
     public GraphSender() {
+        initialize();
     }
 
     public boolean sentPacket(String reviewTarget, GraphPacket packetObj) {
@@ -123,8 +141,7 @@ public class GraphSender {
 
         if (packetObj == null || reviewTarget == null) {
             return false;
-        }
-
+       }
 
         if (mainEngine != null) {
             port = mainEngine.fetchGraph(reviewTarget);
@@ -145,14 +162,8 @@ public class GraphSender {
         }
 
         try {
-            InetAddress address = InetAddress.getByName("127.0.0.1");
-
-            clientSock = new DatagramSocket();
-
-            ByteArrayOutputStream byteStream = new ByteArrayOutputStream(1024 * 7);
-
+            byteStream.reset();
             os = new ObjectOutputStream(new BufferedOutputStream(byteStream));
-            os.flush();
             os.writeObject(packetObj);
             os.flush();
 
@@ -162,8 +173,8 @@ public class GraphSender {
 
             clientSock.send(packet);
 
-            os.close();
-            clientSock.close();
+            //os.close();
+            //clientSock.close();
 
         } catch (IOException ex) {
             Logger.getLogger(GraphSender.class.getName()).log(Level.SEVERE, null, ex);

@@ -56,7 +56,9 @@ import org.jtotus.common.StockType;
 import org.jtotus.gui.graph.GraphSender;
 import org.jtotus.config.ConfTaLibRSI;
 import org.apache.commons.lang.ArrayUtils;
+import org.jtotus.common.StateIterator;
 import org.jtotus.config.ConfigLoader;
+import org.jtotus.methods.utils.Normalizer;
 
 /**
  *
@@ -69,11 +71,10 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
     //INPUTS TO METHOD:
     private double avgSuccessRate = 0.0f;
     private int totalStocksAnalyzed = 0;
-    //public Calendar inputEndingDate = Calendar.getInstance();
+
     public ConfTaLibRSI config = null;
     public ConfigLoader<ConfTaLibRSI> configFile = null;
 
-    
     public TaLibRSI() {
         super();
     }
@@ -81,17 +82,17 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
     public void loadInputs(String configStock) {
 
         configFile = new ConfigLoader<ConfTaLibRSI>(super.inputPortofolio
-                                                + File.separator
-                                                + configStock
-                                                + File.separator
-                                                + this.getMethName());
+                + File.separator
+                + configStock
+                + File.separator
+                + this.getMethName());
 
         if (configFile.getConfig() == null) {
             //Load default values
             config = new ConfTaLibRSI();
             configFile.storeConfig(config);
         } else {
-            config = (ConfTaLibRSI)configFile.getConfig();
+            config = (ConfTaLibRSI) configFile.getConfig();
         }
 
         configFile.applyInputsToObject(this);
@@ -104,10 +105,12 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
         for (int stockCount = 0; stockCount < super.inputListOfStocks.length; stockCount++) {
             closingPrices.clear();
 
+            StockType stockType = new StockType(super.inputListOfStocks[stockCount]);
+
             this.loadInputs(super.inputListOfStocks[stockCount]);
 
             System.out.printf("period:%d\n", config.inputRSIPeriod);
-            StockType stockType = new StockType(super.inputListOfStocks[stockCount]);
+
 
             DateIterator dateIter = new DateIterator(config.inputStartingDate.getTime(),
                     inputEndingDate.getTime());
@@ -150,23 +153,142 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
             if (super.inputPrintResults) {
                 sender = new GraphSender(this.getMethName());
 
-                sender.executeTask(super.getMethName(),
-                                   output, outBegIdx.value,
-                                   outNbElement.value,
-                                   config.inputStartingDate,
-                                   config.inputEndingDate);
+                sender.executeTask(stockType.getName(),
+                        output, outBegIdx.value,
+                        outNbElement.value,
+                        config.inputStartingDate,
+                        config.inputEndingDate);
             }
 
             //************* DECISION TEST *************//
 
+            if (this.inputPerfomDecision) {
+
+
+
+                double bestAssumedBudjet = 0;
+                double bestPeriod = 0;
+                double assumedBudjet = 0.0f;
+                int decSMAPeriod = 0;
+
+                for (StateIterator iter = new StateIterator().addParam("RSIpriod", config.inputRSIDecisionPeriod).addParam("LowestThreshold", config.inputRSILowestThreshold).addParam("HigestThreshold", config.inputRSIHigestThreshold); iter.hasNext() != StateIterator.END_STATE; iter.nextState()) {
+
+                    double amountOfStocks = 0;
+
+                    assumedBudjet = this.inputAssumedBudjet.doubleValue();
+                    decSMAPeriod = iter.nextInt("RSIpriod");
+
+                    final int allocationSizeDecision = period - core.rsiLookback(decSMAPeriod);
+
+                    if (allocationSizeDecision <= 0) {
+                        System.err.printf("No data for period (%d)\n", allocationSizeDecision);
+                        return null;
+                    }
+
+                    double[] outputDec = new double[allocationSizeDecision];
+                    MInteger outBegIdxDec = new MInteger();
+                    MInteger outNbElementDec = new MInteger();
+
+                    RetCode decCode = core.rsi(0, period - 1,
+                            input,
+                            decSMAPeriod,
+                            outBegIdxDec,
+                            outNbElementDec, outputDec);
+
+                    if (decCode.compareTo(RetCode.Success) != 0) {
+                        //Error return empty method results
+                        System.err.printf("RSI failed in Decision!\n");
+                        return new MethodResults(this.getMethName());
+                    }
+
+                    //TODO: Evaluate and store best config
+                    boolean changed = true;
+
+                    double lowestThreshold = iter.nextDouble("LowestThreshold");
+                    double highestThreshold = iter.nextDouble("HigestThreshold");
+
+                    for (int elem = 0; elem < outNbElementDec.value; elem++) {
+
+                        if (outputDec[elem] > highestThreshold) { //above the line, sell
+                            if (amountOfStocks != 0) {
+                                assumedBudjet = amountOfStocks * input[elem + outBegIdxDec.value];
+                                amountOfStocks = 0;
+                                changed = false;
+//                                        System.out.printf("%s selling for:"+input[elem+outBegIdxDec.value]+" budjet:%f per:%d bestper:%f low:%f high:%f elem:%d = %f\n",
+//                                                stockType.getName(), assumedBudjet, decSMAPeriod, bestPeriod, lowestThreshold,highestThreshold, elem, outputDec[elem]);
+
+                                if (bestAssumedBudjet < assumedBudjet) {
+                                    bestAssumedBudjet = assumedBudjet;
+                                    bestPeriod = decSMAPeriod;
+                                }
+                            }
+
+                        } else if (outputDec[elem] < lowestThreshold) {
+                            if (amountOfStocks == 0) {
+                                amountOfStocks = assumedBudjet / input[elem + outBegIdxDec.value];
+                                changed = false;
+                            }
+//                                    System.out.printf("%s buying for:"+input[elem+outBegIdxDec.value]+" budjet:%f period:%d bestper:%f low:%f high:%f elem:%d = %f\n",
+//                                            stockType.getName(), assumedBudjet, decSMAPeriod, bestPeriod,lowestThreshold,highestThreshold,elem, outputDec[elem]);
+
+                        }
+
+                        if (changed) {
+                            if (this.inputPrintResults && decSMAPeriod == config.inputRSIPeriod) {
+                                DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
+                                        config.inputEndingDate.getTime());
+                                dateIterator.move(elem + outBegIdxDec.value);
+
+
+
+                                packet.seriesTitle = "RSIDecision";
+                                packet.result = input[elem + outBegIdxDec.value] + 0.1;
+                                packet.date = dateIterator.getCurrent().getTime();
+
+//                                     System.err.printf("The dec period:%s:%s (%d:%d) elem:%d\n",
+//                                             dateIterator.getCurrent().toString(),stockType.getName(),
+//                                             outBegIdxDec.value, outNbElementDec.value, elem);
+                                sender.sentPacket(stockType.getName(), packet);
+                            }
+                            changed = false;
+                        }
+
+                    }
+
+                }
+
+                Double successRate = ((bestAssumedBudjet / this.inputAssumedBudjet) - 1) * 100;
+                System.out.printf("%s:The best period:%f best budjet:%f pros:%f\n",
+                        stockType.getName(), bestPeriod, bestAssumedBudjet,
+                        successRate.doubleValue());
+
+                totalStocksAnalyzed++;
+                this.avgSuccessRate += successRate;
+                this.config.outputSuccessRate = successRate;
+                this.config.inputRSIPeriod = (int) bestPeriod;
+                if (bestAssumedBudjet != 0) {
+                    this.configFile.storeConfig(config);
+                }
             }
+        }
 
-
+        results.setAvrSuccessRate(avgSuccessRate / totalStocksAnalyzed);
+        System.out.printf("%s has %d successrate\n", this.getMethName(), results.getAvrSuccessRate().intValue());
         return results;
     }
 
     @Override
     public MethodResults performMethod() {
-        return this.performRSI();
+        MethodResults results = this.performRSI();
+
+        System.out.printf("Normilizer:%s\n", config.inputNormilizerType);
+
+        if (config.inputNormilizerType != null) {
+            Normalizer norm = new Normalizer();
+
+            return norm.perform(config.inputNormilizerType, results);
+        }
+
+        return results;
     }
 }

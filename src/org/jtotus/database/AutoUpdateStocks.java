@@ -84,7 +84,7 @@ public class AutoUpdateStocks implements Runnable {
     
     public void run() {
 
-           javadb = new LocalJavaDB();
+           javadb = LocalJavaDB.getInstance();
             if (stockName == null) {
                 System.err.printf("Error autoupdator failure.\n");
                 return;

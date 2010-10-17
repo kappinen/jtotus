@@ -18,6 +18,7 @@
 package org.jtotus.database;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -30,24 +31,37 @@ import org.apache.jcs.access.exception.CacheException;
  * @author Evgeni Kappinen
  */
 public class CacheServer {
-    private HashMap <String,JCS> cacheRegions=null;
+    private HashMap <String, JCS> cacheRegions=null;
+    private static CacheServer cache=null;
+
     
-    public CacheServer() {
+    protected CacheServer() {
         //FIXME:maker proper configuration file and replace Helper.debug()
         org.apache.log4j.Logger logger = org.apache.log4j.LogManager.getRootLogger();
         logger.setLevel(org.apache.log4j.Level.ERROR);
-        
+
+//        System.out.printf("Creating hAHSMAP!!!!!\n");
         cacheRegions = new HashMap <String,JCS>();
 
     }
 
-    private boolean createRegion(String stockName) {
+    public static CacheServer getInstance() {
+        if(cache == null) {
+            cache = new CacheServer();
+        }
+        return cache;
+    }
+
+    private synchronized boolean createRegion(String stockName) {
         try {
 
-
+           
             if (cacheRegions.containsKey(stockName)==false) {
+              //   System.out.printf("Creating region:%s\n",stockName);
                 //TODO:JCS.setConfigFilename(stockName)
-                cacheRegions.put(stockName, JCS.getInstance(stockName));
+                 JCS cacheRegion = JCS.getInstance(stockName);
+                 cacheRegion.clear();
+                 cacheRegions.put(stockName, cacheRegion);
             }
 
         } catch (CacheException ex) {
@@ -62,12 +76,20 @@ public class CacheServer {
         return cacheRegions.get(stockName);
     }
 
-    public void putValue(String stockName, Calendar date, BigDecimal value){
+    private String getKeyValue(Calendar cal) {
+
+        SimpleDateFormat format = new SimpleDateFormat("MMddyyyy");
+        String newKey = format.format(cal.getTime());
+        return newKey;
+    }
+
+    public synchronized void putValue(String stockName, Calendar date, BigDecimal value){
         try {
             if(this.createRegion(stockName)) {
-                this.getRegion(stockName).put(date.toString(), value);
+           //     System.out.printf("Putting "+date.getTime()+"value:%d key:%s\n",value.intValue(), this.getKeyValue(date));
+                this.getRegion(stockName).put(this.getKeyValue(date), value);
             }else {
-                System.err.printf("Unable to find region:%s\n",stockName);
+                System.err.printf("Unable to find region:%s key:%s\n",stockName, this.getKeyValue(date));
             }
         } catch (CacheException ex) {
             Logger.getLogger(CacheServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -75,9 +97,11 @@ public class CacheServer {
 
     }
 
-    public BigDecimal getValue(String stockName, Calendar date){
+    public synchronized BigDecimal getValue(String stockName, Calendar date){
         if(this.createRegion(stockName)) {
-         return (BigDecimal) this.getRegion(stockName).get(date.toString());
+         BigDecimal ret = (BigDecimal) this.getRegion(stockName).get(this.getKeyValue(date));
+              //  System.out.printf("gettng value:%s key:%s\n",ret != null ?ret.toString() : "null", this.getKeyValue(date));
+                return ret;
         }  else {
          return null;
         }

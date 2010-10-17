@@ -108,25 +108,7 @@ public abstract class TaLibAbstract {
         
         System.out.printf("inputListOfStocks len:%d\n", inputListOfStocks.length);
 
-        MethodResults results = this.performMethod();
+        return this.performMethod();
 
-        if (this.inputPrintResults) {
-           
-            if(sender==null){
-               sender  = new GraphSender();
-            }
-            Iterator<Entry<String, Double>> iter = results.iterator();
-            
-            while (iter.hasNext()) {
-                Entry<String, Double> next = iter.next();
-
-                packet.seriesTitle = this.getMethName();
-                packet.result = next.getValue().doubleValue();
-                packet.date = inputEndingDate.getTimeInMillis();
-
-                sender.sentPacket(next.getKey(), packet);
-            }
-        }
-        return results;
     }
 }

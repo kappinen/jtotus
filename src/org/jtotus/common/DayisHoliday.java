@@ -32,7 +32,7 @@ import java.util.logging.Logger;
  * @author Evgeni Kappinen
  */
 public class DayisHoliday {
-    private  ArrayList<Calendar> holidays = new ArrayList<Calendar>();
+    private  ArrayList <Calendar> holidays = new ArrayList<Calendar>();
 
     public DayisHoliday() {
         DateFormat dayFormat = new SimpleDateFormat("dd.MM.yyyy");
@@ -51,6 +51,7 @@ public class DayisHoliday {
                                     "13.04.2009",
                                     "01.05.2009",
                                     "21.05.2009",
+                                    "19.06.2009",
                                     "24.12.2009",
                                     "25.12.2009",
                                     "31.12.2009"
@@ -84,6 +85,7 @@ public class DayisHoliday {
 
     public boolean isHoliday(Calendar date) {
         Iterator <Calendar>dateIter = holidays.iterator();
+        
         while(dateIter.hasNext()) {
             Calendar holidayDay = dateIter.next();
 

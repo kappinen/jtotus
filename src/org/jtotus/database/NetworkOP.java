@@ -76,7 +76,7 @@ public class NetworkOP implements InterfaceDataBase {
                     +startingDate.format(fromDate.getTime())
                     +endingDate.format(calendar.getTime());
     
-    System.out.printf("The full request: %s\n", request);
+    System.out.printf("("+ calendar.getTime() +")The full request: %s \n", request);
     return request;
   }
 

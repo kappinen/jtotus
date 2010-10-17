@@ -43,6 +43,7 @@ public class GraphPrinter {
     private ChartPanel mainPanel = null;
     private TimeSeriesCollection mainDataset = null;
 
+
     
     public GraphPrinter(String reviewTarget) {
         XYDataset dataset = createDataset();
@@ -56,7 +57,6 @@ public class GraphPrinter {
         mainPanel.setMouseZoomable(true, false);
         mainPanel.setFillZoomRectangle(true);
         mainPanel.setMouseWheelEnabled(true);
-
     }
    
     

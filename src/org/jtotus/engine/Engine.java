@@ -32,6 +32,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jtotus.gui.JtotusView;
 import org.jtotus.common.Helper;
+import org.jtotus.common.StateIterator;
 import org.jtotus.config.MethodConfig;
 import org.jtotus.database.AutoUpdateStocks;
 import org.jtotus.gui.MethodResultsPrinter;
@@ -143,12 +144,14 @@ public class Engine {
 
     private void testRun() {
 
-//        StateIterator iter = new StateIterator();
-//        iter.addParam("Param1", "int[2-5]");
-//        iter.addParam("Param2", "int[6-8]");
-//        while(iter.hasNext() != ) {
-//            System.out.printf("Param1:%d Param2: %d\n", iter.nextInt("Param1"), iter.nextInt("Param2"));
-//        }
+        for(StateIterator iter = new StateIterator()
+                .addParam("Param1", "int[2-5]{1}")
+                .addParam("Param2", "int[6-8]{1}")
+                ;iter.hasNext() != StateIterator.END_STATE;iter.nextState()) {
+            
+            System.out.printf("Param1:%d Param2: %d\n", iter.nextInt("Param1"), iter.nextInt("Param2"));
+            
+        }
     }
 
     public void train(){

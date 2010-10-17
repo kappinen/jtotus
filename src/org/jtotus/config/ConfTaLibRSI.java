@@ -18,7 +18,6 @@
 package org.jtotus.config;
 
 import java.util.Calendar;
-import org.jtotus.config.MethodConfig;
 
 /**
  *
@@ -26,31 +25,32 @@ import org.jtotus.config.MethodConfig;
  */
 public class ConfTaLibRSI {
 
-    public String intpuPortfolio=null;
+    public String inputPortfolio=null;
    
     public Calendar inputStartingDate = null;
     public Calendar inputEndingDate = null;
-    public boolean inputPrintResults = false;
+    public boolean inputPrintResults = true;
+    public String inputNormilizerType = null;
     public int inputRSIPeriod = 14;
 
 
 
     public Double outputSuccessRate=null;
-    public boolean inputPerfomDecision = false;
+    public boolean inputPerfomDecision = true;
     public String inputRSIDecisionPeriod = null;
-    public Double inputRSILowestThreshold=null;
-    public Double inputRSIHigestThreshold=null;
+    public String inputRSILowestThreshold=null;
+    public String inputRSIHigestThreshold=null;
 
     public ConfTaLibRSI() {
-        intpuPortfolio = new String("OMXHelsinki");
+        inputPortfolio = new String("OMXHelsinki");
         inputEndingDate = Calendar.getInstance();
         inputStartingDate = Calendar.getInstance();
-        inputStartingDate.add(Calendar.DATE, -90);
-
+        inputStartingDate.add(Calendar.DATE, -300);
+        inputNormilizerType = "SimpleMinWins";
          //Decision
-        inputRSIDecisionPeriod = "[6-15]{1}";
-        inputRSILowestThreshold = new Double(30);
-        inputRSIHigestThreshold = new Double(70);
+        inputRSIDecisionPeriod = "int[6-15]{1}";
+        inputRSILowestThreshold = "int[10-49]{2}";
+        inputRSIHigestThreshold = "int[50-80]{2}";
     }
 
 }

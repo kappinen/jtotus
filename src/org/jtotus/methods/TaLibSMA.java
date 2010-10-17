@@ -46,7 +46,6 @@ Vaihtoehtoisesti:
 
 package org.jtotus.methods;
 
-import java.util.concurrent.Callable;
 import org.jtotus.common.MethodResults;
 import com.tictactec.ta.lib.Core;
 import com.tictactec.ta.lib.MInteger;
@@ -76,10 +75,8 @@ public class TaLibSMA  extends TaLibAbstract implements MethodEntry{
     private int totalStocksAnalyzed = 0;
 
     //INPUTS TO METHOD:
-    public Calendar inputEndingDate = null;
-    public Calendar inputStartingDate = null;
     public ConfTaLibSMA config = null;
-    ConfigLoader<ConfTaLibSMA> configFile = null;
+    public ConfigLoader<ConfTaLibSMA> configFile = null;
 
 
         public void loadInputs(String configStock){
@@ -122,8 +119,8 @@ public class TaLibSMA  extends TaLibAbstract implements MethodEntry{
 
                StockType stockType = new StockType(this.inputListOfStocks[stockCount]);
 
-               DateIterator dateIter = new DateIterator(inputStartingDate.getTime(),
-                                                        inputEndingDate.getTime());
+               DateIterator dateIter = new DateIterator(config.inputStartingDate.getTime(),
+                                                        config.inputEndingDate.getTime());
 
                 //Filling input data with Closing price for days
                while(dateIter.hasNext()) {
@@ -174,7 +171,7 @@ public class TaLibSMA  extends TaLibAbstract implements MethodEntry{
 
                    if (this.inputPrintResults) {
                        sender = new GraphSender(this.getMethName());
-                       DateIterator dateIterator = new DateIterator(inputStartingDate.getTime(),
+                       DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
                                                                     inputEndingDate.getTime());
                         dateIterator.move(outBegIdx.value);
                         for(int i=0;i < outNbElement.value && dateIterator.hasNext();i++) {
@@ -246,6 +243,10 @@ public class TaLibSMA  extends TaLibAbstract implements MethodEntry{
                                     changed=true; //Price is going down
                                     if (amoutOfStocks!=0) {
                                         assumedBudjet=amoutOfStocks*input[elem+outBegIdxDec.value];
+
+                                        System.out.printf("%s selling for:"+input[elem+outBegIdxDec.value]+" budjet:%f per:%d bestper:%f\n",
+                                                stockType.getName(), assumedBudjet, decSMAPeriod, bestPeriod);
+
                                         if(bestAssumedBudjet < assumedBudjet) {
                                             bestAssumedBudjet = assumedBudjet;
                                             bestPeriod = decSMAPeriod;
@@ -258,6 +259,8 @@ public class TaLibSMA  extends TaLibAbstract implements MethodEntry{
                                 if (direction==1) {
                                     changed=true; //Price is going up
                                     amoutOfStocks = assumedBudjet / input[elem+outBegIdxDec.value];
+                                    System.out.printf("%s buying for:"+input[elem+outBegIdxDec.value]+" budjet:%f period:%d bestper:%f\n",
+                                            stockType.getName(), assumedBudjet, decSMAPeriod, bestPeriod);
                                     
                                 }
                                 
@@ -266,8 +269,8 @@ public class TaLibSMA  extends TaLibAbstract implements MethodEntry{
 
                             if(changed){
                                  if (this.inputPrintResults && decSMAPeriod == config.inputSMAPeriod) {
-                                    DateIterator dateIterator = new DateIterator(inputStartingDate.getTime(),
-                                                                                inputEndingDate.getTime());
+                                    DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
+                                                                                 config.inputEndingDate.getTime());
                                     dateIterator.move(elem + outBegIdxDec.value);
 
 

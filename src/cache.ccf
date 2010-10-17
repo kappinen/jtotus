@@ -15,8 +15,8 @@ jcs.region.testCache1.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memo
 jcs.auxiliary.DC=org.apache.jcs.auxiliary.disk.indexed.IndexedDiskCacheFactory
 jcs.auxiliary.DC.attributes=org.apache.jcs.auxiliary.disk.indexed.IndexedDiskCacheAttributes
 jcs.auxiliary.DC.attributes.DiskPath=${user.dir}
-jcs.auxiliary.DC.attributes.MaxPurgatorySize=100000
-jcs.auxiliary.DC.attributes.MaxKeySize=10000
+jcs.auxiliary.DC.attributes.MaxPurgatorySize=10000
+jcs.auxiliary.DC.attributes.MaxKeySize=1000
 jcs.auxiliary.DC.attributes.MaxRecycleBinSize=5000
-jcs.auxiliary.DC.attributes.OptimizeAtRemoveCount=3000
+jcs.auxiliary.DC.attributes.OptimizeAtRemoveCount=4000
 

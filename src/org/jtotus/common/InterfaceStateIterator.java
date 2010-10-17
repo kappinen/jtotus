@@ -15,12 +15,19 @@
     along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.jtotus.methods.utils;
+package org.jtotus.common;
+
+import java.util.Iterator;
 
 /**
  *
  * @author Evgeni Kappinen
  */
-public class NormBiggestBest {
+public interface InterfaceStateIterator extends Iterator , Iterable{
+
+
+    
+
+
 
 }

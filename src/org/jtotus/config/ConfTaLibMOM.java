@@ -23,8 +23,7 @@ import java.util.Calendar;
  *
  * @author Evgeni Kappinen
  */
-public class ConfTaLibEMA {
-
+public class ConfTaLibMOM {
     public String inputPortfolio=null;
 
 
@@ -32,22 +31,26 @@ public class ConfTaLibEMA {
     public Calendar inputStartingDate = null;
     public Calendar inputEndingDate = null;
     public boolean inputPrintResults = true;
-    public int inputEMAPeriod = 10;
-    public Double outputSuccessRate = null;
+    public int inputMOMPeriod = 10;
+
+    //Methods sets, if available.
+    //Should be represented in procents.
+    public Double outputSuccessRate=null;
 
     //Strategy Decision
     public boolean inputPerfomDecision = true;
-    public String inputEMADecisionPeriod;
+    public String inputMOMDecisionPeriod=null;
+    public String inputNormilizerType=null;
 
-    public ConfTaLibEMA() {
+    public ConfTaLibMOM() {
         inputPortfolio = new String("OMXHelsinki");
         inputEndingDate = Calendar.getInstance();
         inputStartingDate = Calendar.getInstance();
         inputStartingDate.add(Calendar.DATE, -600);
 
-        //Decision
-        inputEMADecisionPeriod = "[3-30]{1}";
-        outputSuccessRate = new Double(0.0f);
-    }
 
+        //Decision
+        inputMOMDecisionPeriod = "[3-30]{1}";
+
+    }
 }

@@ -46,7 +46,6 @@ Vaihtoehtoisesti:
 
 package org.jtotus.methods;
 
-import java.util.concurrent.Callable;
 import org.jtotus.common.MethodResults;
 import com.tictactec.ta.lib.Core;
 import com.tictactec.ta.lib.MInteger;
@@ -299,9 +298,7 @@ public class TaLibEMA  extends TaLibAbstract implements MethodEntry{
                     this.config.inputEMAPeriod = (int) bestPeriod;
                     this.configFile.storeConfig(config);
                 }
-
             }
-
 
             results.setAvrSuccessRate(avgSuccessRate/totalStocksAnalyzed);
             System.out.printf("%s has %d successrate\n", this.getMethName(), results.getAvrSuccessRate().intValue());

@@ -25,7 +25,7 @@ import java.util.Calendar;
  */
 public class ConfTaLibSMA {
 
-    public String intpuPortfolio=null;
+    public String inputPortfolio=null;
 
 
     //Basic configuration
@@ -43,7 +43,7 @@ public class ConfTaLibSMA {
     public String inputSMADecisionPeriod;
 
     public ConfTaLibSMA() {
-        intpuPortfolio = new String("OMXHelsinki");
+        inputPortfolio = new String("OMXHelsinki");
         inputEndingDate = Calendar.getInstance();
         inputStartingDate = Calendar.getInstance();
         inputStartingDate.add(Calendar.DATE, -600);

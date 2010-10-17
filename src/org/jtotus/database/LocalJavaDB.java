@@ -39,14 +39,13 @@ public class LocalJavaDB implements InterfaceDataBase {
     private String[] connectionUrl = {"jdbc:derby://localhost:1527/OMXHelsinki",
         "hex", "hex"};
     public String mainTable = "APP.OMXHELSINKI";
-    private Helper help = Helper.getInstance();
     private PreparedStatement priceStmt = null;
     private static ArrayDeque<Connection> conPool = null;
     private static Class driverClass = null;
     private static Object conLock = new Object();;
     private static LocalJavaDB jdbc = null;
 
-    protected LocalJavaDB() {
+    private LocalJavaDB() {
         
         synchronized(LocalJavaDB.conLock){
             LocalJavaDB.conPool = new ArrayDeque<Connection>();
@@ -68,9 +67,11 @@ public class LocalJavaDB implements InterfaceDataBase {
                 }
 
                 if (LocalJavaDB.conPool.isEmpty()) {
-                    return DriverManager.getConnection(connectionUrl[0],
-                            connectionUrl[1],
-                            connectionUrl[2]);
+                    Connection con = DriverManager.getConnection(connectionUrl[0],
+                                            connectionUrl[1],
+                                            connectionUrl[2]);
+                    con.setAutoCommit(false);
+                    return con;
                 } else {
                     return conPool.pop();
                 }
@@ -100,7 +101,7 @@ public class LocalJavaDB implements InterfaceDataBase {
         return this.fetchData(stockName, calendar, "VOLUME");
     }
 
-    private BigDecimal fetchData(String stockName, Calendar calendar, String data) {
+    private synchronized BigDecimal  fetchData(String stockName, Calendar calendar, String data) {
         BigDecimal closingPrice = null;
         Connection conJavaDB = this.getDatabaseConnection();
 
@@ -123,6 +124,7 @@ public class LocalJavaDB implements InterfaceDataBase {
             priceStmt.setDate(2, sqlDate, calendar);
 
             //Perform query
+            conJavaDB.setAutoCommit(false);
             ResultSet results = priceStmt.executeQuery();
 
             while (results.next()) {
