@@ -52,13 +52,13 @@ public class JtotusView extends FrameView {
    public void initialize()
     {
        ((JtotusPortfolioView)portfolioTabbedPane).initialize();
-       ((jtotusMethodView)methodTabbedPane).initialize();
+       ((JTotusMethodView)methodTabbedPane).initialize();
     }
 
    public LinkedList<String> getMethodList() {
 
        //Returns selected methods from methoTabPane
-       return ((jtotusMethodView)methodTabbedPane).getSelectedMethods();
+       return ((JTotusMethodView)methodTabbedPane).getSelectedMethods();
    }
 
 
@@ -186,7 +186,7 @@ public class JtotusView extends FrameView {
         jButton1 = new javax.swing.JButton();
         jButtonRunScripts = new javax.swing.JButton();
         portfolioTabbedPane = new org.jtotus.gui.JtotusPortfolioView();
-        methodTabbedPane = new org.jtotus.gui.jtotusMethodView();
+        methodTabbedPane = new org.jtotus.gui.JTotusMethodView();
         menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
@@ -393,7 +393,7 @@ public class JtotusView extends FrameView {
     private int busyIconIndex = 0;
 
     public int createIntFrame(String reviewTarget) {
-        return ((jtotusMethodView)methodTabbedPane).createIntFrame(reviewTarget);
+        return ((JTotusMethodView)methodTabbedPane).createIntFrame(reviewTarget);
     }
 
     @Action
