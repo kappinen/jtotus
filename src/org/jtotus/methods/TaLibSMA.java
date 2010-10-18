@@ -273,8 +273,6 @@ public class TaLibSMA  extends TaLibAbstract implements MethodEntry{
                                                                                  config.inputEndingDate.getTime());
                                     dateIterator.move(elem + outBegIdxDec.value);
 
-
-                                    
                                     packet.seriesTitle = "CrossingPoint";
                                     packet.result = input[elem+outBegIdxDec.value]+0.1;
                                     packet.date = dateIterator.getCurrent().getTime();

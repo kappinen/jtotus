@@ -102,8 +102,8 @@ public class GraphPrinter {
     private XYItemRenderer getDefaultLine(){
             XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
 
-            //renderer.setSeriesLinesVisible(1, true);
-            //renderer.setSeriesShapesVisible(1, true);
+            renderer.setSeriesLinesVisible(1, true);
+            renderer.setSeriesShapesVisible(1, true);
             return renderer;
       }
     

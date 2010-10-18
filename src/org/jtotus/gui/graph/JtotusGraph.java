@@ -216,10 +216,8 @@ public class JtotusGraph implements Runnable {
 
                     GraphPacket obj = (GraphPacket) is.readObject();
 
-                    if (obj.type == GraphSeriesType.SIMPLEBUBLE) // add it to blocking queue
-                    {
-                        queue.putFirst(obj);
-                    }
+                     // add it to blocking queue
+                    queue.putFirst(obj);
                     byteStream.reset();
 
 //                    if(parent.getState() == Thread.State.TIMED_WAITING) {

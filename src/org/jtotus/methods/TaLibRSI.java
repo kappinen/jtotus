@@ -48,6 +48,7 @@ import com.tictactec.ta.lib.Core;
 import com.tictactec.ta.lib.MInteger;
 import com.tictactec.ta.lib.RetCode;
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -119,7 +120,10 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
 
                 Calendar cal = Calendar.getInstance();
                 cal.setTime(dateIter.next());
-                closingPrices.add(stockType.fetchClosingPrice(cal).doubleValue());
+                BigDecimal ret = stockType.fetchClosingPrice(cal);
+                //Can be null only, if there is no data for today
+                if(ret != null)
+                    closingPrices.add(ret.doubleValue());
             }
 
 
