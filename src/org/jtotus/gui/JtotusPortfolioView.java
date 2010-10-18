@@ -73,13 +73,14 @@ public class JtotusPortfolioView extends JTabbedPane {
         //Load configuration for GUI
        
          String listOfStocks[] = uiConfig.fetchStockName();
-
+         StockType stock = new StockType();
          for (int i = 0;i<listOfStocks.length;i++) {
              if (i>=portfolioModel.getRowCount()){
                  portfolioModel.addRow(new Object[] {null,null,null,null});
              }
+
              portfolioModel.setValueAt(listOfStocks[i], i, 0);
-             StockType stock = new StockType(listOfStocks[i]);
+             stock.setStockName(listOfStocks[i]);
              portfolioModel.setValueAt(stock.fetchCurrentClosingPrice().toString(), i, 1);
              //portfolioModel.setValueAt(stock.fetchPastDayClosingPrice(1).toString(), i, 2);
              portfolioModel.setValueAt(stock.fetchCurrentVolume(), i, 3);

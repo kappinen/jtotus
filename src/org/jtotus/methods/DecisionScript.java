@@ -89,7 +89,7 @@ public class DecisionScript extends TaLibAbstract implements MethodEntry {
 
     
     @Override
-    public MethodResults performMethod() {
+    public MethodResults performMethod(String stockName) {
         File file = new File(path_to_script);
 
         if (!file.isFile() || !file.canRead()) {

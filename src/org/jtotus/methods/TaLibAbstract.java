@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 import org.jtotus.common.MethodResults;
 import java.util.Calendar;
 import org.jtotus.common.Helper;
+import org.jtotus.common.StockType;
 import org.jtotus.config.ConfigLoader;
 import org.jtotus.gui.graph.GraphPacket;
 import org.jtotus.gui.graph.GraphSender;
@@ -45,13 +46,13 @@ public abstract class TaLibAbstract {
     public String inpuPortfolio = null;
     public Double inputAssumedBudjet = null;
     //General inputs
- 
     public Calendar inputEndingDate = null;
     public String[] inputListOfStocks = null;
     //Modes
     public boolean inputPrintResults = true;
     public boolean inputPerfomDecision = true;
-
+    protected MethodResults methodResults = null;
+    protected StockType stockType = null;
 
     public String getMethName() {
         String tmp = this.getClass().getName();
@@ -84,7 +85,7 @@ public abstract class TaLibAbstract {
     }
 
     //To override
-    public MethodResults performMethod() {
+    public MethodResults performMethod(String stockName) {
 
         return null;
     }
@@ -102,11 +103,17 @@ public abstract class TaLibAbstract {
 
         avgSuccessRate = new Double(0.0f);
         packet = new GraphPacket();
+        stockType = new StockType();
+        methodResults = new MethodResults(this.getMethName());
 
-        
+
         System.out.printf("inputListOfStocks len:%d\n", inputListOfStocks.length);
 
-        return this.performMethod();
+        for (int stockCount = 0; stockCount < this.inputListOfStocks.length; stockCount++) {
+            this.performMethod(this.inputListOfStocks[stockCount]);
+        }
+
+        return methodResults;
 
     }
 }

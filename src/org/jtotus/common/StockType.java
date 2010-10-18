@@ -38,13 +38,15 @@ public class StockType implements Iterator{
     private StockNames stocks = new StockNames();
     private Iterator mapIter = null;
     private final DataFetcher fetcher = new DataFetcher();
-    private Helper help=null;
+    private Helper help=Helper.getInstance();;
 
 
+    public StockType() {
+        mapIter = stocks.iterator();
+    }
+    
     public StockType(String name) {
         stockName = name;
-        help = Helper.getInstance();
-
         mapIter = stocks.iterator();
     }
 
@@ -83,8 +85,12 @@ public class StockType implements Iterator{
         return stocks.getHexName(stockName);
     }
 
-    public String getName() {
+    public String getStockName() {
         return stockName;
+    }
+
+    public void setStockName(String name) {
+        stockName = name;
     }
 
     public BigDecimal fetchCurrentClosingPrice() {

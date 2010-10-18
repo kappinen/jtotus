@@ -72,7 +72,7 @@ public class PotentialWithIn implements MethodEntry {
            StockType stock = new StockType(iter.next());
             periodList.add(new PeriodClosingPrice(stock));
             help.debug(this.getClass().getName(),
-                    "StockName for period:%s\n", stock.getName());
+                    "StockName for period:%s\n", stock.getStockName());
        }
 
        //  Find out which Stock has most potentials
@@ -314,9 +314,6 @@ public class PotentialWithIn implements MethodEntry {
     public boolean isCallable() {
         return true;
     }
-
-
-
 
 
 }

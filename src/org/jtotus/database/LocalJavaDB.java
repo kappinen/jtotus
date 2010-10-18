@@ -27,7 +27,6 @@ import java.math.BigDecimal;
 import java.util.ArrayDeque;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jtotus.common.Helper;
 
 /**
  *
@@ -92,7 +91,6 @@ public class LocalJavaDB implements InterfaceDataBase {
    }
 
 
-
     public BigDecimal fetchClosingPrice(String stockName, Calendar calendar) {
         return this.fetchData(stockName, calendar, "CLOSINGPRICE");
     }
@@ -151,15 +149,16 @@ public class LocalJavaDB implements InterfaceDataBase {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public boolean stockNameExists(String stockName, Calendar date) {
+    public boolean stockNameExists(Connection conJavaDB, String stockName, Calendar date) {
 
         boolean result = false;
-        Connection conJavaDB = this.getDatabaseConnection();
 
         if (conJavaDB == null) {
             return false;
         }
+        
         try {
+            System.out.printf("-------->Stock:%s data: %s time:"+date.getTime()+"\n", stockName, mainTable);
 
             String query = "SELECT * FROM " + mainTable + " WHERE STOCKNAME=? AND DATE=?";
             PreparedStatement pstmt = conJavaDB.prepareStatement(query);
@@ -201,7 +200,7 @@ public class LocalJavaDB implements InterfaceDataBase {
     }
 
     //FIXME:add if failed store values to file in other database
-    public void storeData(String stockName,
+    public synchronized void storeData(String stockName,
             Calendar calendar,
             BigDecimal value,
             String param) {
@@ -213,7 +212,7 @@ public class LocalJavaDB implements InterfaceDataBase {
         
         try {
 
-            if (this.stockNameExists(stockName, calendar)) {
+            if (this.stockNameExists(conJavaDB, stockName, calendar)) {
                 String query = "UPDATE " + mainTable + " SET " + param + "=? WHERE STOCKNAME=? AND DATE=?";
                 PreparedStatement pstmt = conJavaDB.prepareStatement(query);
 

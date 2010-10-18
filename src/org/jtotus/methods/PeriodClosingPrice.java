@@ -33,7 +33,6 @@ import java.util.Set;
 import org.jtotus.common.DateIterator;
 import org.jtotus.common.Helper;
 import org.jtotus.common.StockType;
-import org.apache.commons.lang.ArrayUtils;
 
 /**
  *
@@ -53,7 +52,7 @@ public class PeriodClosingPrice {
     
     public PeriodClosingPrice(StockType stockTmp) {
         stock = stockTmp;
-        stockName = stock.getName();
+        stockName = stock.getStockName();
         priceList = new HashMap<Calendar, BigDecimal>();
     }
 
@@ -65,7 +64,7 @@ public class PeriodClosingPrice {
 
     public String getStockName() {
         if (stockName == null && stock != null) {
-            stockName =  stock.getName();
+            stockName =  stock.getStockName();
         }
         return stockName;
     }
@@ -91,7 +90,7 @@ public class PeriodClosingPrice {
         BigDecimal ret = pot.divide(current,MathContext.DECIMAL64).multiply(BigDecimal.valueOf(100.00));
         help.debug("PeriodClosingPrice",
                 "Stock: %s ret:%f - %f =ret:%f\n",
-                stock.getName(),max.floatValue(),current.floatValue(),ret.floatValue());
+                stock.getStockName(),max.floatValue(),current.floatValue(),ret.floatValue());
         return ret;
     }
 
@@ -106,7 +105,7 @@ public class PeriodClosingPrice {
         BigDecimal ret = lowPot.divide(current,MathContext.DECIMAL64).multiply(BigDecimal.valueOf(100.00));
         help.debug("PeriodClosingPrice",
                 "Stock: %s ret:%f - %f =ret:%f\n",
-                stock.getName(),min.floatValue(),current.floatValue(),ret.floatValue());
+                stock.getStockName(),min.floatValue(),current.floatValue(),ret.floatValue());
         return ret;
     }
 

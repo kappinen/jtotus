@@ -100,7 +100,7 @@ public class SimpleMovingAvg implements MethodEntry {
                 packet.result = avr.doubleValue();
                 packet.date = calendar.getTimeInMillis();
 
-                sender.sentPacket(stockType.getName(), packet);
+                sender.sentPacket(stockType.getStockName(), packet);
              }
         }
     }

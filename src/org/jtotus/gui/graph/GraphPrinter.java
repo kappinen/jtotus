@@ -61,6 +61,7 @@ public class GraphPrinter {
         mainPanel.setMouseZoomable(true, false);
         mainPanel.setFillZoomRectangle(true);
         mainPanel.setMouseWheelEnabled(true);
+        
     }
    
     

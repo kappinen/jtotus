@@ -41,15 +41,15 @@ stockType = new org.jtotus.common.StockType(reviewTarget)
 
 sender = new org.jtotus.gui.graph.GraphSender();
 packet = new org.jtotus.gui.graph.GraphPacket();
-packet.seriesTitle = stockType.getName()+"_ClosingPrice";
+packet.seriesTitle = stockType.getStockName()+"_ClosingPrice";
 
 
 
 for (int i=0; i<daysToSearch;i++) {
-        sender.sentPacket(stockType.getName(), stockType.fetchPastDayClosingPricePacket(i))
+        sender.sentPacket(stockType.getStockName(), stockType.fetchPastDayClosingPricePacket(i))
         if (i==daysToSearch-1) {
             Double result = stockType.fetchCurrentClosingPrice();
-            results.putResult(stockType.getName(), result.doubleValue())
+            results.putResult(stockType.getStockName(), result.doubleValue())
         }
     }
 
