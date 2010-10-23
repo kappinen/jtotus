@@ -17,10 +17,10 @@
 
 package org.jtotus.common;
 
+import com.google.common.collect.HashMultiset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
@@ -32,11 +32,12 @@ import java.util.logging.Logger;
  * @author Evgeni Kappinen
  */
 public class DayisHoliday {
-    private  ArrayList <Calendar> holidays = new ArrayList<Calendar>();
+    private  HashMultiset <Calendar> holidays = null;
 
     public DayisHoliday() {
         DateFormat dayFormat = new SimpleDateFormat("dd.MM.yyyy");
-
+        holidays = HashMultiset.create();
+        
         try {//Finnish Holidays
             String[] holidayList = {
                                     "01.01.2010",
@@ -56,7 +57,6 @@ public class DayisHoliday {
                                     "25.12.2009",
                                     "31.12.2009"
                                    };
-
 
             for (int i = 0; i < holidayList.length; i++) {
                 Date dateTmp = dayFormat.parse(holidayList[i]);
@@ -78,9 +78,9 @@ public class DayisHoliday {
         if (cal1 == null || cal2 == null) {
             throw new IllegalArgumentException("The date must not be null");
         }
-        return (cal1.get(Calendar.ERA) == cal2.get(Calendar.ERA) &&
-                cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR));
+        return (cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH) &&
+                cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) &&
+                cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR));
     }
 
     public boolean isHoliday(Calendar date) {

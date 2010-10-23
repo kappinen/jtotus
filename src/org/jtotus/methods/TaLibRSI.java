@@ -72,7 +72,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
     //INPUTS TO METHOD:
     private double avgSuccessRate = 0.0f;
     private int totalStocksAnalyzed = 0;
-    public ConfTaLibRSI config = null;
+    protected ConfTaLibRSI config = null;
     public ConfigLoader<ConfTaLibRSI> configFile = null;
 
     public void loadInputs(String configStock) {
@@ -96,7 +96,6 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
 
     public MethodResults performRSI(String stockName) {
 
-
         List<Double> closingPrices = new ArrayList<Double>();
 
         closingPrices.clear();
@@ -106,9 +105,8 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
 
         System.out.printf("period:%d\n", config.inputRSIPeriod);
 
-
         DateIterator dateIter = new DateIterator(config.inputStartingDate.getTime(),
-                inputEndingDate.getTime());
+                                                 config.inputEndingDate.getTime());
 
         while (dateIter.hasNext()) {
 
@@ -152,7 +150,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
         if (super.inputPrintResults) {
             sender = new GraphSender(this.getMethName());
             DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                    inputEndingDate.getTime());
+                                                         config.inputEndingDate.getTime());
             dateIterator.move(outBegIdx.value);
             for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
                 Date stockDate = dateIterator.next();
@@ -172,9 +170,6 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
         //************* DECISION TEST *************//
 
         if (this.inputPerfomDecision) {
-
-
-
             double bestAssumedBudjet = 0;
             double bestPeriod = 0;
             double assumedBudjet = 0.0f;
@@ -276,9 +271,12 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
             this.avgSuccessRate += successRate;
             this.config.outputSuccessRate = successRate;
             this.config.inputRSIPeriod = (int) bestPeriod;
+            this.config.inputPerfomDecision=false;
             if (bestAssumedBudjet != 0) {
+                 config.inputPerfomDecision=false;
                 this.configFile.storeConfig(config);
             }
+           
         }
 
         methodResults.setAvrSuccessRate(avgSuccessRate / totalStocksAnalyzed);

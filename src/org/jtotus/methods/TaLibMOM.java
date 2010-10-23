@@ -146,7 +146,7 @@ public class TaLibMOM extends TaLibAbstract implements MethodEntry {
         methodResults.putResult(stockType.getStockName(), output[output.length - 1]);
 
         if (this.inputPrintResults) {
-            sender = new GraphSender(this.getMethName());
+            sender = new GraphSender(stockType.getStockName());
             DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
                     inputEndingDate.getTime());
             dateIterator.move(outBegIdx.value);

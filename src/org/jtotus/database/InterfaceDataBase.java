@@ -31,9 +31,10 @@ public interface InterfaceDataBase {
 
     public BigDecimal fetchClosingPrice(String stockName, Calendar date);
 
-    public BigDecimal fetchAveragePrice(String stockName, Calendar date);
-
     public BigDecimal fetchVolume(String stockName, Calendar date);
+    
+    public void storeClosingPrice(String stockName, Calendar date, BigDecimal value);
 
+    public void storeVolume(String stockName, Calendar date, BigDecimal value);
     
 }

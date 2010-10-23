@@ -23,7 +23,7 @@ import org.jtotus.methods.MethodEntry;
 
 /**
  *
- * @author kappiev
+ * @author Evgeni Kappinen
  */
 public class GUIConfig {
 

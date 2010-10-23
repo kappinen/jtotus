@@ -16,6 +16,7 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.methods;
 
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jtotus.common.MethodResults;
@@ -26,6 +27,7 @@ import org.jtotus.config.ConfigLoader;
 import org.jtotus.gui.graph.GraphPacket;
 import org.jtotus.gui.graph.GraphSender;
 import org.jtotus.config.ConfPortfolio;
+import org.jtotus.config.MainMethodConfig;
 
 /**
  *
@@ -53,7 +55,10 @@ public abstract class TaLibAbstract {
     public boolean inputPerfomDecision = true;
     protected MethodResults methodResults = null;
     protected StockType stockType = null;
+    protected MainMethodConfig config = null;
 
+
+    
     public String getMethName() {
         String tmp = this.getClass().getName();
         return tmp.substring(tmp.lastIndexOf(".") + 1, tmp.length());
@@ -70,15 +75,12 @@ public abstract class TaLibAbstract {
         ConfigLoader<ConfPortfolio> configPortfolio =
                 new ConfigLoader<ConfPortfolio>(portfolio);
 
-        System.out.printf("Writting new config1\n");
         if (configPortfolio.getConfig() == null) {
             //Load default values
             ConfPortfolio newPortfolioConfig = new ConfPortfolio();
-            System.out.printf("Writting new config\n");
             configPortfolio.storeConfig(newPortfolioConfig);
         }
 
-        System.out.printf("Writting new config2\n");
         //Get stock names
         configPortfolio.applyInputsToObject(this);
         this.inputPortofolio = portfolio;
@@ -86,7 +88,6 @@ public abstract class TaLibAbstract {
 
     //To override
     public MethodResults performMethod(String stockName) {
-
         return null;
     }
 
@@ -105,7 +106,6 @@ public abstract class TaLibAbstract {
         packet = new GraphPacket();
         stockType = new StockType();
         methodResults = new MethodResults(this.getMethName());
-
 
         System.out.printf("inputListOfStocks len:%d\n", inputListOfStocks.length);
 

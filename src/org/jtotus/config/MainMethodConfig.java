@@ -17,24 +17,29 @@
 
 package org.jtotus.config;
 
+import java.util.Calendar;
+
 /**
  *
  * @author Evgeni Kappinen
  */
-public class ConfTaLibMOM extends MainMethodConfig{
+public class MainMethodConfig {
+   public String inputPortfolio=null;
 
-    //Basic configuration
-    public int inputMOMPeriod = 10;
-    //Methods sets, if available.
-    //Should be represented in procents.
-    public Double outputSuccessRate=null;
-    //Strategy Decision
-    public String inputMOMDecisionPeriod=null;
+   public Calendar inputStartingDate = null;
+   public Calendar inputEndingDate = null;
 
+   public boolean inputPrintResults = true;
+   public boolean inputPerfomDecision = true;
 
-    public ConfTaLibMOM() {
-        //Decision
-        inputMOMDecisionPeriod = "[3-30]{1}";
+   public String inputNormilizerType=null;
+   
+   public MainMethodConfig() {
 
-    }
+        inputPortfolio = new String("OMXHelsinki");
+
+        inputEndingDate = Calendar.getInstance();
+        inputStartingDate = Calendar.getInstance();
+        inputStartingDate.add(Calendar.DATE, -600);
+   }
 }

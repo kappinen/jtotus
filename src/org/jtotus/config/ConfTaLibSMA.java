@@ -17,38 +17,22 @@
 
 package org.jtotus.config;
 
-import java.util.Calendar;
-
 /**
  *
  * @author Evgeni Kappinen
  */
-public class ConfTaLibSMA {
-
-    public String inputPortfolio=null;
-
-
+public class ConfTaLibSMA extends MainMethodConfig{
     //Basic configuration
-    public Calendar inputStartingDate = null;
-    public Calendar inputEndingDate = null;
-    public boolean inputPrintResults = true;
     public int inputSMAPeriod = 10;
-
     //Methods sets, if available. 
     //Should be represented in procents.
     public Double outputSuccessRate=null;
 
     //Strategy Decision
-    public boolean inputPerfomDecision = true;
     public String inputSMADecisionPeriod;
 
     public ConfTaLibSMA() {
-        inputPortfolio = new String("OMXHelsinki");
-        inputEndingDate = Calendar.getInstance();
-        inputStartingDate = Calendar.getInstance();
-        inputStartingDate.add(Calendar.DATE, -600);
-
-
+        inputPerfomDecision = true;
         //Decision
         inputSMADecisionPeriod = "[3-30]{1}";
 

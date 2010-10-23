@@ -36,7 +36,7 @@ public class LocalJavaDB implements InterfaceDataBase {
 
     private String driver = "org.apache.derby.jdbc.ClientDriver";
     private String[] connectionUrl = {"jdbc:derby://localhost:1527/OMXHelsinki",
-        "hex", "hex"};
+                                       "hex", "hex"};
     public String mainTable = "APP.OMXHELSINKI";
     private PreparedStatement priceStmt = null;
     private static ArrayDeque<Connection> conPool = null;
@@ -158,7 +158,7 @@ public class LocalJavaDB implements InterfaceDataBase {
         }
         
         try {
-            System.out.printf("-------->Stock:%s data: %s time:"+date.getTime()+"\n", stockName, mainTable);
+           
 
             String query = "SELECT * FROM " + mainTable + " WHERE STOCKNAME=? AND DATE=?";
             PreparedStatement pstmt = conJavaDB.prepareStatement(query);
@@ -166,6 +166,7 @@ public class LocalJavaDB implements InterfaceDataBase {
 
             java.util.Date searchDay = date.getTime();
 
+            System.out.printf("-------->Stock:%s data: %s time:"+date.getTime()+"\n", stockName, mainTable);
             java.sql.Date sqlDate = new java.sql.Date(searchDay.getTime());
             pstmt.setDate(2, sqlDate, date);
 
@@ -224,10 +225,10 @@ public class LocalJavaDB implements InterfaceDataBase {
                 pstmt.setDate(3, sqlDate, calendar);
 
                 System.out.printf("UPDATING; Stock:%s data: res:%d\n", stockName, value.intValue());
-                pstmt.executeUpdate();
+                pstmt.execute();
 
             } else {
-                String query = "INSERT INTO " + mainTable + " (STOCKNAME,DATE," + param + ") VALUES (?,?,?)";
+                String query = "INSERT INTO " + mainTable + " (STOCKNAME, DATE," + param +") VALUES (?,?,?)";
 
                 PreparedStatement pstmt = conJavaDB.prepareStatement(query);
 
@@ -237,12 +238,11 @@ public class LocalJavaDB implements InterfaceDataBase {
                 java.sql.Date sqlDate = new java.sql.Date(searchDay.getTime());
                 pstmt.setDate(2, sqlDate, calendar);
 
-
                 pstmt.setBigDecimal(3, value);
 
-                int result = pstmt.executeUpdate();
+                pstmt.execute();
 
-                System.out.printf("INSERTING; Stock:%s data:" + value + " res:%d\n", stockName, result);
+                System.out.printf("INSERTING; Stock:%s data:" + value + "\n", stockName);
 
                 pstmt.clearParameters();
                 pstmt.close();

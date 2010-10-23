@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.math.BigDecimal;
 import org.jtotus.common.DayisHoliday;
 import org.jtotus.common.Helper;
+import org.jtotus.database.LocalJDBCFactory;
 
 /**
  *
@@ -36,8 +37,8 @@ public class DataFetcher{
     private Helper help = Helper.getInstance();
     private DayisHoliday holidays = null;
     private CacheServer cache=null;
-
-
+    private LocalJDBC localJDBC = null;
+    
     public DataFetcher()
     {
         listOfResources = new LinkedList<InterfaceDataBase>();
@@ -49,10 +50,10 @@ public class DataFetcher{
         javadb = LocalJavaDB.getInstance();
         holidays = new DayisHoliday();
         cache = CacheServer.getInstance();
+        LocalJDBCFactory factory = LocalJDBCFactory.getInstance();
+        localJDBC = factory.jdbcFactory();
+
         // listOfResources.add(new NetworkGoogle());
-
-
-
 
     }
 
@@ -88,6 +89,12 @@ public class DataFetcher{
             //System.out.printf("FROM CACHE:%s %s %f\n",stockName, date.getTime().toString(), result.floatValue());
             return result;
         }
+        
+        result = localJDBC.fetchClosingPrice(stockName, date);
+        if (result!=null){
+            //System.out.printf("FROM LOCAL:%s %s %f\n",stockName, date.getTime().toString(), result.floatValue());
+            return result;
+        }
 
         result = javadb.fetchClosingPrice(stockName, date);
         if(result == null) {
@@ -99,6 +106,7 @@ public class DataFetcher{
                 result = res.fetchClosingPrice(stockName, date);
                 if (result != null) {
                         javadb.storeClosingPrice(stockName, date, result);
+                        localJDBC.storeClosingPrice(stockName, date, result);
                         cache.putValue(stockName, date, result);
                     return result;
                 }
@@ -106,6 +114,7 @@ public class DataFetcher{
         }else {
             //put to cache
             cache.putValue(stockName, date, result);
+            localJDBC.storeClosingPrice(stockName, date, result);
         }
         
         return result;

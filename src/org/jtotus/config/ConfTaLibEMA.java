@@ -17,34 +17,21 @@
 
 package org.jtotus.config;
 
-import java.util.Calendar;
-
 /**
  *
  * @author Evgeni Kappinen
  */
-public class ConfTaLibEMA {
-
-    public String inputPortfolio=null;
-
+public class ConfTaLibEMA extends MainMethodConfig{
 
     //Basic configuration
-    public Calendar inputStartingDate = null;
-    public Calendar inputEndingDate = null;
-    public boolean inputPrintResults = true;
     public int inputEMAPeriod = 10;
     public Double outputSuccessRate = null;
 
     //Strategy Decision
-    public boolean inputPerfomDecision = true;
     public String inputEMADecisionPeriod;
 
     public ConfTaLibEMA() {
-        inputPortfolio = new String("OMXHelsinki");
-        inputEndingDate = Calendar.getInstance();
-        inputStartingDate = Calendar.getInstance();
-        inputStartingDate.add(Calendar.DATE, -600);
-
+        super();
         //Decision
         inputEMADecisionPeriod = "[3-30]{1}";
         outputSuccessRate = new Double(0.0f);

@@ -16,10 +16,6 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.config;
 
-/**
- *
- * @author house
- */
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import com.thoughtworks.xstream.XStream;
@@ -87,7 +83,7 @@ public class ConfigLoader<T> {
 
         try {
             fos = new FileOutputStream(path, false);
-
+            //xstream.alias("methodConfig", MainMethodConfig.class);
             xstream.toXML(obj, fos);
             fos.flush();
         } catch (IOException ex) {
@@ -108,6 +104,7 @@ public class ConfigLoader<T> {
 
         try {
             fis = new FileInputStream(path);
+           //xstream.alias("methodConfig", MainMethodConfig.class);
             retObj = (T) xstream.fromXML(fis);
         } catch (FileNotFoundException ex) {
             System.err.printf("Failure to read config:%s\n", configName);

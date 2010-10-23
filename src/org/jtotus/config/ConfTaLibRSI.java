@@ -23,29 +23,15 @@ import java.util.Calendar;
  *
  * @author Evgeni Kappinen
  */
-public class ConfTaLibRSI {
-
-    public String inputPortfolio=null;
-   
-    public Calendar inputStartingDate = null;
-    public Calendar inputEndingDate = null;
-    public boolean inputPrintResults = true;
-    public String inputNormilizerType = null;
+public class ConfTaLibRSI extends MainMethodConfig{
     public int inputRSIPeriod = 14;
 
-
-
     public Double outputSuccessRate=null;
-    public boolean inputPerfomDecision = true;
     public String inputRSIDecisionPeriod = null;
     public String inputRSILowestThreshold=null;
     public String inputRSIHigestThreshold=null;
 
     public ConfTaLibRSI() {
-        inputPortfolio = new String("OMXHelsinki");
-        inputEndingDate = Calendar.getInstance();
-        inputStartingDate = Calendar.getInstance();
-        inputStartingDate.add(Calendar.DATE, -300);
         inputNormilizerType = "SimpleMinWins";
          //Decision
         inputRSIDecisionPeriod = "int[6-15]{1}";

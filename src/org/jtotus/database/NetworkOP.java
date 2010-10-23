@@ -28,7 +28,6 @@ import org.jtotus.common.Helper;
 import org.jtotus.common.StockType;
 import java.math.BigDecimal;
 import java.util.Calendar;
-import java.util.Date;
 import org.jtotus.common.StockNames;
 import org.apache.log4j.BasicConfigurator;
 import org.jsoup.Jsoup;
@@ -145,6 +144,14 @@ public class NetworkOP implements InterfaceDataBase {
     public BigDecimal fetchVolume(String stockName, Calendar calendar) {
         
         return this.fetchData(stockName, calendar, 3);
+    }
+
+    public void storeClosingPrice(String stockName, Calendar date, BigDecimal value) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void storeVolume(String stockName, Calendar date, BigDecimal value) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 

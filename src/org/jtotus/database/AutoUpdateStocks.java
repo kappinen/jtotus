@@ -29,7 +29,7 @@ public class AutoUpdateStocks implements Runnable {
     private String stockName = null;
     private Helper help = Helper.getInstance();
     private int maxSearch = 30; //Maximum search of moth
-    private LocalJavaDB javadb = null;
+    private LocalJDBC javadb = null;
     private int stepToRemove = 0;
 
     public AutoUpdateStocks(String tempName) {
@@ -39,7 +39,7 @@ public class AutoUpdateStocks implements Runnable {
     
 
 
-    private int updateClosingPrice(StockType stock, LocalJavaDB javadb){
+    private int updateClosingPrice(StockType stock, LocalJDBC javadb){
        int counter = 0;
        
        Calendar calendar = Calendar.getInstance();
@@ -84,7 +84,8 @@ public class AutoUpdateStocks implements Runnable {
     
     public void run() {
 
-           javadb = LocalJavaDB.getInstance();
+           LocalJDBCFactory factory = new LocalJDBCFactory().getInstance();
+           javadb = factory.jdbcFactory();
             if (stockName == null) {
                 System.err.printf("Error autoupdator failure.\n");
                 return;
@@ -93,7 +94,7 @@ public class AutoUpdateStocks implements Runnable {
             StockType stock = new StockType(stockName);
 
 
-            updateClosingPrice(stock, javadb);
+            this.updateClosingPrice(stock, javadb);
             return;
     }
     

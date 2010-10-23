@@ -116,6 +116,14 @@ public class NetworkGoogle implements InterfaceDataBase {
        return null;
     }
 
+    public void storeClosingPrice(String stockName, Calendar date, BigDecimal value) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void storeVolume(String stockName, Calendar date, BigDecimal value) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 
 
 
