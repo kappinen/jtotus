@@ -111,8 +111,8 @@ public class TaLibEMA extends TaLibAbstract implements MethodEntry {
         this.loadInputs(stockName);
         stockType.setStockName(stockName);
         
-        DateIterator dateIter = new DateIterator(inputStartingDate.getTime(),
-                inputEndingDate.getTime());
+        DateIterator dateIter = new DateIterator(config.inputStartingDate.getTime(),
+                                                 config.inputEndingDate.getTime());
 
         //Filling input data with Closing price for days
         while (dateIter.hasNext()) {
@@ -163,8 +163,8 @@ public class TaLibEMA extends TaLibAbstract implements MethodEntry {
 
         if (this.inputPrintResults) {
             sender = new GraphSender(this.getMethName());
-            DateIterator dateIterator = new DateIterator(inputStartingDate.getTime(),
-                    inputEndingDate.getTime());
+            DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
+                                                         config.inputEndingDate.getTime());
             dateIterator.move(outBegIdx.value);
             for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
                 Date stockDate = dateIterator.next();
@@ -210,10 +210,10 @@ public class TaLibEMA extends TaLibAbstract implements MethodEntry {
                 MInteger outNbElementDec = new MInteger();
 
                 RetCode decCode = core.ema(0, period - 1,
-                        input,
-                        decEMAPeriod,
-                        outBegIdxDec,
-                        outNbElementDec, outputDec);
+                                        input,
+                                        decEMAPeriod,
+                                        outBegIdxDec,
+                                        outNbElementDec, outputDec);
 
                 if (decCode.compareTo(RetCode.Success) != 0) {
                     //Error return empty method results
@@ -255,19 +255,13 @@ public class TaLibEMA extends TaLibAbstract implements MethodEntry {
 
                     if (changed) {
                         if (this.inputPrintResults && decEMAPeriod == config.inputEMAPeriod) {
-                            DateIterator dateIterator = new DateIterator(inputStartingDate.getTime(),
-                                    inputEndingDate.getTime());
+                            DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
+                                                                         config.inputEndingDate.getTime());
                             dateIterator.move(elem + outBegIdxDec.value);
-
-
-
+                            
                             packet.seriesTitle = "CrossingPoint";
                             packet.result = input[elem + outBegIdxDec.value] + 0.1;
                             packet.date = dateIterator.getCurrent().getTime();
-
-//                                     System.err.printf("The dec period:%s:%s (%d:%d) elem:%d\n",
-//                                             dateIterator.getCurrent().toString(),stockType.getName(),
-//                                             outBegIdxDec.value, outNbElementDec.value, elem);
                             sender.sentPacket(stockType.getStockName(), packet);
                         }
                     }

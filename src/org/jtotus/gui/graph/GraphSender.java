@@ -47,8 +47,6 @@ public final class GraphSender {
     protected InetAddress address = null;
     protected ByteArrayOutputStream byteStream = null;
 
-
-    
     class ThreadSender implements Runnable {
 
         private int startingPoint = 0;
@@ -59,14 +57,14 @@ public final class GraphSender {
         private GraphPacket packet = null;
         private int mainPort = 0;
 
-        public  ThreadSender(String methName, int port) {
+        public ThreadSender(String methName, int port) {
             methodName = methName;
             mainPort = port;
         }
 
         public void executeTask(double data[],
-                                int start, int end,
-                                Calendar startDate, Calendar endDate) {
+                int start, int end,
+                Calendar startDate, Calendar endDate) {
 
             startingPoint = start;
             endingPoint = end;
@@ -85,7 +83,7 @@ public final class GraphSender {
             packet = new GraphPacket();
             dateIterator.move(startingPoint);
             for (int i = 0; i < endingPoint - startingPoint
-                   && dateIterator.hasNext(); i++) {
+                    && dateIterator.hasNext(); i++) {
                 Date stockDate = dateIterator.next();
                 //System.out.printf("Date:"+stockDate+" Time:"+inputEndingDate.getTime()+"Time2:"+inputStartingDate.getTime()+"\n");
 
@@ -101,9 +99,9 @@ public final class GraphSender {
     }
 
     public void executeTask(String methName,
-                            double data[],
-                            int start, int end,
-                            Calendar startDate, Calendar endDate) {
+            double data[],
+            int start, int end,
+            Calendar startDate, Calendar endDate) {
 
         ThreadSender task = new ThreadSender(methName, mainPort);
         task.executeTask(data, start, end, startDate, endDate);
@@ -112,11 +110,11 @@ public final class GraphSender {
     }
 
     protected void initialize() {
-                try {
-             address = InetAddress.getByName("127.0.0.1");
+        try {
+            address = InetAddress.getByName("127.0.0.1");
 
-             clientSock = new DatagramSocket();
-             byteStream = new ByteArrayOutputStream(1024 * 4);
+            clientSock = new DatagramSocket();
+            byteStream = new ByteArrayOutputStream(1024 * 4);
 
         } catch (SocketException ex) {
             Logger.getLogger(GraphSender.class.getName()).log(Level.SEVERE, null, ex);
@@ -141,7 +139,7 @@ public final class GraphSender {
 
         if (packetObj == null || reviewTarget == null) {
             return false;
-       }
+        }
 
         if (mainEngine != null) {
             port = mainEngine.fetchGraph(reviewTarget);

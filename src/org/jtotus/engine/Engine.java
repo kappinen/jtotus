@@ -143,14 +143,17 @@ public class Engine {
     }
 
     private void testRun() {
-//        for(StateIterator iter = new StateIterator()
-//                .addParam("Param1", "int[2-5]{1}")
-//                .addParam("Param2", "int[6-8]{1}")
-//                ;iter.hasNext() != StateIterator.END_STATE;iter.nextState()) {
-//
-//            System.out.printf("Param1:%d Param2: %d\n", iter.nextInt("Param1"), iter.nextInt("Param2"));
-//
-//        }
+
+
+    
+        
+        for(StateIterator iter = new StateIterator()
+                .addParam("Param2", "int[6-8]{1}")
+                ;iter.hasNext() != StateIterator.END_STATE;iter.nextState()) {
+
+            System.out.printf("Param2: %d\n", iter.nextInt("Param2"));
+
+        }
     }
 
     public void train(){

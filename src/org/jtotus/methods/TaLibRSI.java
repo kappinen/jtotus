@@ -59,7 +59,8 @@ import org.jtotus.config.ConfTaLibRSI;
 import org.apache.commons.lang.ArrayUtils;
 import org.jtotus.common.StateIterator;
 import org.jtotus.config.ConfigLoader;
-import org.jtotus.methods.utils.Normalizer;
+import org.jtotus.gui.graph.GraphSeriesType;
+import org.jtotus.methods.evaluators.EvaluateMethodSignals;
 
 /**
  *
@@ -90,7 +91,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
         } else {
             config = (ConfTaLibRSI) configFile.getConfig();
         }
-
+        super.child_config = config;
         configFile.applyInputsToObject(this);
     }
 
@@ -106,7 +107,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
         System.out.printf("period:%d\n", config.inputRSIPeriod);
 
         DateIterator dateIter = new DateIterator(config.inputStartingDate.getTime(),
-                                                 config.inputEndingDate.getTime());
+                config.inputEndingDate.getTime());
 
         while (dateIter.hasNext()) {
 
@@ -122,50 +123,8 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
 
         final Core core = new Core();
         double[] input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
-
         int period = input.length - 1;
-        final int allocationSize = period - core.rsiLookback(config.inputRSIPeriod);
 
-        if (allocationSize <= 0) {
-            System.err.printf("No data for period (%d)\n", allocationSize);
-            return null;
-        }
-
-        double[] output = new double[allocationSize];
-        MInteger outBegIdx = new MInteger();
-        MInteger outNbElement = new MInteger();
-
-        RetCode code = core.rsi(0, period - 1, input,
-                config.inputRSIPeriod,
-                outBegIdx,
-                outNbElement, output);
-
-        if (code.compareTo(RetCode.Success) != 0) {
-            //Error return empty method methodResults
-            throw new java.lang.IllegalStateException("RSI failed");
-        }
-
-        methodResults.putResult(stockType.getStockName(), output[output.length - 1]);
-
-        if (super.inputPrintResults) {
-            sender = new GraphSender(this.getMethName());
-            DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                                                         config.inputEndingDate.getTime());
-            dateIterator.move(outBegIdx.value);
-            for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
-                Date stockDate = dateIterator.next();
-                //System.out.printf("Date:"+stockDate+" Time:"+inputEndingDate.getTime()+"Time2:"+inputStartingDate.getTime()+"\n");
-
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(stockDate);
-
-                packet.seriesTitle = this.getMethName();
-                packet.result = output[i];
-                packet.date = stockDate.getTime();
-
-                sender.sentPacket(stockType.getStockName(), packet);
-            }
-        }
 
         //************* DECISION TEST *************//
 
@@ -174,11 +133,17 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
             double bestPeriod = 0;
             double assumedBudjet = 0.0f;
             int decSMAPeriod = 0;
+            EvaluateMethodSignals budjetCounter = new EvaluateMethodSignals();
 
-            for (StateIterator iter = new StateIterator().addParam("RSIpriod", config.inputRSIDecisionPeriod).addParam("LowestThreshold", config.inputRSILowestThreshold).addParam("HigestThreshold", config.inputRSIHigestThreshold);
+
+            for (StateIterator iter = new StateIterator()
+                    .addParam("RSIpriod", config.inputRSIDecisionPeriod)
+                    .addParam("LowestThreshold", config.inputRSILowestThreshold)
+                    .addParam("HigestThreshold", config.inputRSIHigestThreshold);
                     iter.hasNext() != StateIterator.END_STATE; iter.nextState()) {
 
                 double amountOfStocks = 0;
+                budjetCounter.initialize(super.inputAssumedBudjet);
 
                 assumedBudjet = this.inputAssumedBudjet.doubleValue();
                 decSMAPeriod = iter.nextInt("RSIpriod");
@@ -221,7 +186,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
                             changed = false;
 //                                        System.out.printf("%s selling for:"+input[elem+outBegIdxDec.value]+" budjet:%f per:%d bestper:%f low:%f high:%f elem:%d = %f\n",
 //                                                stockType.getName(), assumedBudjet, decSMAPeriod, bestPeriod, lowestThreshold,highestThreshold, elem, outputDec[elem]);
-
+                            budjetCounter.buy(input[elem + outBegIdxDec.value], -1);
                             if (bestAssumedBudjet < assumedBudjet) {
                                 bestAssumedBudjet = assumedBudjet;
                                 bestPeriod = decSMAPeriod;
@@ -230,33 +195,30 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
 
                     } else if (outputDec[elem] < lowestThreshold) {
                         if (amountOfStocks == 0) {
+                            budjetCounter.sell(input[elem + outBegIdxDec.value], -1);
                             amountOfStocks = assumedBudjet / input[elem + outBegIdxDec.value];
                             changed = false;
                         }
 //                                    System.out.printf("%s buying for:"+input[elem+outBegIdxDec.value]+" budjet:%f period:%d bestper:%f low:%f high:%f elem:%d = %f\n",
 //                                            stockType.getName(), assumedBudjet, decSMAPeriod, bestPeriod,lowestThreshold,highestThreshold,elem, outputDec[elem]);
-
                     }
 
-                    if (changed) {
+                    if (false) {
+                        BigDecimal budjet = budjetCounter.getCurrentBestBudjet();
                         if (this.inputPrintResults && decSMAPeriod == config.inputRSIPeriod) {
+                            sender = new GraphSender(stockType.getStockName());
                             DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                                    config.inputEndingDate.getTime());
+                                                                         config.inputEndingDate.getTime());
                             dateIterator.move(elem + outBegIdxDec.value);
-
-
-
-                            packet.seriesTitle = "RSIDecision";
+                            packet.seriesTitle = this.getMethName();
                             packet.result = input[elem + outBegIdxDec.value] + 0.1;
                             packet.date = dateIterator.getCurrent().getTime();
 
-//                                     System.err.printf("The dec period:%s:%s (%d:%d) elem:%d\n",
-//                                             dateIterator.getCurrent().toString(),stockType.getName(),
-//                                             outBegIdxDec.value, outNbElementDec.value, elem);
                             sender.sentPacket(stockType.getStockName(), packet);
                         }
                         changed = false;
                     }
+
 
                 }
 
@@ -271,13 +233,60 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
             this.avgSuccessRate += successRate;
             this.config.outputSuccessRate = successRate;
             this.config.inputRSIPeriod = (int) bestPeriod;
-            this.config.inputPerfomDecision=false;
+            this.config.inputPerfomDecision = false;
             if (bestAssumedBudjet != 0) {
-                 config.inputPerfomDecision=false;
+                config.inputPerfomDecision = false;
                 this.configFile.storeConfig(config);
             }
-           
+
         }
+
+
+
+        final int allocationSize = period - core.rsiLookback(config.inputRSIPeriod);
+
+        if (allocationSize <= 0) {
+            System.err.printf("No data for period (%d)\n", allocationSize);
+            return null;
+        }
+
+        double[] output = new double[allocationSize];
+        MInteger outBegIdx = new MInteger();
+        MInteger outNbElement = new MInteger();
+
+        RetCode code = core.rsi(0, period - 1, input,
+                config.inputRSIPeriod,
+                outBegIdx,
+                outNbElement, output);
+
+        if (code.compareTo(RetCode.Success) != 0) {
+            //Error return empty method methodResults
+            throw new java.lang.IllegalStateException("RSI failed");
+        }
+
+        methodResults.putResult(stockType.getStockName(), output[output.length - 1]);
+
+        if (super.inputPrintResults) {
+            sender = new GraphSender(stockType.getStockName());
+            DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
+                                                         config.inputEndingDate.getTime());
+            
+            dateIterator.move(outBegIdx.value);
+            for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
+                Date stockDate = dateIterator.next();
+
+                
+                packet.type = GraphSeriesType.SIMPLECANDLESTICK;
+                packet.seriesTitle = this.getMethName();
+                packet.result = output[i];
+                packet.date = stockDate.getTime();
+
+                sender.sentPacket(stockType.getStockName(), packet);
+            }
+        }
+
+
+
 
         methodResults.setAvrSuccessRate(avgSuccessRate / totalStocksAnalyzed);
         System.out.printf("%s has %d successrate\n", this.getMethName(), methodResults.getAvrSuccessRate().intValue());
@@ -287,14 +296,6 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
     @Override
     public MethodResults performMethod(String stockName) {
         MethodResults results = this.performRSI(stockName);
-
-        System.out.printf("Normilizer:%s\n", config.inputNormilizerType);
-
-        if (config.inputNormilizerType != null) {
-            Normalizer norm = new Normalizer();
-
-            return norm.perform(config.inputNormilizerType, results);
-        }
 
         return results;
     }

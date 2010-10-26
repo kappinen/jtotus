@@ -24,7 +24,7 @@ import java.io.Serializable;
  *
  * @author Evgeni Kappinen
  */
-public class // <editor-fold defaultstate="collapsed" desc="Packet for JtotusGraph">
+public class 
         GraphPacket// </editor-fold>
  implements Serializable{
     private static final long serialVersionUID = 1L;

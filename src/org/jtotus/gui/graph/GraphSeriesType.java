@@ -11,5 +11,7 @@ package org.jtotus.gui.graph;
  */
 public enum GraphSeriesType {
     SIMPLELINE,
-    SIMPLEBUBLE
+    SIMPLEBUBLE,
+    SIMPLECANDLESTICK,
+    SIMPLEDOT
 }

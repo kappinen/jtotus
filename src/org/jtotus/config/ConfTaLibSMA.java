@@ -17,6 +17,8 @@
 
 package org.jtotus.config;
 
+import java.util.Calendar;
+
 /**
  *
  * @author Evgeni Kappinen
@@ -34,7 +36,9 @@ public class ConfTaLibSMA extends MainMethodConfig{
     public ConfTaLibSMA() {
         inputPerfomDecision = true;
         //Decision
-        inputSMADecisionPeriod = "[3-30]{1}";
+        inputStartingDate = Calendar.getInstance();
+        inputStartingDate.add(Calendar.DATE, -160);
+        inputSMADecisionPeriod = "int[5-25]{1}";
 
     }
 

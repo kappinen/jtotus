@@ -29,12 +29,11 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 import org.jtotus.common.Helper;
 import org.jtotus.common.MethodResults;
 import org.jtotus.config.GUIConfig;
 import org.jtotus.engine.Engine;
-import org.jtotus.gui.graph.JtotusGraph;
+import org.jtotus.gui.graph.JTotusGraph;
 import org.jtotus.methods.MethodEntry;
 
 /**
@@ -95,40 +94,32 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
         }
     }
 
-    public int createIntFrame(String reviewTarget) {
+    public synchronized int createIntFrame(String reviewTarget) {
         int bindPort = -1;
 
-        javax.swing.JInternalFrame tempFrameGraph = new javax.swing.JInternalFrame();
+        JTotusGraph tempGraph = new JTotusGraph(reviewTarget);
 
-        tempFrameGraph.setClosable(true);
-        tempFrameGraph.setIconifiable(true);
-        tempFrameGraph.setMaximizable(true);
-        tempFrameGraph.setDoubleBuffered(true);
-        tempFrameGraph.setInheritsPopupMenu(true);
-        tempFrameGraph.setLayer(5);
-        tempFrameGraph.setName("tempFrameGraph"); // NOI18N
-        tempFrameGraph.setOpaque(false);
-        tempFrameGraph.setVisible(true);
+        tempGraph.setClosable(true);
+        tempGraph.setIconifiable(true);
+        tempGraph.setMaximizable(true);
+        tempGraph.setDoubleBuffered(true);
+        tempGraph.setInheritsPopupMenu(true);
+        tempGraph.setLayer(5);
+        tempGraph.setName("tempFrameGraph"); // NOI18N
+        tempGraph.setOpaque(false);
+        tempGraph.setVisible(true);
+        tempGraph.setBounds(10, 10, 590, 460);
 
-        tempFrameGraph.setBounds(10, 10, 590, 460);
 
-
-        JtotusGraph tempGraph = new JtotusGraph(tempFrameGraph, reviewTarget);
+        
         if (tempGraph.initialize() == false) { //Failed to bind to port
             System.out.printf("[%s] Failed ot bind to port\n", "jtotusMethodView");
             return bindPort;
         }
 
         bindPort = tempGraph.getBindPort();
+        drawDesktopPane.add(tempGraph, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
-        help.debug("jtotusMethodView",
-                "Binded to port:%d\n",
-                tempGraph.getBindPort());
-
-        Thread painter = new Thread(tempGraph);
-        painter.start();
-
-        drawDesktopPane.add(tempFrameGraph, javax.swing.JLayeredPane.DEFAULT_LAYER);
         drawDesktopPane.setAutoscrolls(true);
 
         return bindPort;
