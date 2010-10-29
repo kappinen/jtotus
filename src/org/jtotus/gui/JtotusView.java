@@ -33,6 +33,8 @@ import org.jdesktop.application.TaskMonitor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.LinkedList;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 import javax.swing.Timer;
 import javax.swing.Icon;
 import javax.swing.JFrame;
@@ -392,7 +394,7 @@ public class JtotusView extends FrameView {
     private final Icon[] busyIcons = new Icon[15];
     private int busyIconIndex = 0;
 
-    public int createIntFrame(String reviewTarget) {
+    public LinkedBlockingDeque createIntFrame(String reviewTarget) {
         return ((JTotusMethodView)methodTabbedPane).createIntFrame(reviewTarget);
     }
 

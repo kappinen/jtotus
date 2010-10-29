@@ -59,6 +59,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import org.jtotus.common.StateIterator;
 import org.jtotus.config.ConfTaLibSMA;
+import org.jtotus.gui.graph.GraphPacket;
 import org.jtotus.methods.evaluators.EvaluateMethodSignals;
 
 /**
@@ -102,35 +103,51 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
         configFile.applyInputsToObject(this);
     }
 
-    public MethodResults performSMA(String stockName) {
 
+    public double[] actionSMA(double []input, 
+                              int intput_size,
+                              MInteger outBegIdxDec,
+                              MInteger outNbElementDec,
+                              int decSMAPeriod) {
         
-        List<Double> closingPrices = new ArrayList<Double>();
-
-        double[] output = null;
-        MInteger outBegIdx = null;
-        MInteger outNbElement = null;
-        int period = 0;
-
-        closingPrices.clear();
-        this.loadInputs(stockName);
-        stockType.setStockName(stockName);
-
-        DateIterator dateIter = new DateIterator(config.inputStartingDate.getTime(),
-                                                 config.inputEndingDate.getTime());
-
-        //Filling input data with Closing price for days
-        while (dateIter.hasNext()) {
-
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(dateIter.next());
-            BigDecimal closDay = stockType.fetchClosingPrice(cal);
-            if (closDay != null) {
-                closingPrices.add(closDay.doubleValue());
-            }
+        final Core core = new Core();
+        final int allocationSizeDecision = intput_size - core.smaLookback(decSMAPeriod);
+        
+        
+        if (allocationSizeDecision <= 0) {
+            System.err.printf("No data for period (%d)\n", allocationSizeDecision);
+            return null;
         }
 
-        final Core core = new Core();
+        double[] outputDec = new double[allocationSizeDecision];
+
+
+        RetCode decCode = core.sma(0, intput_size - 1,
+                                   input, decSMAPeriod,
+                                   outBegIdxDec, outNbElementDec,
+                                   outputDec);
+
+        if (decCode.compareTo(RetCode.Success) != 0) {
+            //Error return empty method results
+            throw new java.lang.IllegalStateException("SMA failed:" + decSMAPeriod +
+                                        " Begin:"+outBegIdxDec.value+
+                                        " NumElem:"+outNbElementDec.value+"\n");
+        }
+        
+        return outputDec;
+    }
+
+
+
+    public MethodResults performSMA(String stockName) {
+        List<Double> closingPrices = null;
+        int period = 0;
+
+        this.loadInputs(stockName);
+
+        closingPrices = super.createClosingPriceList(stockName,
+                                                     config.inputStartingDate,
+                                                     config.inputEndingDate);
         double[] input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
         period = input.length - 1;
 
@@ -138,10 +155,8 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
         if (this.inputPerfomDecision) {
             EvaluateMethodSignals budjetCounter = new EvaluateMethodSignals();
 
-            double amoutOfStocks = 0;
             double bestAssumedBudjet = 0;
             double bestPeriod = 0;
-            double assumedBudjet = 0.0f;
             int decSMAPeriod = 0;
 
             for (StateIterator iter = new StateIterator()
@@ -149,37 +164,19 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
                     iter.hasNext() != StateIterator.END_STATE;
                     iter.nextState())
             {
-                amoutOfStocks = 0;
-                assumedBudjet = this.inputAssumedBudjet.doubleValue();
-                decSMAPeriod = iter.nextInt("SMAperiod");
-
                 budjetCounter.initialize(super.inputAssumedBudjet);
-                 
-                final int allocationSizeDecision = period - core.smaLookback(decSMAPeriod);
-
-                if (allocationSizeDecision <= 0) {
-                    System.err.printf("No data for period (%d)\n", allocationSizeDecision);
-                    return null;
-                }
-
-                double[] outputDec = new double[allocationSizeDecision];
+                
                 MInteger outBegIdxDec = new MInteger();
                 MInteger outNbElementDec = new MInteger();
 
-                RetCode decCode = core.sma(0, period - 1,
-                                           input,
-                                           decSMAPeriod,
-                                           outBegIdxDec,
-                                           outNbElementDec, outputDec);
-                
-                if (decCode.compareTo(RetCode.Success) != 0) {
-                    //Error return empty method results
-                    throw  new java.lang.IllegalStateException("SMA failed"+decSMAPeriod+":"+config.inputSMADecisionPeriod);
-                }
+                decSMAPeriod = iter.nextInt("SMAperiod");
+                double []outputDec = this.actionSMA(input, period,
+                                                   outBegIdxDec, outNbElementDec,
+                                                   decSMAPeriod);
 
                 int direction = 0;
                 boolean changed = true;
-
+                System.out.printf("Hip:%d hop:%d\n", outBegIdxDec.value, outNbElementDec.value);
                 for (int elem = 1; elem < outNbElementDec.value; elem++) {
                     
                     double threshold = (outputDec[elem - 1] + outputDec[elem]) / 2;
@@ -215,6 +212,7 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
                                     config.inputEndingDate.getTime());
                             dateIterator.move(elem + outBegIdxDec.value);
 
+                            packet = new GraphPacket();
                             packet.seriesTitle = "CrossingPoint";
                             packet.result = input[elem + outBegIdxDec.value] + 0.05;
                             packet.date = dateIterator.getCurrent().getTime();
@@ -239,26 +237,13 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
             this.configFile.storeConfig(config);
         }
 
-       
-        final int allocationSize = period - core.smaLookback(config.inputSMAPeriod);
-        if (allocationSize <= 0) {
-            System.err.printf("No data for period (%d)\n", allocationSize);
-            return null;
-        }
+        MInteger outBegIdx = new MInteger();
+        MInteger outNbElement = new MInteger();
 
-        output = new double[allocationSize];
-        outBegIdx = new MInteger();
-        outNbElement = new MInteger();
-
-        RetCode code = core.sma(0, period - 1, input,
-                                config.inputSMAPeriod,
-                                outBegIdx, outNbElement, output);
-
-        if (code.compareTo(RetCode.Success) != 0) {
-            //Error return empty method results
-            System.err.printf("SMI failed!\n");
-            return new MethodResults(this.getMethName());
-        }
+        System.out.printf("hoP : %d\n", config.inputSMAPeriod);
+        double[] output = this.actionSMA(input, period,
+                                         outBegIdx, outNbElement,
+                                         config.inputSMAPeriod);
 
         //System.out.printf("The original size: (%d:%d) alloc:%d\n", outBegIdx.value,outNbElement.value,allocationSize);
 
@@ -272,7 +257,7 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
             for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
                 Date stockDate = dateIterator.next();
                 //System.out.printf("Date:"+stockDate+" Time:"+inputEndingDate.getTime()+"Time2:"+inputStartingDate.getTime()+"\n");
-
+                packet = new GraphPacket();
                 packet.seriesTitle = this.getMethName();
                 packet.result = output[i];
                 packet.date = stockDate.getTime();

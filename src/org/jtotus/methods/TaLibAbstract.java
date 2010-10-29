@@ -18,10 +18,14 @@ package org.jtotus.methods;
 
 
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jtotus.common.MethodResults;
 import java.util.Calendar;
+import java.util.List;
+import org.jtotus.common.DateIterator;
 import org.jtotus.common.Helper;
 import org.jtotus.common.StockType;
 import org.jtotus.config.ConfigLoader;
@@ -86,6 +90,32 @@ public abstract class TaLibAbstract {
         //Get stock names
         configPortfolio.applyInputsToObject(this);
         this.inputPortofolio = portfolio;
+    }
+
+    public List<Double> createClosingPriceList(String stockName, Calendar start, Calendar end) {
+
+         List<Double> closingPrices = new ArrayList<Double>();
+
+         DateIterator dateIter = new DateIterator(start.getTime(),
+                                                 end.getTime());
+
+         if (stockType==null) {
+             stockType = new StockType();
+         }
+         //Guranteed to be created by call()
+         stockType.setStockName(stockName);
+
+        //Filling input data with Closing price for days
+        while (dateIter.hasNext()) {
+
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(dateIter.next());
+            BigDecimal closDay = stockType.fetchClosingPrice(cal);
+            if (closDay != null) {
+                closingPrices.add(closDay.doubleValue());
+            }
+        }
+         return closingPrices;
     }
 
     //To override

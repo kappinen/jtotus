@@ -1,22 +1,19 @@
 /*
-    This file is part of jTotus.
+This file is part of jTotus.
 
-    jTotus is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+jTotus is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    jTotus is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+jTotus is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-
-
+You should have received a copy of the GNU General Public License
+along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.jtotus.engine;
 
 import org.jtotus.methods.MethodEntry;
@@ -28,6 +25,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jtotus.gui.JtotusView;
@@ -43,26 +42,21 @@ import org.jtotus.methods.TaLibRSI;
 import org.jtotus.methods.TaLibSMA;
 import org.jtotus.threads.*;
 
-
-
 /**
  *
- * @author kappiev
+ * @author Evgeni Kappinen
  */
-
-
 public class Engine {
+
     private static Engine singleton = null;
     private PortfolioDecision portfolioDecision = null;
-    private LinkedList <MethodEntry>methodList;
+    private LinkedList<MethodEntry> methodList;
     private Helper help = null;
     private JtotusView mainWindow = null;
-    private HashMap <String,Integer> graphAccessPoints = null;
+    private HashMap<String, LinkedBlockingDeque> graphAccessPoints = null;
     private MethodResultsPrinter resultsPrinter = null;
 
-
-
-    private void prepareMethodsList(){
+    private void prepareMethodsList() {
         // Available methods
         methodList.add(new DummyMethod(portfolioDecision));
         methodList.add(new PotentialWithIn());
@@ -72,14 +66,14 @@ public class Engine {
         methodList.add(new TaLibMOM());
 
         File scriptDir = new File("./src/org/jtotus/methods/scripts/");
-        if(!scriptDir.isDirectory()) {
+        if (!scriptDir.isDirectory()) {
             return;
         }
-        
+
         FileFilter filter = fileIsGroovyScript();
         File[] listOfFiles = scriptDir.listFiles(filter);
 
-        for ( File tmp : listOfFiles) {
+        for (File tmp : listOfFiles) {
             try {
                 methodList.add(new DecisionScript(tmp.getCanonicalPath()));
             } catch (IOException ex) {
@@ -89,17 +83,13 @@ public class Engine {
 
     }
 
-
-
-    protected Engine(){
+    protected Engine() {
         help = Helper.getInstance();
         portfolioDecision = new PortfolioDecision();
-        
-        graphAccessPoints = new HashMap<String,Integer>();
+
+        graphAccessPoints = new HashMap<String, LinkedBlockingDeque>();
         methodList = new LinkedList<MethodEntry>();
 
-        
-         
         prepareMethodsList();
     }
 
@@ -112,19 +102,18 @@ public class Engine {
         return singleton;
     }
 
-
-   public void setGUI(JtotusView tempView) {
+    public void setGUI(JtotusView tempView) {
         mainWindow = tempView;
         mainWindow.initialize();
     }
 
-   public synchronized LinkedList<MethodEntry>getMethods() {
-       return methodList;
-   }
+    public synchronized LinkedList<MethodEntry> getMethods() {
+        return methodList;
+    }
 
-    public void run(){
-        
-        if(portfolioDecision.setList(methodList)){
+    public void run() {
+
+        if (portfolioDecision.setList(methodList)) {
             help.debug(1, "Dispatcher is already full");
             return;
         }
@@ -138,108 +127,96 @@ public class Engine {
             updateThread.start();
         }
 
-        
+
         testRun();
     }
 
     private void testRun() {
 
-
-    
-        
-        for(StateIterator iter = new StateIterator()
-                .addParam("Param2", "int[6-8]{1}")
-                ;iter.hasNext() != StateIterator.END_STATE;iter.nextState()) {
+        for (StateIterator iter = new StateIterator().addParam("Param2", "int[6-8]{1}"); iter.hasNext() != StateIterator.END_STATE; iter.nextState()) {
 
             System.out.printf("Param2: %d\n", iter.nextInt("Param2"));
 
         }
     }
 
-    public void train(){
+    public void train() {
 
-        LinkedList<String>methodNames = mainWindow.getMethodList();
+        LinkedList<String> methodNames = mainWindow.getMethodList();
 
 
-        LinkedList <MethodEntry>methodL = (LinkedList<MethodEntry>) methodList.clone();
-        Iterator <MethodEntry>methodIter = methodL.iterator();
+        LinkedList<MethodEntry> methodL = (LinkedList<MethodEntry>) methodList.clone();
+        Iterator<MethodEntry> methodIter = methodL.iterator();
         boolean found = false;
 
 
-        while(methodIter.hasNext())
-        {
-            Iterator <String>nameIter = methodNames.iterator();
+        while (methodIter.hasNext()) {
+            Iterator<String> nameIter = methodNames.iterator();
             MethodEntry methName = methodIter.next();
             String tempName = methName.getMethName();
-            
-            while(nameIter.hasNext()){
+
+            while (nameIter.hasNext()) {
                 String nameList = nameIter.next();
                 help.debug("Engine",
-                           "Search name:%s in list:%s\n",tempName, nameList);
-                
-                if(nameList.compareTo(tempName)==0){
-                    found=true;
+                        "Search name:%s in list:%s\n", tempName, nameList);
+
+                if (nameList.compareTo(tempName) == 0) {
+                    found = true;
                     break;
                 }
             }
-            if (!found){
-               help.debug("Engine","Removeing:%s\n",tempName);
+            if (!found) {
+                help.debug("Engine", "Removeing:%s\n", tempName);
                 methodIter.remove();
             }
-            found=false;
+            found = false;
         }
 
-        if(portfolioDecision.setList(methodL)){
+        if (portfolioDecision.setList(methodL)) {
             help.debug(1, "Dispatcher is already full");
             return;
         }
 
         Thread portThread = new Thread(portfolioDecision);
         portThread.start();
-        
+
     }
 
+    private FileFilter fileIsGroovyScript() {
+        FileFilter fileFilter = new FileFilter() {
 
-
-    private FileFilter fileIsGroovyScript()
-    {
-       FileFilter fileFilter = new FileFilter() {
-           public boolean accept(File file)
-           {
-                if(!file.isFile() || !file.canRead()) {
+            public boolean accept(File file) {
+                if (!file.isFile() || !file.canRead()) {
                     return false;
                 }
 
                 String name = file.getName();
-                if (!name.endsWith(".groovy"))
-                {
+                if (!name.endsWith(".groovy")) {
                     return false;
                 }
-               return true;
-           }
-       };
-       return fileFilter;
+                return true;
+            }
+        };
+        return fileFilter;
     }
 
+    public void registerGraph(String reviewTarget, LinkedBlockingDeque acceccPoint) {
 
-    public void registerGraph(String reviewTarget, int acceccPoint){
-
-        if(graphAccessPoints.containsKey(reviewTarget)) {
-             System.err.printf("Warning BUG SHOULD NO HAPPEND!!\n");
+        if (graphAccessPoints.containsKey(reviewTarget)) {
+            System.err.printf("Warning BUG SHOULD NO HAPPEND!!\n");
             //FIXME:what to do when..
             return;
         }
 
         //Register access port for messages
-        graphAccessPoints.put(reviewTarget, new Integer(acceccPoint));
+        graphAccessPoints.put(reviewTarget, acceccPoint);
 
     }
-
 
     public void registerResultsPrinter(MethodResultsPrinter printer) {
         System.out.printf("Registering result printer\n");
         resultsPrinter = printer;
-        
+
         return;
     }
 
@@ -247,20 +224,17 @@ public class Engine {
         return resultsPrinter;
     }
 
-    public synchronized int fetchGraph(String reviewTarget) {
-        int accessPort = 0;
-        Integer tmp = graphAccessPoints.get(reviewTarget);
-        if (tmp==null) {
-            //FIXME: create new internal frame
-            accessPort = mainWindow.createIntFrame(reviewTarget);
-            if (accessPort <= 0) {
-                return accessPort;
-            }
-            
-            registerGraph(reviewTarget, accessPort);
-            return accessPort;
-        }
-        return tmp.intValue();
-    }
+    public synchronized LinkedBlockingDeque fetchGraph(String reviewTarget) {
+        LinkedBlockingDeque tmp = graphAccessPoints.get(reviewTarget);
 
+        if (tmp == null) {
+            //FIXME: create new internal frame
+            tmp = mainWindow.createIntFrame(reviewTarget);
+            if (tmp != null) {
+                this.registerGraph(reviewTarget, tmp);
+            }
+        }
+
+        return tmp;
+    }
 }

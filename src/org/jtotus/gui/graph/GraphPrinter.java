@@ -64,10 +64,11 @@ public class GraphPrinter {
             return;
         }
 
-        mainPanel = new ChartPanel(mainChart, false);
+        mainPanel = new ChartPanel(mainChart, true);
         mainPanel.setMouseZoomable(true, false);
         mainPanel.setFillZoomRectangle(true);
         mainPanel.setMouseWheelEnabled(true);
+        
     }
 
     private JFreeChart createChart(String title) {
@@ -150,8 +151,12 @@ public class GraphPrinter {
     }
 
     public synchronized void cleanChart() {
-        //TODO: dummy remove
-        //mainDataset.removeAllSeries();
+
+        Iterator serIter = seriesMap.keySet().iterator();
+        while(serIter.hasNext()) {
+            seriesMap.get(serIter.next()).removeAllSeries();
+        }
+        
         return;
     }
 
@@ -169,7 +174,7 @@ public class GraphPrinter {
 
                 collection = seriesMap.get(iter.next());
                 collection.addSeries(newSeries);
-
+                
                 seriesMap.put(title, collection);
                 return newSeries;
             }
@@ -226,11 +231,6 @@ public class GraphPrinter {
                     .add(tmpDay, packet.result);
             }
     }
-
-
-
-
-
 
 
 

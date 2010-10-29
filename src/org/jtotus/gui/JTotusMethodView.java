@@ -21,6 +21,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 import javax.swing.JDesktopPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -94,8 +96,7 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
         }
     }
 
-    public synchronized int createIntFrame(String reviewTarget) {
-        int bindPort = -1;
+    public synchronized LinkedBlockingDeque createIntFrame(String reviewTarget) {
 
         JTotusGraph tempGraph = new JTotusGraph(reviewTarget);
 
@@ -110,19 +111,12 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
         tempGraph.setVisible(true);
         tempGraph.setBounds(10, 10, 590, 460);
 
-
         
-        if (tempGraph.initialize() == false) { //Failed to bind to port
-            System.out.printf("[%s] Failed ot bind to port\n", "jtotusMethodView");
-            return bindPort;
-        }
-
-        bindPort = tempGraph.getBindPort();
         drawDesktopPane.add(tempGraph, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         drawDesktopPane.setAutoscrolls(true);
 
-        return bindPort;
+        return tempGraph.getQueue();
     }
 
     public LinkedList<String> getSelectedMethods() {

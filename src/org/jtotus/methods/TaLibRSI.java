@@ -59,6 +59,7 @@ import org.jtotus.config.ConfTaLibRSI;
 import org.apache.commons.lang.ArrayUtils;
 import org.jtotus.common.StateIterator;
 import org.jtotus.config.ConfigLoader;
+import org.jtotus.gui.graph.GraphPacket;
 import org.jtotus.gui.graph.GraphSeriesType;
 import org.jtotus.methods.evaluators.EvaluateMethodSignals;
 
@@ -274,7 +275,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
             dateIterator.move(outBegIdx.value);
             for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
                 Date stockDate = dateIterator.next();
-
+                packet = new GraphPacket();
                 
                 packet.type = GraphSeriesType.SIMPLECANDLESTICK;
                 packet.seriesTitle = this.getMethName();

@@ -10,13 +10,7 @@
  */
 package org.jtotus.gui.graph;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.SocketException;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,9 +22,8 @@ public class JTotusGraph extends javax.swing.JInternalFrame {
 
     private GraphPrinter graphPrinter = null;
     public final Object seriesMap_lock = new Object();
-    protected int defaultPort = 8888;
-    protected DatagramSocket serverSocket = null;
     private Thread serverThread = null;
+    private LinkedBlockingDeque <GraphPacket> queue = null;
 
     public JTotusGraph(String reviewTarget) {
         initComponents();
@@ -38,16 +31,18 @@ public class JTotusGraph extends javax.swing.JInternalFrame {
         this.setName(reviewTarget);
         this.setTitle(reviewTarget);
 
-        if (serverThread == null) {
-            if (initialize() == false) {
-                return;
-            }
-        }
 
-        serverThread.start();
+        queue = new LinkedBlockingDeque<GraphPacket>();
 
         graphPrinter = new GraphPrinter(reviewTarget);
         this.setContentPane(graphPrinter.getContainer());
+
+
+        JtotusGraphDispatcher dispatcher = new JtotusGraphDispatcher();
+        serverThread = new Thread(dispatcher);
+        
+        serverThread.start();
+        
     }
 
     /** This method is called from within the constructor to
@@ -104,7 +99,7 @@ public class JTotusGraph extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jMenuItem1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenuItem1MouseClicked
-        // TODO add your handling code here:
+        
     }//GEN-LAST:event_jMenuItem1MouseClicked
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu jMenu1;
@@ -113,109 +108,35 @@ public class JTotusGraph extends javax.swing.JInternalFrame {
     private javax.swing.JMenuItem jMenuItem1;
     // End of variables declaration//GEN-END:variables
 
-    public boolean initialize() {
-        JtotusGraphDispatcher dispatcher = new JtotusGraphDispatcher();
-
-        if (dispatcher.bindHost() < 0) {
-            return false;
+    
+    /**
+     * @return the queue
+     */
+    public synchronized LinkedBlockingDeque<GraphPacket> getQueue() {
+        
+        if (queue == null) {
+            queue = new LinkedBlockingDeque<GraphPacket>();
         }
-
-        serverThread = new Thread(dispatcher);
-
-        return true;
+        return queue;
     }
 
-    synchronized public int getBindPort() {
-        if (serverSocket == null) {
-            return -1;
-        }
-        return defaultPort;
-    }
-
-    synchronized private int addtBindPort(int value) {
-        defaultPort += value;
-
-        return defaultPort;
-    }
-
+    //FIXME:remove
     private class JtotusGraphDispatcher implements Runnable {
-
-        public int bindHost() {
-            int tries = 0;
-
-            while (serverSocket == null && tries < 100) {
-                try {
-                    serverSocket = new DatagramSocket(defaultPort);
-
-                    if (serverSocket == null) {
-                        addtBindPort(tries);
-                        tries++;
-                    }
-                    //seriesMap = new HashMap<String,TimeSeries>();
-                } catch (SocketException ex) {
-                    addtBindPort(tries);
-                    tries++;
-                }
-            }
-
-            if (serverSocket == null) {
-                return -1;
-            }
-
-            return defaultPort;
-        }
 
         public void run() {
 
-            final int maxSizeOfPacket = 1024 * 10;
-            byte[] buf = new byte[maxSizeOfPacket];
-
-
-            if (serverSocket == null) {
-                int result = bindHost();
-                if (result < 0) {
-                    return;
-                }
-            }
-
-            //Convert data to object
-
-            ObjectInputStream is = null;
-
-            DatagramPacket packet = new DatagramPacket(buf, maxSizeOfPacket);
-            ByteArrayInputStream byteStream = new ByteArrayInputStream(buf);
-
-
-            while (true) {
+            while (getQueue() != null) {
                 try {
-                    //  byteStream.reset();
-                    //Recieve packet
-                    serverSocket.receive(packet);
-
-                    is = new ObjectInputStream(new BufferedInputStream(byteStream));
-
-                    GraphPacket obj = (GraphPacket) is.readObject();
-
-                    // add it to blocking queue
-                    //queue.putFirst(obj);
-                    //FIXME:data lost !
-                    byteStream.reset();
-                    graphPrinter.drawSeries(obj);
-//                    if(parent.getState() == Thread.State.TIMED_WAITING) {
-//                        parent.interrupt();
-//                    }
-
-
-                } catch (ClassNotFoundException ex) {
+                    GraphPacket packet = getQueue().takeLast();
+                    graphPrinter.drawSeries(packet);
+                } 
+                catch (InterruptedException ex) {
                     Logger.getLogger(JTotusGraph.class.getName()).log(Level.SEVERE, null, ex);
-                    break;
-                } catch (IOException ex) {
-                    Logger.getLogger(JTotusGraph.class.getName()).log(Level.SEVERE, null, ex);
-                    break;
                 }
             }
-
             return;
         }
     }
+
+    
 }
