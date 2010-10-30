@@ -21,12 +21,14 @@ package org.jtotus.gui.graph;
 
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Font;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CombinedDomainXYPlot;
@@ -83,7 +85,12 @@ public class GraphPrinter {
         mainPlot = new CombinedDomainXYPlot(domain);
         mainPlot.setGap(4.0);
         //mainPlot.setOrientation(PlotOrientation.HORIZONTAL);
-
+        mainPlot.setBackgroundPaint(Color.lightGray);
+        mainPlot.setRangePannable(true);
+        mainPlot.setDomainGridlinesVisible(true);
+        mainPlot.setOutlineVisible(true);
+        mainPlot.setDomainCrosshairVisible(true);
+        mainPlot.setRangeMinorGridlinesVisible(true);
 
 
         JFreeChart chart = new JFreeChart(title,
@@ -92,13 +99,7 @@ public class GraphPrinter {
                                          true);
 
         chart.setBackgroundPaint(Color.white);
-        mainPlot.setBackgroundPaint(Color.lightGray);
 
-        mainPlot.setRangePannable(true);
-        mainPlot.setDomainGridlinesVisible(true);
-        mainPlot.setOutlineVisible(true);
-        mainPlot.setDomainCrosshairVisible(true);
-        mainPlot.setRangeMinorGridlinesVisible(true);
 
         return chart;
 
@@ -177,10 +178,13 @@ public class GraphPrinter {
         newSubPlot.setRangeCrosshairVisible(true);
         newSubPlot.setDomainGridlinesVisible(true);
 
-        mainPlot.add(newSubPlot);
-        plotMap.put(plotName, newSubPlot);
+        if(!plotMap.containsKey(plotName)) {
+            plotMap.put(plotName, newSubPlot);
+            mainPlot.add(newSubPlot);
+            return newSubPlot;
+        }
 
-        return newSubPlot;
+        return null;
     }
 
     private XYPlot fetchPlot(String name) {
@@ -231,35 +235,31 @@ public class GraphPrinter {
      * @param packet Packet Object from blocking queus
      */
     public void drawSeries(GraphPacket packet) {
+        TimeSeries series = null;
 
         if (seriesMap.containsKey(packet.seriesTitle)) { //Series Exists
-            TimeSeries hashSeries = seriesMap.get(packet.seriesTitle);
-
-            Iterator<StockUnit> iter = packet.results.iterator();
-            while (iter.hasNext()) {
-                //update if already existing series
-                StockUnit tmp = iter.next();
-                if (hashSeries.addOrUpdate(this.localDateToDay(tmp.date), tmp.value) != null) {
-                    System.err.printf("Warning overwritting existent value in time series:%s :%f :%s\n",
-                            packet.seriesTitle, tmp.value, tmp.date.toString());
-                }
-            }
-        } else {  // New series
-
-            //Will create Plot if neeed, and create TimeSeries,
-            //but will not add it to Dataset of XYPlot.
-            TimeSeries series = this.createTimeSeries(packet);
-
-            Iterator<StockUnit> iter = packet.results.iterator();
-            while (iter.hasNext()) {
-                StockUnit tmp = iter.next();
-                series.add(this.localDateToDay(tmp.date),
-                        tmp.value);
-            }
-
-            System.out.printf("The conntainers:%d\n", this.fetchPlot(packet.plotName).getDatasetCount());
+            series = seriesMap.get(packet.seriesTitle);
+        }else {
+            series = this.createTimeSeries(packet);
+            //FIXME: is it prefereable to add series after points are added ?
             TimeSeriesCollection collection = (TimeSeriesCollection) this.fetchPlot(packet.plotName).getDataset();
             collection.addSeries(series);
+        }
+
+        Iterator<StockUnit> iter = packet.results.iterator();
+            while (iter.hasNext()) {
+                //update if already existing series
+                StockUnit unit = iter.next();
+                if(unit.annotation != null) {
+                    final XYTextAnnotation annotation = new XYTextAnnotation(unit.annotation,
+                                                                             this.localDateToDay(unit.date).getMiddleMillisecond(),
+                                                                             unit.value);
+                    annotation.setFont(new Font("SansSerif", Font.PLAIN, 9));
+                    this.fetchPlot(packet.plotName).addAnnotation(annotation);
+                }
+
+                series.addOrUpdate(this.localDateToDay(unit.date),
+                                   unit.value);
         }
     }
 }

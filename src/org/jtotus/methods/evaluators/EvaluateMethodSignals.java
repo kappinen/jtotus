@@ -32,7 +32,6 @@ public class EvaluateMethodSignals {
     private BigDecimal currentBudjet = null;
     private BigDecimal currentBestBudjet = null;
     private BigDecimal stockCount = null;
-
     private long statActions = 0;
     
     public void initialize(Double assumedBudjet) {
@@ -113,4 +112,6 @@ public class EvaluateMethodSignals {
     public void setStatActions(long statActions) {
         this.statActions = statActions;
     }
+
+
 }

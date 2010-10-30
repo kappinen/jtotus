@@ -141,6 +141,8 @@ public class Engine {
         for (StateIterator iter = new StateIterator().addParam("Param2", "int[6-8]{1}"); iter.hasNext() != StateIterator.END_STATE; iter.nextState()) {
             System.out.printf("Param2: %d\n", iter.nextInt("Param2"));
         }
+
+
     }
 
     public void train() {

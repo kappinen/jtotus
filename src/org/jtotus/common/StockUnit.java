@@ -26,4 +26,7 @@ import org.joda.time.LocalDate;
 public class StockUnit {
     public LocalDate date = null;
     public Double value = null;
+
+    //Annotation for XYPlot
+    public String annotation = null;
 }

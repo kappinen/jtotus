@@ -58,6 +58,7 @@ import java.math.BigDecimal;
 import org.jtotus.common.StateIterator;
 import org.jtotus.config.ConfTaLibSMA;
 import org.jtotus.methods.evaluators.EvaluateMethodSignals;
+import org.jtotus.methods.evaluators.TimeSeriesCondition;
 
 /**
  *
@@ -154,7 +155,7 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
             double bestAssumedBudjet = 0;
             double bestPeriod = 0;
             int decSMAPeriod = 0;
-
+            int lastAction=0;
             for (StateIterator iter = new StateIterator()
                     .addParam("SMAperiod", config.inputSMADecisionPeriod);
                     iter.hasNext() != StateIterator.END_STATE;
@@ -180,6 +181,7 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
                         if (direction == -1) {
                             changed = true; //Price is going down
                                 budjetCounter.sell(input[elem + outBegIdxDec.value], -1);
+                                lastAction=1;
 
                                 if (bestAssumedBudjet < budjetCounter.getCurrentBestBudjet().doubleValue()) {
                                     bestAssumedBudjet = budjetCounter.getCurrentBestBudjet().doubleValue();
@@ -192,14 +194,13 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
                         if (direction == 1) {
                             changed = true; //Price is going up
                             budjetCounter.buy(input[elem + outBegIdxDec.value], -1);
+                            lastAction=2;
                         }
                         direction = -1;
                     }
 
                     if (changed) {
                     BigDecimal budjet = budjetCounter.getCurrentBestBudjet();
-                   // System.out.printf("The budjet is:%f trade:%d\n",
-                     //       budjet.doubleValue(), budjetCounter.getStatActions());
 
                         if (this.inputPrintResults && decSMAPeriod == config.inputSMAPeriod) {
                             sender = new GraphSender(stockType.getStockName());
@@ -208,11 +209,18 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
                             DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
                                                                          config.inputEndingDate.getTime());
                             dateIterator.move(elem + outBegIdxDec.value);
-                            sender.addForSending(dateIterator.getCurrent(), input[elem + outBegIdxDec.value] + 0.05);
+                            String ann = null;
+                            if (lastAction==1)
+                               ann = "Sell";
+                            else
+                              ann = "Buy";
+                            sender.addForSending(dateIterator.getCurrent(), 
+                                                 input[elem + outBegIdxDec.value] + 0.05,
+                                                 ann);
+                            
                             sender.sendAllStored();
                         }
                     }
-
                 }
 
             }
@@ -261,7 +269,38 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
 
         methodResults.putResult(stockType.getStockName(), output[output.length - 1]);
 
-        if (this.inputPrintResults) {
+
+                TimeSeriesCondition signals = new TimeSeriesCondition();
+
+                signals.declareFunc("A", input);
+                signals.declareFunc("B", output);
+                for (int elem = 1; elem < outNbElement.value; elem++) {
+
+                     sender = new GraphSender(stockType.getStockName());
+                     DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
+                                                                  config.inputEndingDate.getTime());
+                     dateIterator.move(elem + outBegIdx.value);
+                     
+                    if(signals.setA(elem + outBegIdx.value)
+                              .crosses()
+                              .setB(elem).isTrue()) {
+                            sender = new GraphSender(stockType.getStockName());
+                            sender.setSeriesName("CrossingPointsv2");
+
+                     
+                            sender.addForSending(dateIterator.getCurrent(), input[elem + outBegIdx.value] + 0.05);
+                            sender.sendAllStored();
+                            
+                    }
+                    sender = new GraphSender(stockType.getStockName());
+                    sender.setSeriesName("Original");
+                    sender.addForSending(dateIterator.getCurrent(), input[elem + outBegIdx.value] + 0.05);
+                    sender.sendAllStored();
+               }
+
+
+
+        if (config.inputPrintResults) {
             sender = new GraphSender(stockType.getStockName());
             sender.setSeriesName(this.getMethName());
             

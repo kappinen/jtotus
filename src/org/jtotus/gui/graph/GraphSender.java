@@ -61,6 +61,14 @@ public final class GraphSender {
         listOfValues.add(unit);
     }
 
+    public void addForSending(Date date, Double value, String annotation) {
+        StockUnit unit = new StockUnit();
+        unit.date = LocalDate.fromDateFields(date);
+        unit.value = value;
+        unit.annotation = annotation;
+        listOfValues.add(unit);
+    }
+
     public void sendAllStored() {
         GraphPacket packet = new GraphPacket();
         packet.seriesTitle  = this.getSeriesName();
