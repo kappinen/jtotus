@@ -47,8 +47,6 @@ import org.jtotus.common.MethodResults;
 import com.tictactec.ta.lib.Core;
 import com.tictactec.ta.lib.MInteger;
 import com.tictactec.ta.lib.RetCode;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import org.jtotus.common.DateIterator;
@@ -59,7 +57,6 @@ import java.io.File;
 import java.math.BigDecimal;
 import org.jtotus.common.StateIterator;
 import org.jtotus.config.ConfTaLibSMA;
-import org.jtotus.gui.graph.GraphPacket;
 import org.jtotus.methods.evaluators.EvaluateMethodSignals;
 
 /**
@@ -138,8 +135,7 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
     }
 
 
-
-    public MethodResults performSMA(String stockName) {
+    public void performDecisionTest(String stockName) {
         List<Double> closingPrices = null;
         int period = 0;
 
@@ -150,9 +146,9 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
                                                      config.inputEndingDate);
         double[] input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
         period = input.length - 1;
-
+        
         //************* DECISION TEST *************//
-        if (this.inputPerfomDecision) {
+
             EvaluateMethodSignals budjetCounter = new EvaluateMethodSignals();
 
             double bestAssumedBudjet = 0;
@@ -165,7 +161,7 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
                     iter.nextState())
             {
                 budjetCounter.initialize(super.inputAssumedBudjet);
-                
+
                 MInteger outBegIdxDec = new MInteger();
                 MInteger outNbElementDec = new MInteger();
 
@@ -176,9 +172,8 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
 
                 int direction = 0;
                 boolean changed = true;
-                System.out.printf("Hip:%d hop:%d\n", outBegIdxDec.value, outNbElementDec.value);
                 for (int elem = 1; elem < outNbElementDec.value; elem++) {
-                    
+
                     double threshold = (outputDec[elem - 1] + outputDec[elem]) / 2;
                     changed = false;
                     if (input[outBegIdxDec.value + elem] > threshold) { //above the line
@@ -203,22 +198,19 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
 
                     if (changed) {
                     BigDecimal budjet = budjetCounter.getCurrentBestBudjet();
-                    System.out.printf("The budjet is:%f trade:%d\n",
-                            budjet.doubleValue(), budjetCounter.getStatActions());
+                   // System.out.printf("The budjet is:%f trade:%d\n",
+                     //       budjet.doubleValue(), budjetCounter.getStatActions());
 
                         if (this.inputPrintResults && decSMAPeriod == config.inputSMAPeriod) {
                             sender = new GraphSender(stockType.getStockName());
+                            sender.setSeriesName("DecisionSMA");
+
                             DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                                    config.inputEndingDate.getTime());
+                                                                         config.inputEndingDate.getTime());
                             dateIterator.move(elem + outBegIdxDec.value);
-
-                            packet = new GraphPacket();
-                            packet.seriesTitle = "CrossingPoint";
-                            packet.result = input[elem + outBegIdxDec.value] + 0.05;
-                            packet.date = dateIterator.getCurrent().getTime();
-                            sender.sentPacket(stockType.getStockName(), packet);
+                            sender.addForSending(dateIterator.getCurrent(), input[elem + outBegIdxDec.value] + 0.05);
+                            sender.sendAllStored();
                         }
-
                     }
 
                 }
@@ -235,6 +227,26 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
             this.config.outputSuccessRate = successRate;
             this.config.inputSMAPeriod = (int) bestPeriod;
             this.configFile.storeConfig(config);
+    }
+
+
+
+
+    public MethodResults performSMA(String stockName) {
+
+        List<Double> closingPrices = null;
+        int period = 0;
+
+        this.loadInputs(stockName);
+
+        closingPrices = super.createClosingPriceList(stockName,
+                                                     config.inputStartingDate,
+                                                     config.inputEndingDate);
+        double[] input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
+        period = input.length - 1;
+ 
+        if (this.inputPerfomDecision) {
+            this.performDecisionTest(stockName);
         }
 
         MInteger outBegIdx = new MInteger();
@@ -251,19 +263,16 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
 
         if (this.inputPrintResults) {
             sender = new GraphSender(stockType.getStockName());
+            sender.setSeriesName(this.getMethName());
+            
             DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
                                                          config.inputEndingDate.getTime());
             dateIterator.move(outBegIdx.value);
             for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
                 Date stockDate = dateIterator.next();
-                //System.out.printf("Date:"+stockDate+" Time:"+inputEndingDate.getTime()+"Time2:"+inputStartingDate.getTime()+"\n");
-                packet = new GraphPacket();
-                packet.seriesTitle = this.getMethName();
-                packet.result = output[i];
-                packet.date = stockDate.getTime();
-
-                sender.sentPacket(stockType.getStockName(), packet);
+                sender.addForSending(stockDate, output[i]);
             }
+            sender.sendAllStored();
         }
 
         methodResults.setAvrSuccessRate(avgSuccessRate / totalStocksAnalyzed);

@@ -128,7 +128,7 @@ public class LocalJDBC implements InterfaceDataBase {
             pstm.setDate(1, sqlDate);
             pstm.setDate(2, sqlDate);
 
-            System.out.printf("Inserting :%f\n", value.doubleValue());
+            System.out.printf("Inserting :%f :%s time:%s\n", value.doubleValue(), stockName, date.getTime().toString());
             pstm.setDouble(3, value.doubleValue());
             pstm.execute();
 

@@ -17,16 +17,22 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 package org.jtotus.gui.graph;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import org.jtotus.common.StockUnit;
 
 /**
  *
  * @author Evgeni Kappinen
  */
 public class GraphPacket implements Serializable {
+    //Optional, needed only then new timeseries are created.
+    public String plotName = null;
+    
+    //Should be unique for ReviewTarget (Window)
+    public String seriesTitle = null;
+    //Series Type
+    public GraphSeriesType type = null;
 
-    private static final long serialVersionUID = 1L;
-    public String seriesTitle;
-    public double result;
-    public long date;
-    public GraphSeriesType type;
+    public ArrayList<StockUnit> results = null;
+    
 }

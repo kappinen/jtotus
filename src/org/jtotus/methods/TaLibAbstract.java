@@ -141,7 +141,6 @@ public abstract class TaLibAbstract {
 
         System.out.printf("inputListOfStocks len:%d\n", inputListOfStocks.length);
 
-
         for (int stockCount = 0; stockCount < this.inputListOfStocks.length; stockCount++) {
             this.performMethod(this.inputListOfStocks[stockCount]);
         }

@@ -22,10 +22,9 @@ package org.jtotus.gui.graph;
 import java.awt.Color;
 import java.awt.Container;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Set;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
@@ -40,6 +39,8 @@ import org.jfree.chart.renderer.xy.XYStepRenderer;
 import org.jfree.data.time.Day;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
+import org.joda.time.LocalDate;
+import org.jtotus.common.StockUnit;
 
 /**
  *
@@ -48,46 +49,48 @@ import org.jfree.data.time.TimeSeriesCollection;
 public class GraphPrinter {
     // Create a chart
 
+    private String mainPlotName = "MainPlot";
     private JFreeChart mainChart = null;
     private ChartPanel mainPanel = null;
     private CombinedDomainXYPlot mainPlot = null;
-
-    private HashMap<String, TimeSeriesCollection> seriesMap = null;
+    private HashMap<String, TimeSeries> seriesMap = null;
+    private HashMap<String, XYPlot> plotMap = null;
 
     public GraphPrinter(String reviewTarget) {
 
-        seriesMap = new HashMap<String, TimeSeriesCollection>();
+        seriesMap = new HashMap<String, TimeSeries>();
+        plotMap = new HashMap<String, XYPlot>();
 
-        
         mainChart = this.createChart(reviewTarget);
         if (mainChart == null) {
             return;
         }
 
-        mainPanel = new ChartPanel(mainChart, true);
+        mainPanel = new ChartPanel(mainChart, false);
         mainPanel.setMouseZoomable(true, false);
         mainPanel.setFillZoomRectangle(true);
         mainPanel.setMouseWheelEnabled(true);
-        
+
     }
 
     private JFreeChart createChart(String title) {
 
 
-       // valueAxis.setAutoRangeMinimumSize(1);
+        // valueAxis.setAutoRangeMinimumSize(1);
         DateAxis domain = new DateAxis("Date");
         domain.setDateFormatOverride(new SimpleDateFormat("dd-MM-yyyy"));
 
-        mainPlot  = new CombinedDomainXYPlot(domain);
+        mainPlot = new CombinedDomainXYPlot(domain);
         mainPlot.setGap(4.0);
         //mainPlot.setOrientation(PlotOrientation.HORIZONTAL);
 
 
 
-        JFreeChart chart = new JFreeChart(title, 
-                                JFreeChart.DEFAULT_TITLE_FONT,
-                                mainPlot, false);
-        
+        JFreeChart chart = new JFreeChart(title,
+                                         JFreeChart.DEFAULT_TITLE_FONT,
+                                         mainPlot,
+                                         true);
+
         chart.setBackgroundPaint(Color.white);
         mainPlot.setBackgroundPaint(Color.lightGray);
 
@@ -122,7 +125,7 @@ public class GraphPrinter {
 
     private XYItemRenderer getDefualtCandleStick() {
         XYStepRenderer renderer = new XYStepRenderer();
-        
+
         return renderer;
     }
 
@@ -131,16 +134,16 @@ public class GraphPrinter {
             return this.getDefaultLine();
         }
 
-        
+
         switch (type) {
             case SIMPLELINE:
                 return this.getDefaultLine();
             case SIMPLEBUBLE:
                 return this.getdDefualtBuble();
-             case SIMPLECANDLESTICK:
-                 return this.getDefualtCandleStick();
-             case SIMPLEDOT:
-                 return this.getdDefualtDot();
+            case SIMPLECANDLESTICK:
+                return this.getDefualtCandleStick();
+            case SIMPLEDOT:
+                return this.getdDefualtDot();
             default:
                 return this.getDefaultLine();
         }
@@ -152,86 +155,111 @@ public class GraphPrinter {
 
     public synchronized void cleanChart() {
 
-        Iterator serIter = seriesMap.keySet().iterator();
-        while(serIter.hasNext()) {
-            seriesMap.get(serIter.next()).removeAllSeries();
+        Iterator<TimeSeries> serIter = seriesMap.values().iterator();
+        while (serIter.hasNext()) {
+            serIter.next().clear();
         }
-        
+
         return;
     }
 
-
-    public TimeSeries createSubPlot(String title, GraphSeriesType type) {
-        TimeSeries newSeries = new TimeSeries(title);
-
-        if (type == null) {
-            TimeSeriesCollection collection=null;
-            
-            if(!seriesMap.isEmpty()) {
-
-                Set<String> set = seriesMap.keySet();
-                Iterator<String> iter = set.iterator();
-
-                collection = seriesMap.get(iter.next());
-                collection.addSeries(newSeries);
-                
-                seriesMap.put(title, collection);
-                return newSeries;
-            }
-        }
-
+    private XYPlot createSubPlot(String plotName, GraphSeriesType type) {
 
         final TimeSeriesCollection collection = new TimeSeriesCollection();
-        
-        collection.addSeries(newSeries);
-        
-        seriesMap.put(title, collection);
-
         final NumberAxis range = new NumberAxis("Value");
         final XYPlot newSubPlot = new XYPlot(collection,
-                                             null,
-                                             range,
-                                             this.getRenderer(type));
-        
+                                            null,
+                                            range,
+                                            this.getRenderer(type));
+
 
         newSubPlot.setDomainCrosshairVisible(true);
         newSubPlot.setRangeCrosshairVisible(true);
+        newSubPlot.setDomainGridlinesVisible(true);
 
-        
         mainPlot.add(newSubPlot);
+        plotMap.put(plotName, newSubPlot);
+
+        return newSubPlot;
+    }
+
+    private XYPlot fetchPlot(String name) {
+        if (name == null) {
+            name = this.mainPlotName;
+        }
+        return plotMap.get(name);
+    }
+
+    private TimeSeries createTimeSeries(GraphPacket packet) {
+        XYPlot addSeriesToPlot = null;
+        //TimeSeries with packet.seriesTitle is not found.
+
+        //Create MainPlot for the rest of the packets.
+        //This plot will be used if in packet.plotName is null
+        if (plotMap.isEmpty()) {
+            addSeriesToPlot = this.createSubPlot(this.mainPlotName, GraphSeriesType.SIMPLELINE);
+        }
+
+        //If packet.plotName is null, lets use MainPlot
+        if (packet.plotName != null)  {
+            addSeriesToPlot = plotMap.get(packet.plotName);
+            if (addSeriesToPlot == null) {
+                addSeriesToPlot = this.createSubPlot(packet.plotName, packet.type);
+            }
+        }
+
+        //If we are in this function, this means that
+        //unique name of timeseries is not found in seriesMap.
+        TimeSeries newSeries = new TimeSeries(packet.seriesTitle);
+        seriesMap.put(packet.seriesTitle, newSeries);
+
         return newSeries;
     }
 
+    private Day localDateToDay(LocalDate date) {
+        Day tmpDay = new Day(date.getDayOfMonth(),
+                date.getMonthOfYear(),
+                date.getYear());
 
-
-    public void drawSeries(GraphPacket packet) {
-
-            Calendar cal = Calendar.getInstance();
-            cal.setTimeInMillis(packet.date);
-
-            Day tmpDay = new Day(cal.get(Calendar.DATE),
-                                 cal.get(Calendar.MONTH) + 1,
-                                 cal.get(Calendar.YEAR));
-
-            // add point to seriesMap
-            if (seriesMap.containsKey(packet.seriesTitle)) { //Series Exists
-                TimeSeries hashSeries = seriesMap
-                                        .get(packet.seriesTitle)
-                                        .getSeries(packet.seriesTitle);
-                
-                //update if already exists
-                if (hashSeries.addOrUpdate(tmpDay, packet.result) != null) {
-                    System.err.printf("Warning overwritting existent value in time series:%s :%f :%s\n",
-                            packet.seriesTitle, packet.result, tmpDay.toString());
-                }
-
-            } else {  // New series
-
-                this.createSubPlot(packet.seriesTitle, packet.type)
-                    .add(tmpDay, packet.result);
-            }
+        return tmpDay;
     }
 
 
+    /*
+     * Creates new plot if neeed and adds values to time series
+     *
+     * @param packet Packet Object from blocking queus
+     */
+    public void drawSeries(GraphPacket packet) {
 
+        if (seriesMap.containsKey(packet.seriesTitle)) { //Series Exists
+            TimeSeries hashSeries = seriesMap.get(packet.seriesTitle);
+
+            Iterator<StockUnit> iter = packet.results.iterator();
+            while (iter.hasNext()) {
+                //update if already existing series
+                StockUnit tmp = iter.next();
+                if (hashSeries.addOrUpdate(this.localDateToDay(tmp.date), tmp.value) != null) {
+                    System.err.printf("Warning overwritting existent value in time series:%s :%f :%s\n",
+                            packet.seriesTitle, tmp.value, tmp.date.toString());
+                }
+            }
+        } else {  // New series
+
+            //Will create Plot if neeed, and create TimeSeries,
+            //but will not add it to Dataset of XYPlot.
+            TimeSeries series = this.createTimeSeries(packet);
+
+            Iterator<StockUnit> iter = packet.results.iterator();
+            while (iter.hasNext()) {
+                StockUnit tmp = iter.next();
+                series.add(this.localDateToDay(tmp.date),
+                        tmp.value);
+            }
+
+            System.out.printf("The conntainers:%d\n", this.fetchPlot(packet.plotName).getDatasetCount());
+            TimeSeriesCollection collection = (TimeSeriesCollection) this.fetchPlot(packet.plotName).getDataset();
+            collection.addSeries(series);
+        }
+    }
 }

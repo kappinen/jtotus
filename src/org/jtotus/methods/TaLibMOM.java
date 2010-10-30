@@ -147,22 +147,16 @@ public class TaLibMOM extends TaLibAbstract implements MethodEntry {
 
         if (this.inputPrintResults) {
             sender = new GraphSender(stockType.getStockName());
+            sender.setSeriesName(this.getMethName());
             DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
                                                          config.inputEndingDate.getTime());
             dateIterator.move(outBegIdx.value);
             for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
                 Date stockDate = dateIterator.next();
                 //System.out.printf("Date:"+stockDate+" Time:"+inputEndingDate.getTime()+"Time2:"+inputStartingDate.getTime()+"\n");
-
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(stockDate);
-
-                packet.seriesTitle = this.getMethName();
-                packet.result = output[i];
-                packet.date = stockDate.getTime();
-
-                sender.sentPacket(stockType.getStockName(), packet);
+                sender.addForSending(stockDate, output[i]);
             }
+            sender.sendAllStored();
         }
 
         //************* DECISION TEST *************//
@@ -242,16 +236,9 @@ public class TaLibMOM extends TaLibAbstract implements MethodEntry {
                                                                          config.inputEndingDate.getTime());
                             dateIterator.move(elem + outBegIdxDec.value);
 
-                            packet.seriesTitle = "Sell/Buy signals";
-                            packet.type = GraphSeriesType.SIMPLEBUBLE;
+                            sender.setSeriesName("Sell/Buy signals");
 
-                            packet.result = input[elem + outBegIdxDec.value] + 0.1;
-                            packet.date = dateIterator.getCurrent().getTime();
-
-//                                     System.err.printf("The dec period:%s:%s (%d:%d) elem:%d\n",
-//                                             dateIterator.getCurrent().toString(),stockType.getName(),
-//                                             outBegIdxDec.value, outNbElementDec.value, elem);
-                            sender.sentPacket(stockType.getStockName(), packet);
+                            sender.addForSending(dateIterator.getCurrent(), input[elem + outBegIdxDec.value] + 0.1);
                         }
                     }
                 }

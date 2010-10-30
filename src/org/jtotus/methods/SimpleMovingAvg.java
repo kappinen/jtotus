@@ -93,14 +93,10 @@ public class SimpleMovingAvg implements MethodEntry {
                     stocks[i], avr.floatValue(), count);
 
             if (printResults) {
-                GraphSender sender = new GraphSender(stockType.getHexName());
-                GraphPacket packet = new GraphPacket();
-
-                packet.seriesTitle = this.getMethName();
-                packet.result = avr.doubleValue();
-                packet.date = calendar.getTimeInMillis();
-
-                sender.sentPacket(stockType.getStockName(), packet);
+                GraphSender sender = new GraphSender(stockType.getStockName());
+                sender.setSeriesName(this.getMethName());
+                sender.addForSending(calendar.getTime(), avr.doubleValue());
+                sender.sendAllStored();
              }
         }
     }

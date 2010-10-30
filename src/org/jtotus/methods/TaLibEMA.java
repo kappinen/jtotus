@@ -163,21 +163,14 @@ public class TaLibEMA extends TaLibAbstract implements MethodEntry {
 
         if (this.inputPrintResults) {
             sender = new GraphSender(this.getMethName());
+            sender.setSeriesName(this.getMethName());
             DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
                                                          config.inputEndingDate.getTime());
             dateIterator.move(outBegIdx.value);
             for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
                 Date stockDate = dateIterator.next();
-                //System.out.printf("Date:"+stockDate+" Time:"+inputEndingDate.getTime()+"Time2:"+inputStartingDate.getTime()+"\n");
-
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(stockDate);
-
-                packet.seriesTitle = this.getMethName();
-                packet.result = output[i];
-                packet.date = stockDate.getTime();
-
-                sender.sentPacket(stockType.getStockName(), packet);
+                sender.addForSending(stockDate, output[i]);
+                sender.sendAllStored();
             }
         }
 
@@ -258,11 +251,9 @@ public class TaLibEMA extends TaLibAbstract implements MethodEntry {
                             DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
                                                                          config.inputEndingDate.getTime());
                             dateIterator.move(elem + outBegIdxDec.value);
-                            
-                            packet.seriesTitle = "CrossingPoint";
-                            packet.result = input[elem + outBegIdxDec.value] + 0.1;
-                            packet.date = dateIterator.getCurrent().getTime();
-                            sender.sentPacket(stockType.getStockName(), packet);
+                            sender.setSeriesName("CrossingPoint");
+                            sender.addForSending(dateIterator.getCurrent(), input[elem + outBegIdxDec.value] + 0.1);
+                            sender.sendAllStored();
                         }
                     }
                 }

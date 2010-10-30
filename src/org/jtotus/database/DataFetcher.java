@@ -22,7 +22,6 @@ import java.util.LinkedList;
 import java.math.BigDecimal;
 import org.jtotus.common.DayisHoliday;
 import org.jtotus.common.Helper;
-import org.jtotus.database.LocalJDBCFactory;
 
 /**
  *
@@ -31,7 +30,6 @@ import org.jtotus.database.LocalJDBCFactory;
 public class DataFetcher {
 
     private LinkedList<InterfaceDataBase> listOfResources = null;
-    private LocalJavaDB javadb = null;
     private Helper help = Helper.getInstance();
     private DayisHoliday holidays = null;
     private CacheServer cache = null;
@@ -44,7 +42,6 @@ public class DataFetcher {
         listOfResources.add(new FileSystemFromHex());
         listOfResources.add(new NetworkOP());
 
-        javadb = LocalJavaDB.getInstance();
         holidays = new DayisHoliday();
         cache = CacheServer.getInstance();
         LocalJDBCFactory factory = LocalJDBCFactory.getInstance();
@@ -85,12 +82,6 @@ public class DataFetcher {
         }
 
         result = localJDBC.fetchClosingPrice(stockName, date);
-        if (result != null) {
-            //System.out.printf("FROM LOCAL:%s %s %f\n",stockName, date.getTime().toString(), result.floatValue());
-            return result;
-        }
-
-        result = javadb.fetchClosingPrice(stockName, date);
         if (result == null) {
             Iterator<InterfaceDataBase> resources = listOfResources.iterator();
 
@@ -99,7 +90,6 @@ public class DataFetcher {
 
                 result = res.fetchClosingPrice(stockName, date);
                 if (result != null) {
-                    javadb.storeClosingPrice(stockName, date, result);
                     localJDBC.storeClosingPrice(stockName, date, result);
                     cache.putValue(stockName, date, result);
                     return result;
@@ -108,7 +98,6 @@ public class DataFetcher {
         } else {
             //put to cache
             cache.putValue(stockName, date, result);
-            localJDBC.storeClosingPrice(stockName, date, result);
         }
 
         return result;
@@ -132,7 +121,7 @@ public class DataFetcher {
 
         Iterator<InterfaceDataBase> resources = listOfResources.iterator();
 
-        result = javadb.fetchVolume(stockName, date);
+        result = localJDBC.fetchVolume(stockName, date);
 
         if (result == null) {
             help.debug("DataFetcher",
@@ -146,7 +135,7 @@ public class DataFetcher {
                 result = res.fetchVolume(stockName, date);
                 if (result != null) {
                     //  System.out.printf("Searching for volume3\n");
-                    javadb.storeVolume(stockName, date, result);
+                    localJDBC.storeVolume(stockName, date, result);
                     return result;
                 }
             }

@@ -138,26 +138,6 @@ public class StockType implements Iterator{
         return tmp;
     }
 
-    public GraphPacket fetchPastDayClosingPricePacket(int count){
-        GraphPacket packet = null;
-        BigDecimal tmp = null;
-
-        Calendar cal = Calendar.getInstance();
-        
-        cal.add(Calendar.DAY_OF_MONTH, count*-1);
-
-        tmp = fetcher.fetchClosingPrice(stockName, cal);
-
-        if (tmp != null) {
-            packet = new GraphPacket();
-            packet.seriesTitle = stockName;
-            packet.date = cal.getTimeInMillis();
-            packet.result = tmp.doubleValue();
-        }
-
-        return packet;
-    }
-
     public BigDecimal fetchCurrentVolume(){
        Calendar cal = Calendar.getInstance();
        BigDecimal retVolume = null;

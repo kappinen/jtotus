@@ -204,21 +204,21 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
 //                                            stockType.getName(), assumedBudjet, decSMAPeriod, bestPeriod,lowestThreshold,highestThreshold,elem, outputDec[elem]);
                     }
 
-                    if (false) {
-                        BigDecimal budjet = budjetCounter.getCurrentBestBudjet();
-                        if (this.inputPrintResults && decSMAPeriod == config.inputRSIPeriod) {
-                            sender = new GraphSender(stockType.getStockName());
-                            DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                                                                         config.inputEndingDate.getTime());
-                            dateIterator.move(elem + outBegIdxDec.value);
-                            packet.seriesTitle = this.getMethName();
-                            packet.result = input[elem + outBegIdxDec.value] + 0.1;
-                            packet.date = dateIterator.getCurrent().getTime();
-
-                            sender.sentPacket(stockType.getStockName(), packet);
-                        }
-                        changed = false;
-                    }
+//                    if (false) {
+//                        BigDecimal budjet = budjetCounter.getCurrentBestBudjet();
+//                        if (this.inputPrintResults && decSMAPeriod == config.inputRSIPeriod) {
+//                            sender = new GraphSender(stockType.getStockName());
+//                            DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
+//                                                                         config.inputEndingDate.getTime());
+//                            dateIterator.move(elem + outBegIdxDec.value);
+//                            packet.seriesTitle = this.getMethName();
+//                            packet.result = input[elem + outBegIdxDec.value] + 0.1;
+//                            packet.date = dateIterator.getCurrent().getTime();
+//
+//                            sender.sentPacket(stockType.getStockName(), packet);
+//                        }
+//                        changed = false;
+//                    }
 
 
                 }
@@ -269,21 +269,17 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
 
         if (super.inputPrintResults) {
             sender = new GraphSender(stockType.getStockName());
+            sender.setSeriesName(this.getMethName());
+            sender.setPlotName("RSI");
+            sender.setType(GraphSeriesType.SIMPLECANDLESTICK);
             DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
                                                          config.inputEndingDate.getTime());
             
             dateIterator.move(outBegIdx.value);
             for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
-                Date stockDate = dateIterator.next();
-                packet = new GraphPacket();
-                
-                packet.type = GraphSeriesType.SIMPLECANDLESTICK;
-                packet.seriesTitle = this.getMethName();
-                packet.result = output[i];
-                packet.date = stockDate.getTime();
-
-                sender.sentPacket(stockType.getStockName(), packet);
+                sender.addForSending(dateIterator.next(), output[i]);
             }
+            sender.sendAllStored();
         }
 
 

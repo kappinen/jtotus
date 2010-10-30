@@ -31,38 +31,38 @@ import org.jtotus.engine.Engine;
 import org.jtotus.gui.graph.GraphPacket;
 import org.jtotus.config.MethodConfig;
 import org.jtotus.common.MethodResults;
-
-
-results = new MethodResults("StockClosingPrice");
-
-def drawClosingPrice (String reviewTarget, int daysToSearch) {
-
-stockType = new org.jtotus.common.StockType(reviewTarget)
-
-sender = new org.jtotus.gui.graph.GraphSender();
-packet = new org.jtotus.gui.graph.GraphPacket();
-packet.seriesTitle = stockType.getStockName()+"_ClosingPrice";
-
-
-
-for (int i=0; i<daysToSearch;i++) {
-        sender.sentPacket(stockType.getStockName(), stockType.fetchPastDayClosingPricePacket(i))
-        if (i==daysToSearch-1) {
-            Double result = stockType.fetchCurrentClosingPrice();
-            results.putResult(stockType.getStockName(), result.doubleValue())
-        }
-    }
-
-    results.printToConsole();
-}
-
-
-MethodConfig method = new MethodConfig();
-Iterator<String> iter = method.iterator();
-
-while(iter.hasNext()) {
-    drawClosingPrice(iter.next(), 100)
-}
+//
+//
+//results = new MethodResults("StockClosingPrice");
+//
+//def drawClosingPrice (String reviewTarget, int daysToSearch) {
+//
+//stockType = new org.jtotus.common.StockType(reviewTarget)
+//
+//sender = new org.jtotus.gui.graph.GraphSender();
+//packet = new org.jtotus.gui.graph.GraphPacket();
+//packet.seriesTitle = stockType.getStockName()+"_ClosingPrice";
+//
+//
+//
+//for (int i=0; i<daysToSearch;i++) {
+//        sender.sentPacket(stockType.getStockName(), stockType.fetchPastDayClosingPricePacket(i))
+//        if (i==daysToSearch-1) {
+//            Double result = stockType.fetchCurrentClosingPrice();
+//            results.putResult(stockType.getStockName(), result.doubleValue())
+//        }
+//    }
+//
+//    results.printToConsole();
+//}
+//
+//
+//MethodConfig method = new MethodConfig();
+//Iterator<String> iter = method.iterator();
+//
+//while(iter.hasNext()) {
+//    drawClosingPrice(iter.next(), 100)
+//}
 
 println "DONE for StockClosingPrice"
 

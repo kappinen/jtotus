@@ -19,9 +19,13 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.gui.graph;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.joda.time.LocalDate;
+import org.jtotus.common.StockUnit;
 import org.jtotus.engine.Engine;
 
 /**
@@ -32,13 +36,42 @@ public final class GraphSender {
     private String mainReviewTarget = null;
     private Engine mainEngine = null;
     private LinkedBlockingDeque<GraphPacket> mainPort = null;
+    private ArrayList<StockUnit> listOfValues = null;
 
+
+
+    private GraphSeriesType type = GraphSeriesType.SIMPLELINE;
+    private String seriesName = null;
+    private String plotName = null;
+    
+    
     public GraphSender(String reviewTarget) {
         mainReviewTarget = reviewTarget;
         mainEngine = Engine.getInstance();
-        
+
+        listOfValues = new ArrayList<StockUnit>();
         mainPort = mainEngine.fetchGraph(mainReviewTarget);
     }
+
+    
+    public void addForSending(Date date, Double value) {
+        StockUnit unit = new StockUnit();
+        unit.date = LocalDate.fromDateFields(date);
+        unit.value = value;
+        listOfValues.add(unit);
+    }
+
+    public void sendAllStored() {
+        GraphPacket packet = new GraphPacket();
+        packet.seriesTitle  = this.getSeriesName();
+        packet.plotName = this.getPlotName();
+        packet.type = this.getType();
+        packet.results  = listOfValues;
+
+        this.sentPacket(mainReviewTarget, packet);
+        
+    }
+    
 
     public boolean sentPacket(String reviewTarget, GraphPacket packetObj) {
         LinkedBlockingDeque<GraphPacket> queue = null;
@@ -52,7 +85,6 @@ public final class GraphSender {
         }else {
             queue = mainPort;
         }
-
         
         try {
             
@@ -63,4 +95,47 @@ public final class GraphSender {
 
         return true;
     }
+
+    /**
+     * @return the mainSeriesName
+     */
+    public String getSeriesName() {
+        return seriesName;
+    }
+
+    /**
+     * @param mainSeriesName the mainSeriesName to set
+     */
+    public void setSeriesName(String mainSeriesName) {
+        this.seriesName = mainSeriesName;
+    }
+
+    /**
+     * @return the plotName
+     */
+    public String getPlotName() {
+        return plotName;
+    }
+
+    /**
+     * @param plotName the plotName to set
+     */
+    public void setPlotName(String plotName) {
+        this.plotName = plotName;
+    }
+
+    /**
+     * @return the type
+     */
+    public GraphSeriesType getType() {
+        return type;
+    }
+
+    /**
+     * @param type the type to set
+     */
+    public void setType(GraphSeriesType type) {
+        this.type = type;
+    }
+
 }
