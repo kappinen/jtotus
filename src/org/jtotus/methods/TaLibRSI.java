@@ -108,7 +108,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
         System.out.printf("period:%d\n", config.inputRSIPeriod);
 
         DateIterator dateIter = new DateIterator(config.inputStartingDate.getTime(),
-                config.inputEndingDate.getTime());
+                                                 config.inputEndingDate.getTime());
 
         while (dateIter.hasNext()) {
 
@@ -136,7 +136,8 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
             int decSMAPeriod = 0;
             EvaluateMethodSignals budjetCounter = new EvaluateMethodSignals();
 
-
+            
+            
             for (StateIterator iter = new StateIterator()
                     .addParam("RSIpriod", config.inputRSIDecisionPeriod)
                     .addParam("LowestThreshold", config.inputRSILowestThreshold)
@@ -144,7 +145,9 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
                     iter.hasNext() != StateIterator.END_STATE; iter.nextState()) {
 
                 double amountOfStocks = 0;
-                budjetCounter.initialize(super.inputAssumedBudjet);
+                budjetCounter.initialize(stockType.getStockName(),
+                                         "RSISignals",
+                                         super.inputAssumedBudjet, null);
 
                 assumedBudjet = this.inputAssumedBudjet.doubleValue();
                 decSMAPeriod = iter.nextInt("RSIpriod");

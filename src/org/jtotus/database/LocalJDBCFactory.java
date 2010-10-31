@@ -32,7 +32,6 @@ public class LocalJDBCFactory {
     private static JdbcConnectionPool pool = null;
 
     protected LocalJDBCFactory() {
-        System.out.printf("Test\n");
         try {
             Class.forName("org.h2.Driver").newInstance();
         } catch (ClassNotFoundException ex) {
@@ -47,7 +46,6 @@ public class LocalJDBCFactory {
         if (pool == null) {
             pool = JdbcConnectionPool.create("jdbc:h2:~/.jtotus/local_database", "sa", "sa");
             pool.setMaxConnections(100);
-            System.out.printf("Test 2:%s\n",pool.toString());
         }
     }
 

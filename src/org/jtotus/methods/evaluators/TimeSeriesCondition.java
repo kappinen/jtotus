@@ -24,8 +24,11 @@ import java.util.ArrayList;
  * @author Evgeni Kappinen
  */
 public class TimeSeriesCondition {
-    private int NULL = 0;
     public int CROSSING = 0;
+    public int BIGGER = 1;
+    public int SMALLER = 2;
+
+
     private ArrayList<TimeSeriesFunction> funcList = null;
 
     private int a = 0;
@@ -51,7 +54,21 @@ public class TimeSeriesCondition {
         return series;
     }
 
-    public boolean crossing(){
+     public boolean abiggerb(){
+        TimeSeriesFunction aFunc = funcList.get(0);
+        TimeSeriesFunction bFunc = funcList.get(1);
+
+         return aFunc.get(getA()) > bFunc.get(getB());
+     }
+
+     public boolean asmallerb(){
+        TimeSeriesFunction aFunc = funcList.get(0);
+        TimeSeriesFunction bFunc = funcList.get(1);
+
+         return aFunc.get(getA()) < bFunc.get(getB());
+     }
+
+    private boolean crossing(){
         TimeSeriesFunction aFunc = funcList.get(0);
         TimeSeriesFunction bFunc = funcList.get(1);
 
@@ -77,10 +94,16 @@ public class TimeSeriesCondition {
             case 0:
                 result = crossing();
                 break;
+            case 1:
+                result = abiggerb();
+                break;
+             case 2:
+                result = asmallerb();
+                break;
         }
 
         if (and) {
-            result = previous && result;
+            result = (previous && result);
             and = false;
         }
 
@@ -137,10 +160,19 @@ public class TimeSeriesCondition {
         return this;
     }
 
-    public TimeSeriesCondition and() {
-        this.and = true;
-        previous = this.isTrue();
+    public TimeSeriesCondition bigger() {
+        this.op = this.BIGGER;
+        return this;
+    }
 
+    public TimeSeriesCondition smaller() {
+        this.op = this.SMALLER;
+        return this;
+    }
+
+    public TimeSeriesCondition and() {
+        previous = this.isTrue();
+        this.and = true;
         return this;
     }
 

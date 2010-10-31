@@ -18,6 +18,8 @@ package org.jtotus.methods.evaluators;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Date;
+import org.jtotus.gui.graph.GraphSender;
 
 /**
  *
@@ -30,20 +32,58 @@ import java.math.RoundingMode;
 public class EvaluateMethodSignals {
 
     private BigDecimal currentBudjet = null;
+    private BigDecimal assumedBudjet = null;
     private BigDecimal currentBestBudjet = null;
     private BigDecimal stockCount = null;
     private long statActions = 0;
     
-    public void initialize(Double assumedBudjet) {
-        currentBudjet = BigDecimal.valueOf(assumedBudjet);
-        setCurrentBestBudjet(BigDecimal.valueOf(0.0));
+    private GraphSender bestResultsGraph = null;
+    private GraphSender graphSender = null;
+
+
+
+    private double statesCount = 0.0f;
+
+
+    /* Initialization function, should be run
+     * for each state for StateIterator.
+     *
+     * @param reviewTarget Current stock name
+     * @param seriesName   Method related series name
+     * @param originalBudjet Assumed budjet from portofolio
+     * @param stockGraph   Stores values for each iteration of StateIterator.class
+     *
+     * @return boolean  Currently, Always returns true
+     *
+     */
+    public boolean initialize(String reviewTarget,
+                              String seriesName,
+                              Double originalBudjet,
+                              GraphSender stockGraph) {
+
+        setCurrentBudjet(BigDecimal.valueOf(originalBudjet));
+        assumedBudjet = BigDecimal.valueOf(originalBudjet);
+        
+        if(this.getCurrentBestBudjet() == null){
+            this.setCurrentBestBudjet(BigDecimal.valueOf(0.0));
+        }
         stockCount = BigDecimal.valueOf(0.0);
         setStatActions(0);
+        
+        /*All points, which lead to signal are stored
+           in Graph container. 
+         */
+        graphSender = new GraphSender(reviewTarget);
+        graphSender.setSeriesName(seriesName);
+
+        return true;
     }
 
     public BigDecimal brockerExpensePerAction(BigDecimal tradingVolume) {
         //Nordent State 3 -> 0.15% /Min. 7
-        BigDecimal payment = tradingVolume.setScale(5, RoundingMode.HALF_UP).divide(BigDecimal.valueOf(100.0)).multiply(BigDecimal.valueOf(0.15));
+        BigDecimal payment = tradingVolume.setScale(5, RoundingMode.HALF_UP)
+                                          .divide(BigDecimal.valueOf(100.0))
+                                          .multiply(BigDecimal.valueOf(0.15));
 
         if (payment.compareTo(BigDecimal.valueOf(7)) > 0) {
             return payment;
@@ -54,37 +94,60 @@ public class EvaluateMethodSignals {
 
     public EvaluateMethodSignals buy(double price, int amount) {
 
-        if (currentBudjet.subtract(this.brockerExpensePerAction(currentBudjet))
+        if (getCurrentBudjet().subtract(this.brockerExpensePerAction(getCurrentBudjet()))
                          .compareTo(BigDecimal.valueOf(0.0)) <= 0) {
            // System.err.printf("There is no money left\n");
             return null;
         }
 
         if (amount == -1) {//ALL-in
-            stockCount = currentBudjet.subtract(this.brockerExpensePerAction(currentBudjet))
+            stockCount = getCurrentBudjet().subtract(this.brockerExpensePerAction(getCurrentBudjet()))
                                       .divide(BigDecimal.valueOf(price), 3, RoundingMode.HALF_DOWN);
 
-            currentBudjet = BigDecimal.valueOf(0.0);
+            setCurrentBudjet(BigDecimal.valueOf(0.0));
             setStatActions(getStatActions() + 1);
         } else {
-            
+            //TODO: implement
         }
 
         return this;
     }
 
+    public EvaluateMethodSignals buy(double price, int amount, Date date) {
+        this.buy(price, amount);
+
+        String annotation = "Buy";
+        graphSender.addForSending(date, price, annotation);
+        
+        return this;
+    }
+
+
     public EvaluateMethodSignals sell(double price, int amount) {
 
         if (amount == -1) {//ALL-in
-            currentBudjet = stockCount.multiply(BigDecimal.valueOf(price));
-            currentBudjet = currentBudjet.subtract(this.brockerExpensePerAction(currentBudjet));
+            setCurrentBudjet(stockCount.multiply(BigDecimal.valueOf(price)));
+            setCurrentBudjet(getCurrentBudjet().subtract(this.brockerExpensePerAction(getCurrentBudjet())));
 
-            if (getCurrentBestBudjet().compareTo(currentBudjet) < 0) {
-                setCurrentBestBudjet(currentBudjet);
+            //Best Budjet is found
+            if (getCurrentBestBudjet().compareTo(getCurrentBudjet()) < 0) {
+                setCurrentBestBudjet(getCurrentBudjet());
+                bestResultsGraph = graphSender;
             }
 
             stockCount = BigDecimal.valueOf(0.0);
         }
+        return this;
+    }
+
+
+        public EvaluateMethodSignals sell(double price, int amount, Date date) {
+            
+            this.sell(price,amount);
+
+            String annotation = "Sell";
+            graphSender.addForSending(date, price, annotation);
+
         return this;
     }
 
@@ -113,5 +176,29 @@ public class EvaluateMethodSignals {
         this.statActions = statActions;
     }
 
+    public void printBestResults() {
+        bestResultsGraph.sendAllStored();
+    }
+
+
+
+    public Double getProfitInProcents() {
+        Double tmp =  currentBestBudjet.doubleValue();
+        return ((tmp / this.assumedBudjet.doubleValue()) -1) * 100;
+    }
+
+    /**
+     * @return the currentBudjet
+     */
+    public BigDecimal getCurrentBudjet() {
+        return currentBudjet;
+    }
+
+    /**
+     * @param currentBudjet the currentBudjet to set
+     */
+    public void setCurrentBudjet(BigDecimal currentBudjet) {
+        this.currentBudjet = currentBudjet;
+    }
 
 }

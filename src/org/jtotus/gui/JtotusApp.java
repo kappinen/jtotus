@@ -72,7 +72,7 @@ public class JtotusApp extends SingleFrameApplication {
     public static void main(String[] args) {
 
         launch(JtotusApp.class, args);
-        
+
     }
 
 }

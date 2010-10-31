@@ -53,6 +53,10 @@ public final class GraphSender {
         mainPort = mainEngine.fetchGraph(mainReviewTarget);
     }
 
+    public void reset() {
+         listOfValues = new ArrayList<StockUnit>();
+    }
+
     
     public void addForSending(Date date, Double value) {
         StockUnit unit = new StockUnit();
@@ -77,7 +81,7 @@ public final class GraphSender {
         packet.results  = listOfValues;
 
         this.sentPacket(mainReviewTarget, packet);
-        
+        this.reset();
     }
     
 

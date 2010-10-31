@@ -54,7 +54,6 @@ import org.jtotus.config.ConfigLoader;
 import org.jtotus.gui.graph.GraphSender;
 import org.apache.commons.lang.ArrayUtils;
 import java.io.File;
-import java.math.BigDecimal;
 import org.jtotus.common.StateIterator;
 import org.jtotus.config.ConfTaLibSMA;
 import org.jtotus.methods.evaluators.EvaluateMethodSignals;
@@ -75,9 +74,8 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
 
     public TaLibSMA() {
         super();
-        
-    }
 
+    }
 
     public void loadInputs(String configStock) {
 
@@ -86,8 +84,6 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
                 + configStock
                 + File.separator
                 + this.getMethName());
-
-        // new ConfigLoader<ConfTaLibSMA>(portfolio+File.separator+this.getMethName());
 
         if (configFile.getConfig() == null) {
             //Load default values
@@ -99,19 +95,19 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
 
         super.child_config = config;
         configFile.applyInputsToObject(this);
+
     }
 
+    public double[] actionSMA(double[] input,
+            int intput_size,
+            MInteger outBegIdxDec,
+            MInteger outNbElementDec,
+            int decSMAPeriod) {
 
-    public double[] actionSMA(double []input, 
-                              int intput_size,
-                              MInteger outBegIdxDec,
-                              MInteger outNbElementDec,
-                              int decSMAPeriod) {
-        
         final Core core = new Core();
         final int allocationSizeDecision = intput_size - core.smaLookback(decSMAPeriod);
-        
-        
+
+
         if (allocationSizeDecision <= 0) {
             System.err.printf("No data for period (%d)\n", allocationSizeDecision);
             return null;
@@ -121,189 +117,95 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
 
 
         RetCode decCode = core.sma(0, intput_size - 1,
-                                   input, decSMAPeriod,
-                                   outBegIdxDec, outNbElementDec,
-                                   outputDec);
+                input, decSMAPeriod,
+                outBegIdxDec, outNbElementDec,
+                outputDec);
 
         if (decCode.compareTo(RetCode.Success) != 0) {
             //Error return empty method results
-            throw new java.lang.IllegalStateException("SMA failed:" + decSMAPeriod +
-                                        " Begin:"+outBegIdxDec.value+
-                                        " NumElem:"+outNbElementDec.value+"\n");
+            throw new java.lang.IllegalStateException("SMA failed:" + decSMAPeriod
+                    + " Begin:" + outBegIdxDec.value
+                    + " NumElem:" + outNbElementDec.value + "\n");
         }
-        
+
         return outputDec;
     }
 
-
-    public void performDecisionTest(String stockName) {
-        List<Double> closingPrices = null;
-        int period = 0;
-
-        this.loadInputs(stockName);
-
-        closingPrices = super.createClosingPriceList(stockName,
-                                                     config.inputStartingDate,
-                                                     config.inputEndingDate);
-        double[] input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
-        period = input.length - 1;
-        
-        //************* DECISION TEST *************//
-
-            EvaluateMethodSignals budjetCounter = new EvaluateMethodSignals();
-
-            double bestAssumedBudjet = 0;
-            double bestPeriod = 0;
-            int decSMAPeriod = 0;
-            int lastAction=0;
-            for (StateIterator iter = new StateIterator()
-                    .addParam("SMAperiod", config.inputSMADecisionPeriod);
-                    iter.hasNext() != StateIterator.END_STATE;
-                    iter.nextState())
-            {
-                budjetCounter.initialize(super.inputAssumedBudjet);
-
-                MInteger outBegIdxDec = new MInteger();
-                MInteger outNbElementDec = new MInteger();
-
-                decSMAPeriod = iter.nextInt("SMAperiod");
-                double []outputDec = this.actionSMA(input, period,
-                                                   outBegIdxDec, outNbElementDec,
-                                                   decSMAPeriod);
-
-                int direction = 0;
-                boolean changed = true;
-                for (int elem = 1; elem < outNbElementDec.value; elem++) {
-
-                    double threshold = (outputDec[elem - 1] + outputDec[elem]) / 2;
-                    changed = false;
-                    if (input[outBegIdxDec.value + elem] > threshold) { //above the line
-                        if (direction == -1) {
-                            changed = true; //Price is going down
-                                budjetCounter.sell(input[elem + outBegIdxDec.value], -1);
-                                lastAction=1;
-
-                                if (bestAssumedBudjet < budjetCounter.getCurrentBestBudjet().doubleValue()) {
-                                    bestAssumedBudjet = budjetCounter.getCurrentBestBudjet().doubleValue();
-                                    bestPeriod = decSMAPeriod;
-                                }
-                        }
-
-                        direction = 1;
-                    } else {
-                        if (direction == 1) {
-                            changed = true; //Price is going up
-                            budjetCounter.buy(input[elem + outBegIdxDec.value], -1);
-                            lastAction=2;
-                        }
-                        direction = -1;
-                    }
-
-                    if (changed) {
-                    BigDecimal budjet = budjetCounter.getCurrentBestBudjet();
-
-                        if (this.inputPrintResults && decSMAPeriod == config.inputSMAPeriod) {
-                            sender = new GraphSender(stockType.getStockName());
-                            sender.setSeriesName("DecisionSMA");
-
-                            DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                                                                         config.inputEndingDate.getTime());
-                            dateIterator.move(elem + outBegIdxDec.value);
-                            String ann = null;
-                            if (lastAction==1)
-                               ann = "Sell";
-                            else
-                              ann = "Buy";
-                            sender.addForSending(dateIterator.getCurrent(), 
-                                                 input[elem + outBegIdxDec.value] + 0.05,
-                                                 ann);
-                            
-                            sender.sendAllStored();
-                        }
-                    }
-                }
-
-            }
-
-            Double successRate = ((bestAssumedBudjet / this.inputAssumedBudjet) - 1) * 100;
-            System.out.printf("%s:The best period:%f best budjet:%f pros:%f\n",
-                    stockType.getStockName(), bestPeriod, bestAssumedBudjet,
-                    successRate.doubleValue());
-
-            totalStocksAnalyzed++;
-            this.avgSuccessRate += successRate;
-            this.config.outputSuccessRate = successRate;
-            this.config.inputSMAPeriod = (int) bestPeriod;
-            this.configFile.storeConfig(config);
-    }
-
-
-
-
-    public MethodResults performSMA(String stockName) {
-
-        List<Double> closingPrices = null;
-        int period = 0;
-
-        this.loadInputs(stockName);
-
-        closingPrices = super.createClosingPriceList(stockName,
-                                                     config.inputStartingDate,
-                                                     config.inputEndingDate);
-        double[] input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
-        period = input.length - 1;
- 
-        if (this.inputPerfomDecision) {
-            this.performDecisionTest(stockName);
-        }
+    /************* DECISION TEST *************
+     * @param evaluator Evaluation object
+     * @param stockName ReviewTarget of the method
+     * @param input closing price for period
+     * @param stateConfig Contains all information
+     *                    about a state for particular test.
+     *
+     * @return  void
+     */
+    public void performDecisionTest(EvaluateMethodSignals evaluator,
+                                    String stockName,
+                                    double[] input,
+                                    int decSMAPeriod) {
 
         MInteger outBegIdx = new MInteger();
         MInteger outNbElement = new MInteger();
 
-        System.out.printf("hoP : %d\n", config.inputSMAPeriod);
-        double[] output = this.actionSMA(input, period,
-                                         outBegIdx, outNbElement,
-                                         config.inputSMAPeriod);
+        double[] output = this.actionSMA(input, input.length - 1,
+                                            outBegIdx,
+                                            outNbElement,
+                                            decSMAPeriod);
 
-        //System.out.printf("The original size: (%d:%d) alloc:%d\n", outBegIdx.value,outNbElement.value,allocationSize);
+        int direction = 0;
+
+        DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
+                                                     config.inputEndingDate.getTime());
+
+        TimeSeriesCondition signals = new TimeSeriesCondition();
+        signals.declareFunc("A", input);
+        signals.declareFunc("B", output);
+        dateIterator.move(outBegIdx.value);
+        for (int elem = 1; elem <= outNbElement.value && dateIterator.hasNext(); elem++) {
+            Date date = dateIterator.next();
+            if (signals.setA(elem + outBegIdx.value).crosses().setB(elem).and().smaller().isTrue()) {
+                evaluator.buy(input[elem + outBegIdx.value], -1, date);
+            }else if (signals.setA(elem + outBegIdx.value).crosses().setB(elem).and().bigger().isTrue()) {
+                evaluator.sell(input[elem + outBegIdx.value], -1, date);
+            }
+        }
+    }
+
+    public MethodResults performSMA(String stockName, double[] input) {
+
+        int inputSize = input.length - 1;
+
+        MInteger outBegIdx = new MInteger();
+        MInteger outNbElement = new MInteger();
+
+        double[] output = this.actionSMA(input, inputSize,
+                                        outBegIdx, outNbElement,
+                                        config.inputSMAPeriod);
+
 
         methodResults.putResult(stockType.getStockName(), output[output.length - 1]);
 
-
-                TimeSeriesCondition signals = new TimeSeriesCondition();
-
-                signals.declareFunc("A", input);
-                signals.declareFunc("B", output);
-                for (int elem = 1; elem < outNbElement.value; elem++) {
-
-                     sender = new GraphSender(stockType.getStockName());
-                     DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                                                                  config.inputEndingDate.getTime());
-                     dateIterator.move(elem + outBegIdx.value);
-                     
-                    if(signals.setA(elem + outBegIdx.value)
-                              .crosses()
-                              .setB(elem).isTrue()) {
-                            sender = new GraphSender(stockType.getStockName());
-                            sender.setSeriesName("CrossingPointsv2");
-
-                     
-                            sender.addForSending(dateIterator.getCurrent(), input[elem + outBegIdx.value] + 0.05);
-                            sender.sendAllStored();
-                            
-                    }
-                    sender = new GraphSender(stockType.getStockName());
-                    sender.setSeriesName("Original");
-                    sender.addForSending(dateIterator.getCurrent(), input[elem + outBegIdx.value] + 0.05);
-                    sender.sendAllStored();
-               }
+        TimeSeriesCondition signals = new TimeSeriesCondition();
+        signals.declareFunc("A", input);
+        signals.declareFunc("B", output);
+        sender = new GraphSender(stockType.getStockName());
+        for (int elem = 0; elem <= outNbElement.value; elem++) {
+            DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
+                                                         config.inputEndingDate.getTime());
+            dateIterator.move(elem + outBegIdx.value);
+            sender.setSeriesName("Original");
+            sender.addForSending(dateIterator.getCurrent(), input[elem + outBegIdx.value]);
+            
+        }
+        sender.sendAllStored();
 
 
-
+        
         if (config.inputPrintResults) {
             sender = new GraphSender(stockType.getStockName());
             sender.setSeriesName(this.getMethName());
-            
+
             DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
                                                          config.inputEndingDate.getTime());
             dateIterator.move(outBegIdx.value);
@@ -314,13 +216,50 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
             sender.sendAllStored();
         }
 
-        methodResults.setAvrSuccessRate(avgSuccessRate / totalStocksAnalyzed);
-        System.out.printf("%s has %d successrate\n", this.getMethName(), methodResults.getAvrSuccessRate().intValue());
+        System.out.printf("%s (%s) has %d successrate\n", this.getMethName(), 
+                stockType.getStockName(), methodResults.getSuccessRate().intValue());
         return methodResults;
     }
 
     @Override
     public MethodResults performMethod(String stockName) {
-        return this.performSMA(stockName);
+        List<Double> closingPrices = null;
+
+        //Load config for a stock
+        this.loadInputs(stockName);
+        //Create period
+        closingPrices = super.createClosingPriceList(stockName,
+                config.inputStartingDate,
+                config.inputEndingDate);
+        double[] input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
+
+
+        //Perform testing if it is asked
+        if (this.inputPerfomDecision) {
+            EvaluateMethodSignals budjetCounter = new EvaluateMethodSignals();
+
+            for (StateIterator iter = new StateIterator().addParam("SMAperiod", config.inputSMADecisionPeriod);
+                    iter.hasNext() != StateIterator.END_STATE;
+                    iter.nextState()) {
+
+                budjetCounter.initialize(stockType.getStockName(),
+                                        "DecisionSMA",
+                                        super.inputAssumedBudjet,
+                                        sender);
+
+                this.performDecisionTest(budjetCounter,
+                        stockName,
+                        input,
+                        iter.nextInt("SMAperiod"));
+            }
+            
+            this.config.outputSuccessRate = budjetCounter.getProfitInProcents();
+            methodResults.putSuccessRate(stockName, budjetCounter.getProfitInProcents());
+            this.configFile.storeConfig(config);
+            budjetCounter.printBestResults();
+        }
+
+        //Perform method
+        return this.performSMA(stockName, input);
     }
 }

@@ -28,14 +28,16 @@ import java.util.Set;
  */
 public class MethodResults implements Iterator, Iterable{
     private String methodName = null;
-    private HashMap<String,Double> results = null;
+    private HashMap<String, Double> results = null;
     private Iterator<Entry<String, Double>> iterator=null;
     private Double avrSuccessRate=null;
-    
+
+    private HashMap<String, Double> statistics = null;
 
     public MethodResults(String nameOfMethod) {
         methodName = nameOfMethod;
         results = new HashMap<String, Double>();
+        statistics = new HashMap<String, Double>();
     }
     
     public MethodResults() {
@@ -50,7 +52,22 @@ public class MethodResults implements Iterator, Iterable{
         methodName = MethodName;
     }
 
-    
+
+    public void putSuccessRate(String stockName, Double rate) {
+        statistics.put(stockName, rate);
+    }
+
+    public Double getSuccessRate() {
+        Double allProcens = Double.valueOf(0.0f);
+        
+        Iterator<Double> iter = statistics.values().iterator();
+        while(iter.hasNext()) {
+            allProcens+=iter.next();
+        }
+
+        return allProcens/statistics.size();
+    }
+
     public void putResult(String stockName, Double stockValue) {
         if (results != null) {
             results.put(stockName, stockValue);
