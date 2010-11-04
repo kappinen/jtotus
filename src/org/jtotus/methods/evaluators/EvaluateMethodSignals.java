@@ -31,18 +31,19 @@ import org.jtotus.gui.graph.GraphSender;
  */
 public class EvaluateMethodSignals {
 
-    private BigDecimal currentBudjet = null;
-    private BigDecimal assumedBudjet = null;
-    private BigDecimal currentBestBudjet = null;
+    private BigDecimal currentCapital = null;
+    private BigDecimal assumedCapital = null;
+    private BigDecimal currentBestCapital = null;
     private BigDecimal stockCount = null;
-    private long statActions = 0;
+
+    private BigDecimal previousCapital = null;
     
     private GraphSender bestResultsGraph = null;
     private GraphSender graphSender = null;
 
 
-
-    private double statesCount = 0.0f;
+    private double numberOfWinningTrades = 0;
+    private double numberOfLosingTrades = 0;
 
 
     /* Initialization function, should be run
@@ -50,7 +51,7 @@ public class EvaluateMethodSignals {
      *
      * @param reviewTarget Current stock name
      * @param seriesName   Method related series name
-     * @param originalBudjet Assumed budjet from portofolio
+     * @param originalCapital Assumed Capital from portofolio
      * @param stockGraph   Stores values for each iteration of StateIterator.class
      *
      * @return boolean  Currently, Always returns true
@@ -58,23 +59,24 @@ public class EvaluateMethodSignals {
      */
     public boolean initialize(String reviewTarget,
                               String seriesName,
-                              Double originalBudjet,
+                              Double originalCapital,
                               GraphSender stockGraph) {
 
-        setCurrentBudjet(BigDecimal.valueOf(originalBudjet));
-        assumedBudjet = BigDecimal.valueOf(originalBudjet);
+        setCurrentCapital(BigDecimal.valueOf(originalCapital));
+        assumedCapital = BigDecimal.valueOf(originalCapital);
         
-        if(this.getCurrentBestBudjet() == null){
-            this.setCurrentBestBudjet(BigDecimal.valueOf(0.0));
+        if(this.getCurrentBestCapital() == null){
+            this.setCurrentBestCapital(BigDecimal.valueOf(0.0));
         }
         stockCount = BigDecimal.valueOf(0.0);
-        setStatActions(0);
         
         /*All points, which lead to signal are stored
            in Graph container. 
          */
         graphSender = new GraphSender(reviewTarget);
         graphSender.setSeriesName(seriesName);
+        this.numberOfLosingTrades = 0.0;
+        this.numberOfWinningTrades = 0.0;
 
         return true;
     }
@@ -94,18 +96,19 @@ public class EvaluateMethodSignals {
 
     public EvaluateMethodSignals buy(double price, int amount) {
 
-        if (getCurrentBudjet().subtract(this.brockerExpensePerAction(getCurrentBudjet()))
+        if (getCurrentCapital().subtract(this.brockerExpensePerAction(getCurrentCapital()))
                          .compareTo(BigDecimal.valueOf(0.0)) <= 0) {
            // System.err.printf("There is no money left\n");
             return null;
         }
 
         if (amount == -1) {//ALL-in
-            stockCount = getCurrentBudjet().subtract(this.brockerExpensePerAction(getCurrentBudjet()))
+            stockCount = getCurrentCapital().subtract(this.brockerExpensePerAction(getCurrentCapital()))
                                       .divide(BigDecimal.valueOf(price), 3, RoundingMode.HALF_DOWN);
 
-            setCurrentBudjet(BigDecimal.valueOf(0.0));
-            setStatActions(getStatActions() + 1);
+            setPreviousCapital(getCurrentCapital());
+            setCurrentCapital(BigDecimal.valueOf(0.0));
+            
         } else {
             //TODO: implement
         }
@@ -125,15 +128,26 @@ public class EvaluateMethodSignals {
 
     public EvaluateMethodSignals sell(double price, int amount) {
 
+        if(stockCount.compareTo(BigDecimal.valueOf(0.0))<=0) {
+            return this;
+        }
+        
         if (amount == -1) {//ALL-in
-            setCurrentBudjet(stockCount.multiply(BigDecimal.valueOf(price)));
-            setCurrentBudjet(getCurrentBudjet().subtract(this.brockerExpensePerAction(getCurrentBudjet())));
+            setCurrentCapital(stockCount.multiply(BigDecimal.valueOf(price)));
+            setCurrentCapital(getCurrentCapital().subtract(this.brockerExpensePerAction(getCurrentCapital())));
 
-            //Best Budjet is found
-            if (getCurrentBestBudjet().compareTo(getCurrentBudjet()) < 0) {
-                setCurrentBestBudjet(getCurrentBudjet());
+            //Best Capital is found
+            if (getCurrentBestCapital().compareTo(getCurrentCapital()) < 0) {
+                setCurrentBestCapital(getCurrentCapital());
                 bestResultsGraph = graphSender;
             }
+
+            if(getPreviousCapital().compareTo(getCurrentCapital()) >= 0) {
+                this.numberOfLosingTrades++;
+            }else {
+                this.numberOfWinningTrades++;
+            }
+
 
             stockCount = BigDecimal.valueOf(0.0);
         }
@@ -151,30 +165,17 @@ public class EvaluateMethodSignals {
         return this;
     }
 
-    public BigDecimal getCurrentBestBudjet() {
-        return currentBestBudjet;
+    public BigDecimal getCurrentBestCapital() {
+        return currentBestCapital;
     }
 
     /**
-     * @param currentBestBudjet the currentBestBudjet to set
+     * @param currentBestCapital the currentBestCapital to set
      */
-    public void setCurrentBestBudjet(BigDecimal currentBestBudjet) {
-        this.currentBestBudjet = currentBestBudjet;
+    public void setCurrentBestCapital(BigDecimal currentBestCapital) {
+        this.currentBestCapital = currentBestCapital;
     }
 
-    /**
-     * @return the statActions
-     */
-    public long getStatActions() {
-        return statActions;
-    }
-
-    /**
-     * @param statActions the statActions to set
-     */
-    public void setStatActions(long statActions) {
-        this.statActions = statActions;
-    }
 
     public void printBestResults() {
         bestResultsGraph.sendAllStored();
@@ -183,22 +184,51 @@ public class EvaluateMethodSignals {
 
 
     public Double getProfitInProcents() {
-        Double tmp =  currentBestBudjet.doubleValue();
-        return ((tmp / this.assumedBudjet.doubleValue()) -1) * 100;
+        Double tmp =  currentBestCapital.doubleValue();
+        return ((tmp / this.assumedCapital.doubleValue()) -1) * 100;
     }
 
     /**
-     * @return the currentBudjet
+     * @return the currentCapital
      */
-    public BigDecimal getCurrentBudjet() {
-        return currentBudjet;
+    public BigDecimal getCurrentCapital() {
+        return currentCapital;
     }
 
     /**
-     * @param currentBudjet the currentBudjet to set
+     * @param currentCapital the currentCapital to set
      */
-    public void setCurrentBudjet(BigDecimal currentBudjet) {
-        this.currentBudjet = currentBudjet;
+    public void setCurrentCapital(BigDecimal currentCapital) {
+        this.currentCapital = currentCapital;
     }
 
+    /**
+     * @return the previousCapital
+     */
+    public BigDecimal getPreviousCapital() {
+        return previousCapital;
+    }
+
+    /**
+     * @param previousCapital the previousCapital to set
+     */
+    public void setPreviousCapital(BigDecimal previousCapital) {
+        this.previousCapital = previousCapital;
+    }
+
+
+    public double getWinRatio() {
+        return this.numberOfWinningTrades / this.numberOfLosingTrades;
+
+    }
+
+    public void dumpResults() {
+        System.out.printf("BestCapital:%f WinRatio:%f for:%s\n",
+                currentBestCapital.doubleValue(), this.getWinRatio(),
+                graphSender.getMainReviewTarget());
+
+        System.out.printf("wining trades:%f losing trades:%f\n",
+                this.numberOfWinningTrades,
+                this.numberOfLosingTrades);
+    }
 }

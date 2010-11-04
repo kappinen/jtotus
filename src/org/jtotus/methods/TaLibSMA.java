@@ -65,12 +65,9 @@ import org.jtotus.methods.evaluators.TimeSeriesCondition;
  */
 public class TaLibSMA extends TaLibAbstract implements MethodEntry {
 
-    /*Stock list */
-    private double avgSuccessRate = 0.0f;
-    private int totalStocksAnalyzed = 0;
     //INPUTS TO METHOD:
-    public ConfTaLibSMA config = null;
-    public ConfigLoader<ConfTaLibSMA> configFile = null;
+    private ConfTaLibSMA config = null;
+    private ConfigLoader<ConfTaLibSMA> configFile = null;
 
     public TaLibSMA() {
         super();
@@ -141,22 +138,20 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
      * @return  void
      */
     public void performDecisionTest(EvaluateMethodSignals evaluator,
-                                    String stockName,
-                                    double[] input,
-                                    int decSMAPeriod) {
+            String stockName,
+            double[] input,
+            int decSMAPeriod) {
 
         MInteger outBegIdx = new MInteger();
         MInteger outNbElement = new MInteger();
 
         double[] output = this.actionSMA(input, input.length - 1,
-                                            outBegIdx,
-                                            outNbElement,
-                                            decSMAPeriod);
-
-        int direction = 0;
+                outBegIdx,
+                outNbElement,
+                decSMAPeriod);
 
         DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                                                     config.inputEndingDate.getTime());
+                config.inputEndingDate.getTime());
 
         TimeSeriesCondition signals = new TimeSeriesCondition();
         signals.declareFunc("A", input);
@@ -166,7 +161,7 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
             Date date = dateIterator.next();
             if (signals.setA(elem + outBegIdx.value).crosses().setB(elem).and().smaller().isTrue()) {
                 evaluator.buy(input[elem + outBegIdx.value], -1, date);
-            }else if (signals.setA(elem + outBegIdx.value).crosses().setB(elem).and().bigger().isTrue()) {
+            } else if (signals.setA(elem + outBegIdx.value).crosses().setB(elem).and().bigger().isTrue()) {
                 evaluator.sell(input[elem + outBegIdx.value], -1, date);
             }
         }
@@ -180,34 +175,30 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
         MInteger outNbElement = new MInteger();
 
         double[] output = this.actionSMA(input, inputSize,
-                                        outBegIdx, outNbElement,
-                                        config.inputSMAPeriod);
+                outBegIdx, outNbElement,
+                config.inputSMAPeriod);
 
 
         methodResults.putResult(stockType.getStockName(), output[output.length - 1]);
 
-        TimeSeriesCondition signals = new TimeSeriesCondition();
-        signals.declareFunc("A", input);
-        signals.declareFunc("B", output);
         sender = new GraphSender(stockType.getStockName());
         for (int elem = 0; elem <= outNbElement.value; elem++) {
             DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                                                         config.inputEndingDate.getTime());
+                    config.inputEndingDate.getTime());
             dateIterator.move(elem + outBegIdx.value);
             sender.setSeriesName("Original");
             sender.addForSending(dateIterator.getCurrent(), input[elem + outBegIdx.value]);
-            
+
         }
         sender.sendAllStored();
 
 
-        
         if (config.inputPrintResults) {
             sender = new GraphSender(stockType.getStockName());
             sender.setSeriesName(this.getMethName());
 
             DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                                                         config.inputEndingDate.getTime());
+                    config.inputEndingDate.getTime());
             dateIterator.move(outBegIdx.value);
             for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
                 Date stockDate = dateIterator.next();
@@ -216,7 +207,7 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
             sender.sendAllStored();
         }
 
-        System.out.printf("%s (%s) has %d successrate\n", this.getMethName(), 
+        System.out.printf("%s (%s) has %d successrate\n", this.getMethName(),
                 stockType.getStockName(), methodResults.getSuccessRate().intValue());
         return methodResults;
     }
@@ -243,20 +234,21 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
                     iter.nextState()) {
 
                 budjetCounter.initialize(stockType.getStockName(),
-                                        "DecisionSMA",
-                                        super.inputAssumedBudjet,
-                                        sender);
+                        "DecisionSMA",
+                        super.inputAssumedBudjet,
+                        sender);
 
                 this.performDecisionTest(budjetCounter,
                         stockName,
                         input,
                         iter.nextInt("SMAperiod"));
             }
-            
+
             this.config.outputSuccessRate = budjetCounter.getProfitInProcents();
             methodResults.putSuccessRate(stockName, budjetCounter.getProfitInProcents());
             this.configFile.storeConfig(config);
             budjetCounter.printBestResults();
+            budjetCounter.dumpResults();
         }
 
         //Perform method

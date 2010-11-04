@@ -80,7 +80,7 @@ public final class GraphSender {
         packet.type = this.getType();
         packet.results  = listOfValues;
 
-        this.sentPacket(mainReviewTarget, packet);
+        this.sentPacket(getMainReviewTarget(),packet);
         this.reset();
     }
     
@@ -88,7 +88,7 @@ public final class GraphSender {
     public boolean sentPacket(String reviewTarget, GraphPacket packetObj) {
         LinkedBlockingDeque<GraphPacket> queue = null;
         
-        if (mainReviewTarget.compareTo(reviewTarget) != 0){
+        if (getMainReviewTarget().compareTo(reviewTarget) != 0){
             queue = mainEngine.fetchGraph(reviewTarget);
             if (queue == null) {
                 System.err.printf("Unable to fetch Graph port!\n");
@@ -148,6 +148,20 @@ public final class GraphSender {
      */
     public void setType(GraphSeriesType type) {
         this.type = type;
+    }
+
+    /**
+     * @return the mainReviewTarget
+     */
+    public String getMainReviewTarget() {
+        return mainReviewTarget;
+    }
+
+    /**
+     * @param mainReviewTarget the mainReviewTarget to set
+     */
+    public void setMainReviewTarget(String mainReviewTarget) {
+        this.mainReviewTarget = mainReviewTarget;
     }
 
 }
