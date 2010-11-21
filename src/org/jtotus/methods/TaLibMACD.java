@@ -19,24 +19,8 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  *
 https://www.nordnet.fi/mux/page/hjalp/ordHjalp.html?ord=diagram%20rsi
  *
-RSI
+MACD
 
-RSI on hintaa seuraava oskilaattori, joka saavuttaa 0-100 välisiä arvoja.
-Se vertaa viimeisten ylöspäin tapahtuneiden hintamuutosten voimakkuutta
-alaspäin suuntautuneisiin hintamuutoksiin. Suosituimmat tarkasteluvälit
-ovat 9, 14 ja 25 päivän RSI.
-
-Tulkinta:
-- RSI huipussa: korkea arvo (yli 70/noususuhdanteessa yleensä 80) indikoi yliostotilannetta
-- RSI pohjassa: matala arvo (alle 30/laskusuhdanteessa yleenäs 20) indikoi aliostotilannetta
-
-Signaalit:
-- Osta, kun RSI:n arvo leikkaa aliostorajan alapuolelta
-- Myy, kun RSI:n arvo leikkaa yliostorajan yläpuolelta
-
-Vaihtoehtoisesti:
-- Osta, kun RSI leikkaa keskilinjan (50) alapuolelta
-- Myy, kun RSI leikkaa keskilinjan (50) yläpuolelta
 
 
 
@@ -52,7 +36,7 @@ import java.util.Date;
 import java.util.List;
 import org.jtotus.common.DateIterator;
 import org.jtotus.gui.graph.GraphSender;
-import org.jtotus.config.ConfTaLibRSI;
+import org.jtotus.config.ConfTaLibMACD;
 import org.apache.commons.lang.ArrayUtils;
 import org.jtotus.common.StateIterator;
 import org.jtotus.config.ConfigLoader;
@@ -62,15 +46,15 @@ import org.jtotus.methods.evaluators.EvaluateMethodSignals;
  *
  * @author Evgeni Kappinen
  */
-public class TaLibRSI extends TaLibAbstract implements MethodEntry {
+public class TaLibMACD extends TaLibAbstract implements MethodEntry {
     /*Stock list */
 
-    protected ConfTaLibRSI config = null;
-    public ConfigLoader<ConfTaLibRSI> configFile = null;
+    protected ConfTaLibMACD config = null;
+    public ConfigLoader<ConfTaLibMACD> configFile = null;
 
     public void loadInputs(String configStock) {
 
-        configFile = new ConfigLoader<ConfTaLibRSI>(super.inputPortofolio
+        configFile = new ConfigLoader<ConfTaLibMACD>(super.inputPortofolio
                 + File.separator
                 + configStock
                 + File.separator
@@ -78,16 +62,16 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
 
         if (configFile.getConfig() == null) {
             //Load default values
-            config = new ConfTaLibRSI();
+            config = new ConfTaLibMACD();
             configFile.storeConfig(config);
         } else {
-            config = (ConfTaLibRSI) configFile.getConfig();
+            config = (ConfTaLibMACD) configFile.getConfig();
         }
         super.child_config = config;
         configFile.applyInputsToObject(this);
     }
 
-    
+
 
     /************* DECISION TEST *************
      * @param evaluator Evaluation object
@@ -101,44 +85,41 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
     public void performDecisionTest(EvaluateMethodSignals evaluator,
                                     String stockName,
                                     double[] input,
-                                    int decRSIPeriod,
-                                    int lowestThreshold,
-                                    int highestThreshold) {
+                                    int fastPeriod,
+                                    int slowPeriod,
+                                    int signalPeriod) {
 
         boolean change=false;
         MInteger outBegIdx = new MInteger();
         MInteger outNbElement = new MInteger();
 
-        double[] output = this.actionRSI(input,
-                                        outBegIdx,
-                                        outNbElement,
-                                        decRSIPeriod);
+        double []macd = new double [input.length - 1];
+        double []macdSignal = new double [input.length - 1];
+        double []macdHis = new double [input.length - 1];
 
-        DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                config.inputEndingDate.getTime());
+        double[] output = this.actionMACD(input,
+                                        outBegIdx, outNbElement,
+                                        macd, macdSignal,macdHis,
+                                        fastPeriod, slowPeriod, signalPeriod);
 
-        dateIterator.move(outBegIdx.value);
-        for (int elem = 0; elem < outNbElement.value && dateIterator.hasNext(); elem++) {
-            Date date = dateIterator.next();
-            if (output[elem] < lowestThreshold && change == false) {
-                evaluator.buy(input[elem + outBegIdx.value], -1, date);
-                change=true;
-            } else if (output[elem] > highestThreshold && change == true) {
-                evaluator.sell(input[elem + outBegIdx.value], -1, date);
-                change=false;
-            }
-        }
     }
-    
 
-    public double[] actionRSI(double[] input,
-            MInteger outBegIdxDec,
-            MInteger outNbElementDec,
-            int decRSIPeriod) {
+
+    public double[] actionMACD(double[] input,
+                                MInteger outBegIdxDec,
+                                MInteger outNbElementDec,
+                                double []macd,
+                                double []macdSignal,
+                                double []macdHis,
+                                int fastPeriod,
+                                int slowPeriod,
+                                int signalPeriod) {
 
         int intput_size = input.length - 1;
         final Core core = new Core();
-        final int allocationSizeDecision = intput_size - core.rsiLookback(decRSIPeriod);
+        final int allocationSizeDecision = intput_size - core.macdLookback(fastPeriod,
+                                                                           slowPeriod,
+                                                                           signalPeriod);
 
 
         if (allocationSizeDecision <= 0) {
@@ -146,42 +127,51 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
             return null;
         }
 
-        double[] outputDec = new double[allocationSizeDecision];
-
-
-        RetCode decCode = core.rsi(0, intput_size - 1,
-                input, decRSIPeriod,
+        RetCode decCode = core.macd(0, intput_size - 1,
+                input, fastPeriod, slowPeriod, signalPeriod,
                 outBegIdxDec, outNbElementDec,
-                outputDec);
+                macd, macdSignal, macdHis);
 
         if (decCode.compareTo(RetCode.Success) != 0) {
             //Error return empty method results
-            throw new java.lang.IllegalStateException("RSI failed:" + decRSIPeriod
+            throw new java.lang.IllegalStateException("MACD failed:"
+                    + " Fast: " +fastPeriod+" Slow: "+slowPeriod+" Signal: "+signalPeriod
                     + " Begin:" + outBegIdxDec.value
                     + " NumElem:" + outNbElementDec.value + "\n");
         }
 
-        return outputDec;
+        return macd;
     }
-    
 
-    public MethodResults performRSI(String stockName, double[] input) {
+
+    public MethodResults performMACD(String stockName, double[] input) {
+        
         stockType.setStockName(stockName);
         this.loadInputs(stockName);
 
-        System.out.printf("period:%d\n", config.inputRSIPeriod);
+        System.out.printf("Periods fast:%d slow:%d signal:%d\n",
+                                         config.inputMACDFastPeriod,
+                                         config.inputMACDSlowPeriod,
+                                         config.inputMACDSignalPeriod);
 
         //************* DECISION TEST *************//
 
         MInteger outBegIdx = new MInteger();
         MInteger outNbElement = new MInteger();
 
-        double[] output = this.actionRSI(input,
-                outBegIdx, outNbElement,
-                config.inputRSIPeriod);
+        double []macd = new double [input.length - 1];
+        double []macdSignal = new double [input.length - 1];
+        double []macdHis = new double [input.length - 1];
+        
+        double[] output = this.actionMACD(input,
+                                        outBegIdx, outNbElement,
+                                        macd, macdSignal, macdHis,
+                                        config.inputMACDFastPeriod,
+                                        config.inputMACDSlowPeriod,
+                                        config.inputMACDSignalPeriod);
 
 
-        methodResults.putResult(stockType.getStockName(), output[output.length - 1]);
+        methodResults.putResult(stockType.getStockName(), macd[outNbElement.value - 1]);
 
         sender = new GraphSender(stockType.getStockName());
         for (int elem = 0; elem <= outNbElement.value; elem++) {
@@ -193,11 +183,11 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
 
         }
         sender.sendAllStored();
-        
+
 
         if (config.inputPrintResults) {
             sender = new GraphSender(stockType.getStockName());
-            sender.setPlotName("RSI");
+            sender.setPlotName("MACD");
             sender.setSeriesName(this.getMethName());
 
             DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
@@ -205,7 +195,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
             dateIterator.move(outBegIdx.value);
             for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
                 Date stockDate = dateIterator.next();
-                sender.addForSending(stockDate, output[i]);
+                sender.addForSending(stockDate, macd[i]);
             }
             sender.sendAllStored();
         }
@@ -216,7 +206,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
         return methodResults;
 
     }
-    
+
 
     @Override
     public MethodResults performMethod(String stockName) {
@@ -230,31 +220,33 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
                 config.inputEndingDate);
         double[] input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
 
-
         //Perform testing if it is asked
-        if (this.inputPerfomDecision) {
+        if (false) {
             EvaluateMethodSignals budjetCounter = new EvaluateMethodSignals();
 
             for (StateIterator iter = new StateIterator()
-                    .addParam("RSIpriod", config.inputRSIDecisionPeriod)
-                    .addParam("LowestThreshold", config.inputRSILowestThreshold)
-                    .addParam("HigestThreshold", config.inputRSIHigestThreshold);
-                    iter.hasNext() != StateIterator.END_STATE; iter.nextState()) {
+                    .addParam("macdFastPeriod", config.inputDecisionFastPeriod)
+                    .addParam("macdSlowPeriod", config.inputDecisionSlowPeriod)
+                    .addParam("macdSignal", config.inputDecisionSinal);
+                    iter.hasNext() != StateIterator.END_STATE;
+                iter.nextState()) {
 
                 budjetCounter.initialize(stockType.getStockName(),
-                                        "DecisionRSI",
+                                        "DecisionMACD",
                                         super.inputAssumedBudjet,
                                         sender);
 
                 this.performDecisionTest(budjetCounter,
                                         stockName,
                                         input,
-                                        iter.nextInt("RSIpriod"),
-                                        iter.nextInt("LowestThreshold"),
-                                        iter.nextInt("HigestThreshold"));
+                                        iter.nextInt("macdFastPeriod"),
+                                        iter.nextInt("macdSlowPeriod"),
+                                        iter.nextInt("macdSignal"));
 
                 if(budjetCounter.newBest()) {
-                    config.inputRSIPeriod = iter.nextInt("RSIpriod");
+                    config.inputMACDFastPeriod = iter.nextInt("macdFastPeriod");
+                    config.inputMACDSlowPeriod = iter.nextInt("macdSlowPeriod");
+                    config.inputMACDSignalPeriod = iter.nextInt("macdSignal");
                 }
             }
 
@@ -266,6 +258,6 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
         }
 
         //Perform method
-        return this.performRSI(stockName, input);
+        return this.performMACD(stockName, input);
     }
 }

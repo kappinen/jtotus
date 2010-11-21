@@ -26,7 +26,6 @@ import java.util.Calendar;
 public class ConfTaLibRSI extends MainMethodConfig{
     public int inputRSIPeriod = 14;
 
-    public Double outputSuccessRate=null;
     public String inputRSIDecisionPeriod = null;
     public String inputRSILowestThreshold=null;
     public String inputRSIHigestThreshold=null;
@@ -34,9 +33,9 @@ public class ConfTaLibRSI extends MainMethodConfig{
     public ConfTaLibRSI() {
         inputNormilizerType = "SimpleMinWins";
          //Decision
-        inputRSIDecisionPeriod = "int[6-15]{1}";
-        inputRSILowestThreshold = "int[10-49]{2}";
-        inputRSIHigestThreshold = "int[50-80]{2}";
+        inputRSIDecisionPeriod = "int[3-20]{1}";
+        inputRSILowestThreshold = "int[1-50]{2}";
+        inputRSIHigestThreshold = "int[50-99]{2}";
     }
 
 }

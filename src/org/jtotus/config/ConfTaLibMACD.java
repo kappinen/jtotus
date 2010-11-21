@@ -17,33 +17,23 @@
 
 package org.jtotus.config;
 
-import java.util.Calendar;
-
 /**
  *
  * @author Evgeni Kappinen
  */
-public class MainMethodConfig {
-   public String inputPortfolio=null;
+public class ConfTaLibMACD extends MainMethodConfig{
 
-   public Calendar inputStartingDate = null;
-   public Calendar inputEndingDate = null;
+    public int inputMACDFastPeriod = 12;
+    public int inputMACDSlowPeriod = 26;
+    public int inputMACDSignalPeriod = 9;
 
-   public boolean inputPrintResults = true;
-   public boolean inputPerfomDecision = true;
 
-   public String inputNormilizerType=null;
+    public String inputDecisionFastPeriod = "int[12-12]{1}";
+    public String inputDecisionSlowPeriod = "int[13-30]{1}";
+    public String inputDecisionSinal = "int[9-9]{1}";
+    
+    public ConfTaLibMACD() {
+        this.inputPerfomDecision = false;
+    }
 
-    //Methods sets, if available.
-    //Should be represented in procents.
-    public Double outputSuccessRate=null;
-
-   public MainMethodConfig() {
-
-        inputPortfolio = new String("OMXHelsinki");
-
-        inputEndingDate = Calendar.getInstance();
-        inputStartingDate = Calendar.getInstance();
-        inputStartingDate.add(Calendar.DATE, -300);
-   }
 }

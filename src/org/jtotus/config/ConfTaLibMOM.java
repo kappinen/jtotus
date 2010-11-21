@@ -25,9 +25,7 @@ public class ConfTaLibMOM extends MainMethodConfig{
 
     //Basic configuration
     public int inputMOMPeriod = 10;
-    //Methods sets, if available.
-    //Should be represented in procents.
-    public Double outputSuccessRate=null;
+
     //Strategy Decision
     public String inputMOMDecisionPeriod=null;
 

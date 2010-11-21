@@ -242,6 +242,10 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
                         stockName,
                         input,
                         iter.nextInt("SMAperiod"));
+
+                if(budjetCounter.newBest()) {
+                    config.inputSMAPeriod = iter.nextInt("SMAperiod");
+                }
             }
 
             this.config.outputSuccessRate = budjetCounter.getProfitInProcents();

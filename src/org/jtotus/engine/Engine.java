@@ -38,6 +38,7 @@ import org.jtotus.database.AutoUpdateStocks;
 import org.jtotus.gui.MethodResultsPrinter;
 import org.jtotus.methods.PotentialWithIn;
 import org.jtotus.methods.TaLibEMA;
+import org.jtotus.methods.TaLibMACD;
 import org.jtotus.methods.TaLibMOM;
 import org.jtotus.methods.TaLibRSI;
 import org.jtotus.methods.TaLibSMA;
@@ -65,6 +66,7 @@ public class Engine {
         methodList.add(new TaLibSMA());
         methodList.add(new TaLibEMA());
         methodList.add(new TaLibMOM());
+        methodList.add(new TaLibMACD());
 
         File scriptDir = new File("./src/org/jtotus/methods/scripts/");
         if (!scriptDir.isDirectory()) {

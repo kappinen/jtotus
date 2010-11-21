@@ -133,8 +133,6 @@ public class ConfigLoader<T> {
         Field[] toObjectFields = obj.getClass().getSuperclass().getDeclaredFields();
         Field[] fromObjectFields = config.getClass().getDeclaredFields();
 
-        System.out.printf("Copying config from:%s to:%s\n",config.getClass().getName(), obj.getClass().getName());
-
         for (int to = 0; to < toObjectFields.length; to++) {
             String inputToName = toObjectFields[to].getName();
 

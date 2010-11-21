@@ -51,8 +51,6 @@ public class NumberRangeIter<T extends Number> implements InterfaceStateIterator
 
     public int setRange(String range) {
 
-        //   String range = rangeString.replaceAll("[|]", "");
-
         String startString = range.substring(range.lastIndexOf("[") + 1,
                 range.lastIndexOf("-"));
 

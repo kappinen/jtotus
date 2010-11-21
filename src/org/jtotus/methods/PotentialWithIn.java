@@ -120,9 +120,7 @@ public class PotentialWithIn implements MethodEntry {
                }
            }
         }
-
-
-
+       
        //IF current price is the minimum of the period
        //substract its  position in the table
 
@@ -217,12 +215,6 @@ public class PotentialWithIn implements MethodEntry {
                }
            }
         }
-
-
-
-
-
-
 
 
 

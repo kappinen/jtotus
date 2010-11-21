@@ -25,7 +25,6 @@ public class ConfTaLibEMA extends MainMethodConfig{
 
     //Basic configuration
     public int inputEMAPeriod = 10;
-    public Double outputSuccessRate = null;
 
     //Strategy Decision
     public String inputEMADecisionPeriod;

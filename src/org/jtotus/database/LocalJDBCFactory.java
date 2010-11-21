@@ -17,8 +17,6 @@
 
 package org.jtotus.database;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.h2.jdbcx.JdbcConnectionPool;
@@ -62,8 +60,7 @@ public class LocalJDBCFactory {
     public synchronized LocalJDBC jdbcFactory() {
         LocalJDBC localJDBC = new LocalJDBC();
         localJDBC.setPool(pool);
-        System.out.printf("Active connections:%d max:%d\n", pool.getActiveConnections(), pool.getMaxConnections());
-
+        
         return localJDBC;
     }
 

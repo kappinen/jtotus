@@ -23,7 +23,6 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Font;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import org.jfree.chart.ChartPanel;

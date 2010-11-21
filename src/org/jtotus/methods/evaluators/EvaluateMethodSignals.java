@@ -33,19 +33,18 @@ public class EvaluateMethodSignals {
 
     private BigDecimal currentCapital = null;
     private BigDecimal assumedCapital = null;
-    private BigDecimal currentBestCapital = null;
     private BigDecimal stockCount = null;
-
     private BigDecimal previousCapital = null;
-    
-    private GraphSender bestResultsGraph = null;
     private GraphSender graphSender = null;
-
-
     private double numberOfWinningTrades = 0;
     private double numberOfLosingTrades = 0;
-
-
+    private boolean newBestIsFound = false;
+    //Best state
+    private GraphSender bestResultsGraph = null;
+    private BigDecimal currentBestCapital = null;
+    private double bestNumberOfWinningTrades = 0;
+    private double bestNumberOfLosingTrades = 0;
+    
     /* Initialization function, should be run
      * for each state for StateIterator.
      *
@@ -77,6 +76,7 @@ public class EvaluateMethodSignals {
         graphSender.setSeriesName(seriesName);
         this.numberOfLosingTrades = 0.0;
         this.numberOfWinningTrades = 0.0;
+        newBestIsFound = false;
 
         return true;
     }
@@ -136,18 +136,20 @@ public class EvaluateMethodSignals {
             setCurrentCapital(stockCount.multiply(BigDecimal.valueOf(price)));
             setCurrentCapital(getCurrentCapital().subtract(this.brockerExpensePerAction(getCurrentCapital())));
 
-            //Best Capital is found
-            if (getCurrentBestCapital().compareTo(getCurrentCapital()) < 0) {
-                setCurrentBestCapital(getCurrentCapital());
-                bestResultsGraph = graphSender;
-            }
-
             if(getPreviousCapital().compareTo(getCurrentCapital()) >= 0) {
                 this.numberOfLosingTrades++;
             }else {
                 this.numberOfWinningTrades++;
             }
-
+            
+            //Best Capital is found
+            if (getCurrentBestCapital().compareTo(getCurrentCapital()) < 0) {
+                setCurrentBestCapital(getCurrentCapital());
+                bestResultsGraph = graphSender;
+                bestNumberOfWinningTrades = numberOfWinningTrades;
+                bestNumberOfLosingTrades = numberOfLosingTrades;
+                newBestIsFound = true;                
+            }
 
             stockCount = BigDecimal.valueOf(0.0);
         }
@@ -218,17 +220,26 @@ public class EvaluateMethodSignals {
 
 
     public double getWinRatio() {
-        return this.numberOfWinningTrades / this.numberOfLosingTrades;
+        return this.bestNumberOfWinningTrades / this.bestNumberOfLosingTrades;
 
     }
 
     public void dumpResults() {
-        System.out.printf("BestCapital:%f WinRatio:%f for:%s\n",
-                currentBestCapital.doubleValue(), this.getWinRatio(),
-                graphSender.getMainReviewTarget());
+
+        System.out.printf("[----------\n");
+        System.out.printf("%s : BestCapital:%f WinRatio:%f\n",
+                graphSender.getMainReviewTarget(),
+                currentBestCapital.doubleValue(), this.getWinRatio());
 
         System.out.printf("wining trades:%f losing trades:%f\n",
-                this.numberOfWinningTrades,
-                this.numberOfLosingTrades);
+                this.bestNumberOfWinningTrades,
+                this.bestNumberOfLosingTrades);
+
+        System.out.printf("-----------]\n");
+    }
+
+
+    public boolean newBest() {
+        return newBestIsFound;
     }
 }
