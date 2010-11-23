@@ -33,24 +33,34 @@ public class StockNames {
     public StockNames() {
 
                 //Aliases
+        //http://en.wikipedia.org/wiki/OMX_Helsinki_25
+
+        stockMap.put("Cargotec Oyj","CGCBV.HSE");
+        stockMap.put("Elisa Oyj","ELI1V.HSE");
         stockMap.put("Fortum Oyj", "FUM1V.HE");
         stockMap.put("Fortum Oyj", "FUM1V.HSE");
-
-        stockMap.put("Nokia Oyj", "NOK1V.HSE");
-
-        stockMap.put("UPM-Kymmene Oyj","UPM1V.HSE");
-        stockMap.put("Rautaruukki Oyj","RTRKS.HSE");
-
-        stockMap.put("Sanoma Oyj","SAA1V.HSE");
-        stockMap.put("Tieto Oyj","TIE1V.HSE");
-        stockMap.put("Metso Oyj","MEO1V.HSE");
-
+        stockMap.put("Kemira Oyj","KRA1V.HSE");
         stockMap.put("KONE Oyj","KNEBV.HSE");
         stockMap.put("Konecranes Oyj","KCR1V.HSE");
-        stockMap.put("Kemira Oyj","KRA1V.HSE");
-        stockMap.put("Uponor Oyj","UNR1V.HSE");
+        stockMap.put("Metso Oyj","MEO1V.HSE");
+        stockMap.put("Neste Oil","NES1V.HSE");
+        stockMap.put("Nokia Oyj", "NOK1V.HSE");
+        stockMap.put("Nokian Renkaat Oyj","NRE1V.HSE");
+        stockMap.put("Nordea Bank AB","NDA1V.HSE");
+        stockMap.put("Outokumpu Oyj","OUT1V.HSE");
+        stockMap.put("Outotec Oyj","OTE1V.HSE");
+        stockMap.put("Pohjola Bank A","POH1S.HSE");
+        stockMap.put("Rautaruukki Oyj","RTRKS.HSE");
+        stockMap.put("Pohjola Bank A","POH1S.HSE");
+        stockMap.put("Sampo Oyj A","SAMAS.HSE");
+        stockMap.put("Sanoma Oyj","SAA1V.HSE");
         stockMap.put("Stora Enso Oyj A","STEAV.HSE");
-        
+        stockMap.put("TeliaSonera AB","TLS1V.HSE");
+        stockMap.put("Tieto Oyj","TIE1V.HSE");
+        stockMap.put("UPM-Kymmene Oyj","UPM1V.HSE");
+        stockMap.put("Wärtsilä Corporation","WRT1V.HSE");
+        stockMap.put("YIT Oyj","YTY1V.HSE");
+
     }
 
     public Iterator iterator() {
@@ -63,4 +73,10 @@ public class StockNames {
     public String getHexName(String name) {
         return stockMap.get(name);
     }
+
+    public String[]getNames() {
+        return stockMap.keySet().toArray(new String [0]);
+    }
+
+    
 }

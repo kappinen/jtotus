@@ -18,6 +18,7 @@
 package org.jtotus.config;
 
 import java.util.LinkedList;
+import org.jtotus.common.StockNames;
 import org.jtotus.engine.Engine;
 import org.jtotus.methods.MethodEntry;
 
@@ -26,24 +27,22 @@ import org.jtotus.methods.MethodEntry;
  * @author Evgeni Kappinen
  */
 public class GUIConfig {
-
-    public final String []StockNames = { "Fortum Oyj",
-                                         "Nokia Oyj",
-                                         "UPM-Kymmene Oyj",
-                                         "Metso Oyj",
-                                         "Kemira Oyj",
-                                         "Konecranes Oyj",
-                                         "KONE Oyj",
-                                         "Rautaruukki Oyj",
-                                         "Sanoma Oyj",
-                                         "Tieto Oyj",
-                                         "Uponor Oyj",
-                                         "Stora Enso Oyj A"
-                                          };
+    public StockNames names = null;
+    public String []StockNames = null;
     public final int day_period = 5;
 
+    public GUIConfig(){
+        if (names==null)
+            names = new StockNames();
+        
+        StockNames = names.getNames();
+    }
+
     public String []fetchStockName() {
-        return StockNames;
+        if (names==null)
+            names = new StockNames();
+        
+        return names.getNames();
     }
 
     public LinkedList <MethodEntry> getSupportedMethodsList() {

@@ -74,10 +74,12 @@ public class LocalJDBC implements InterfaceDataBase {
     public BigDecimal fetchData(String tableName, Calendar date, String column) {
         BigDecimal retValue = null;
         PreparedStatement pstm = null;
+
         try {
             String statement = "SELECT "+column+" FROM "+this.normTableName(tableName)+" WHERE DATE=?";
             connection = mainPool.getConnection();
-            
+             this.createTable(connection, this.normTableName(tableName));
+
             pstm = connection.prepareStatement(statement);
             
             java.sql.Date sqlDate = new java.sql.Date(date.getTimeInMillis());
@@ -92,7 +94,7 @@ public class LocalJDBC implements InterfaceDataBase {
             retValue = results.getBigDecimal(column);
 
         } catch (SQLException ex) {
-            System.err.printf("Unable to find date for:'%s' from'%s' Time"+date.getTime()+"\n", column,tableName);
+            System.err.printf("LocalJDBC Unable to find date for:'%s' from'%s' Time"+date.getTime()+"\n", column,tableName);
              //   Logger.getLogger(LocalJDBC.class.getName()).log(Level.SEVERE, null, ex);
         }
 

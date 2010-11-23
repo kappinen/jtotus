@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.swing.JDesktopPane;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
@@ -114,7 +115,7 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
         
         drawDesktopPane.add(tempGraph, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
-        drawDesktopPane.setAutoscrolls(true);
+        drawDesktopPane.setAutoscrolls(false);
 
         return tempGraph.getQueue();
     }
@@ -177,24 +178,30 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
     private void configureMethodTab() {
 
         this.setTabLayoutPolicy(javax.swing.JTabbedPane.SCROLL_TAB_LAYOUT);
-        this.setAutoscrolls(true);
+        this.setAutoscrolls(false);
         this.setName("methodTabbedPane"); // NOI18N
 
 
         jScrollPane1.setAutoscrolls(true);
         jScrollPane1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         jScrollPane1.setName("jScrollPane1");
+        
+
 
         methodTable = createMethodTable();
         jScrollPane1.setViewportView(methodTable);
 
         //First tab - Method result
+        this.setAutoscrolls(false);
+
+        jScrollPane1.setBorder(null);
+        
         this.addTab("Methods", jScrollPane1);
 
         //Second tab - Graphs
         this.addTab("Graphs", drawDesktopPane);
 
-        drawDesktopPane.setAutoscrolls(true);
+        drawDesktopPane.setAutoscrolls(false);
         drawDesktopPane.setName("drawDesktopPane");
         methodTable.setShowGrid(true);
 
@@ -205,13 +212,14 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
     public void initialize() {
         jScrollPane1 = new JScrollPane();
         drawDesktopPane = new JDesktopPane();
-
+        
         //Register Method Results printer
         Engine engine = Engine.getInstance();
         engine.registerResultsPrinter(this);
 
         this.configureMethodTab();
-
+        jScrollPane1.setHorizontalScrollBarPolicy(jScrollPane1.HORIZONTAL_SCROLLBAR_ALWAYS);
+       
 
 
     }
