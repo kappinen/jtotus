@@ -29,7 +29,7 @@ import org.jtotus.config.GUIConfig;
 
 /**
  *
- * @author house
+ * @author Evgeni Kappinen
  */
 public class JtotusPortfolioView extends JTabbedPane {
     private JScrollPane jScrollPane4 = null;

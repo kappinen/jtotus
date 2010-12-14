@@ -26,8 +26,6 @@ package org.jtotus.gui;
 
 import java.awt.Component;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -35,7 +33,6 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractCellEditor;
-import javax.swing.DefaultCellEditor;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerDateModel;
 import javax.swing.SpinnerModel;
@@ -47,12 +44,9 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-import net.sf.nachocalendar.CalendarFactory;
-import net.sf.nachocalendar.components.DateField;
 import net.sf.nachocalendar.table.DateFieldTableEditor;
 import net.sf.nachocalendar.table.JTableCustomizer;
 import org.dom4j.Document;
-import org.dom4j.io.XMLWriter;
 import org.jtotus.config.ConfigLoader;
 
 /**
@@ -392,7 +386,9 @@ public class ConfigView extends javax.swing.JDialog {
                     if(paramName.compareTo(fields[y].getName())==0){
                         try {
                             Object newValue = model.getValueAt(i, 1);
-                            System.out.printf("Type name:%s fields:%s\n",fields[y].getType().getName(), newValue.getClass().getName());
+                       //     System.out.printf("Type name:%s fields:%s\n",fields[y].getType().getName(), newValue.getClass().getName());
+                            if (newValue == null)
+                                continue;
                             
                             if(fields[y].getType() == newValue.getClass()){
                                  System.out.printf("Writtign name:%s fields:%s\n",fields[y].getType().getName(), newValue.getClass().getName());

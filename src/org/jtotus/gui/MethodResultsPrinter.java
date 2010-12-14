@@ -24,7 +24,10 @@ import org.jtotus.common.MethodResults;
  * @author Evgeni Kappinen
  */
 public interface MethodResultsPrinter {
+    
     public void drawResults(MethodResults results);
 
+    //Send content of method table to an email address.
+    public void sendReport();
 
 }

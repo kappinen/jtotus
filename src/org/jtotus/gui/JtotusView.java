@@ -34,7 +34,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedBlockingQueue;
 import javax.swing.Timer;
 import javax.swing.Icon;
 import javax.swing.JFrame;
@@ -194,6 +193,7 @@ public class JtotusView extends FrameView {
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenu configMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem configMenuItem = new javax.swing.JMenuItem();
+        jMenuItem1 = new javax.swing.JMenuItem();
         statusPanel = new javax.swing.JPanel();
         javax.swing.JSeparator statusPanelSeparator = new javax.swing.JSeparator();
         statusMessageLabel = new javax.swing.JLabel();
@@ -290,6 +290,15 @@ public class JtotusView extends FrameView {
         });
         configMenu.add(configMenuItem);
 
+        jMenuItem1.setText(resourceMap.getString("jMenuItem1.text")); // NOI18N
+        jMenuItem1.setName("jMenuItem1"); // NOI18N
+        jMenuItem1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                jMenuItem1MousePressed(evt);
+            }
+        });
+        configMenu.add(jMenuItem1);
+
         menuBar.add(configMenu);
 
         statusPanel.setName("statusPanel"); // NOI18N
@@ -374,12 +383,21 @@ public class JtotusView extends FrameView {
         configView.setVisible(true);
     }//GEN-LAST:event_configMenuItemMousePressed
 
+    private void jMenuItem1MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenuItem1MousePressed
+        // TODO add your handling code here:
+        MethodResultsPrinter printer = (MethodResultsPrinter) methodTabbedPane;
+        printer.sendReport();
+        
+
+    }//GEN-LAST:event_jMenuItem1MousePressed
+
    
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel infoLable;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButtonRunScripts;
+    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JMenuBar menuBar;

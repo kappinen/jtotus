@@ -29,7 +29,9 @@ import org.jtotus.methods.MethodEntry;
 public class GUIConfig {
     public StockNames names = null;
     public String []StockNames = null;
-    public final int day_period = 5;
+    public String gmailLogin = null;
+    public String gmailPassword = null;
+    public int day_period = 5;
 
     public GUIConfig(){
         if (names==null)

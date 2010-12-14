@@ -22,9 +22,9 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JDesktopPane;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
@@ -34,9 +34,11 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import org.jtotus.common.Helper;
 import org.jtotus.common.MethodResults;
+import org.jtotus.config.ConfigLoader;
 import org.jtotus.config.GUIConfig;
 import org.jtotus.engine.Engine;
 import org.jtotus.gui.graph.JTotusGraph;
+import org.jtotus.gui.mail.JtotusGmailClient;
 import org.jtotus.methods.MethodEntry;
 
 /**
@@ -279,4 +281,39 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
         }
         return -1;
     }
+
+
+    //FIXME:report should be sent by engine not gui
+    public void sendReport() {
+        JtotusGmailClient gmailClient = new JtotusGmailClient();
+
+        ConfigLoader<GUIConfig> loader = new ConfigLoader<GUIConfig>("GUIConfig");
+        GUIConfig config = loader.getConfig();
+
+        gmailClient.setDefaultLogin(config.gmailLogin);
+        gmailClient.setDefaultPassword(config.gmailPassword);
+        
+        DefaultTableModel methodModel = (DefaultTableModel) methodTable.getModel();
+
+        for(int column = 1;column <methodModel.getColumnCount();column++) {
+            gmailClient.pushText("Stock: " + methodModel.getColumnName(column) + "\n");
+            for(int row = 1; row < methodModel.getRowCount();row++) {
+                Object value = methodModel.getValueAt(row, column);
+                if (value != null) {
+                    Object method = methodModel.getValueAt(row, 0);
+                    gmailClient.pushText( method.toString() +"=" + value.toString()+"\n");
+                }
+            }
+            gmailClient.pushText("\n");
+        }
+
+        try {
+            gmailClient.call();
+        } catch (Exception ex) {
+            Logger.getLogger(JTotusMethodView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+
+    }
+
 }
