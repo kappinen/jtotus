@@ -70,7 +70,7 @@ public class DataFetcher {
     public BigDecimal fetchClosingPrice(String stockName, Calendar date) {
         BigDecimal result = null;
 
-        if (timeFailsSanityCheck(date)) {
+        if (this.timeFailsSanityCheck(date)) {
             return result;
         }
 
