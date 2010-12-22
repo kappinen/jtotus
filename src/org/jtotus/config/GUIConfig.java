@@ -19,6 +19,7 @@ package org.jtotus.config;
 
 import java.util.LinkedList;
 import org.jtotus.common.StockNames;
+import org.jtotus.crypt.JtotusCrypt;
 import org.jtotus.engine.Engine;
 import org.jtotus.methods.MethodEntry;
 
@@ -29,13 +30,21 @@ import org.jtotus.methods.MethodEntry;
 public class GUIConfig {
     public StockNames names = null;
     public String []StockNames = null;
+
     public String gmailLogin = null;
     public String gmailPassword = null;
+    
+    public String brokerLogin = null;
+    public String brokerPassword = null;
+
+    public String keyRingPassword = null;
+    
     public int day_period = 5;
 
     public GUIConfig(){
-        if (names==null)
+        if (names==null) {
             names = new StockNames();
+        }
         
         StockNames = names.getNames();
     }
@@ -52,5 +61,48 @@ public class GUIConfig {
         return  engine.getMethods();
     }
 
+    
+
+    public String getBrokerLogin() {
+        return this.keyRing().decryptWithKeyRing(brokerLogin, keyRingPassword);
+    }
+
+    public String getBrokerPassword() {
+        return this.keyRing().decryptWithKeyRing(brokerPassword, keyRingPassword);
+    }
+
+    public String getGmailLogin() {
+        return this.keyRing().decryptWithKeyRing(gmailLogin, keyRingPassword);
+    }
+
+    public String getGmailPassword() {
+        return this.keyRing().decryptWithKeyRing(gmailPassword, keyRingPassword);
+    }
+
+
+    private JtotusCrypt keyRing() {
+      JtotusCrypt keyRing = new JtotusCrypt();
+
+      if (keyRingPassword == null) {
+           keyRingPassword = keyRing.createKeyRing();
+      }
+      return keyRing;
+    }
+
+    public void setBrokerLogin(String brokerLogin) {
+        this.brokerLogin = this.keyRing().encryptWithKeyRing(brokerLogin, keyRingPassword);
+    }
+
+    public void setBrokerPassword(String brokerPassword) {
+        this.brokerPassword = this.keyRing().encryptWithKeyRing(brokerPassword, keyRingPassword);
+    }
+
+    public void setGmailLogin(String gmailLogin) {
+        this.gmailLogin = this.keyRing().encryptWithKeyRing(gmailLogin, keyRingPassword);
+    }
+
+    public void setGmailPassword(String gmailPassword) {
+        this.gmailPassword = this.keyRing().encryptWithKeyRing(gmailPassword, keyRingPassword);
+    }
 }
 

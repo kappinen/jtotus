@@ -290,8 +290,8 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
         ConfigLoader<GUIConfig> loader = new ConfigLoader<GUIConfig>("GUIConfig");
         GUIConfig config = loader.getConfig();
 
-        gmailClient.setDefaultLogin(config.gmailLogin);
-        gmailClient.setDefaultPassword(config.gmailPassword);
+        gmailClient.setDefaultLogin(config.getGmailLogin());
+        gmailClient.setDefaultPassword(config.getGmailPassword());
         
         DefaultTableModel methodModel = (DefaultTableModel) methodTable.getModel();
 

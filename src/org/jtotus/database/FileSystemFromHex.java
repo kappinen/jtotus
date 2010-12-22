@@ -123,7 +123,10 @@ private BigDecimal fetchValue(String stockName, Calendar date, int row)
 
     File[] listOfFiles = dir.listFiles(filter);
 
-
+    if (listOfFiles == null) {
+        return null;
+    }
+    
     for (int i = 0; i < listOfFiles.length ; i++) {
         String nameOfFile = listOfFiles[i].getName();
 
