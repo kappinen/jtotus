@@ -1,4 +1,4 @@
-/*
+    /*
 This file is part of jTotus.
 
 jTotus is free software: you can redistribute it and/or modify
@@ -21,21 +21,21 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  *
  *
  * Test
-        JtotusCrypt crypt = new JtotusCrypt();
-        //crypt.dumpSupportedAlgorithms();
-        String encrypt = crypt.encrypt("This is the message to check", "SuperC!JA*SDLFJK342");
-        System.out.printf("After encryption:%s\n", encrypt);
-        String decrypt = crypt.decrypt(encrypt, "SuperC!JA*SDLFJK342");
-        System.out.printf("After decrypt:%s\n", decrypt);
+JtotusCrypt crypt = new JtotusCrypt();
+//crypt.dumpSupportedAlgorithms();
+String encrypt = crypt.encrypt("This is the message to check", "SuperC!JA*SDLFJK342");
+System.out.printf("After encryption:%s\n", encrypt);
+String decrypt = crypt.decrypt(encrypt, "SuperC!JA*SDLFJK342");
+System.out.printf("After decrypt:%s\n", decrypt);
 
-        String hashPass = crypt.createKeyRing("Thisisthetest");
-        if(crypt.checkKeyRingPassword("Thisisthetest", hashPass) != false)
-            throw new RuntimeException("Hash failure");
+String hashPass = crypt.createKeyRing("Thisisthetest");
+if(crypt.checkKeyRingPassword("Thisisthetest", hashPass) != false)
+throw new RuntimeException("Hash failure");
 
-        System.out.printf("After digest:%s\n", hashPass);
+System.out.printf("After digest:%s\n", hashPass);
 
-        if(crypt.checkKeyRingPassword("Thisisthetest", hashPass) != true)
-            throw new RuntimeException("Hash failure");
+if(crypt.checkKeyRingPassword("Thisisthetest", hashPass) != true)
+throw new RuntimeException("Hash failure");
  */
 package org.jtotus.crypt;
 
@@ -51,14 +51,15 @@ public class JtotusCrypt {
     public String decrypt(String encrypedText, String password) {
         BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
         textEncryptor.setPassword(password);
+
         return textEncryptor.decrypt(encrypedText);
 
     }
 
     public String encrypt(String plainText, String password) {
         BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
-
         textEncryptor.setPassword(password);
+
         return textEncryptor.encrypt(plainText);
     }
 
@@ -66,6 +67,7 @@ public class JtotusCrypt {
         JtotusKeyRingPassword keyRing = JtotusKeyRingPassword.getInstance();
 
         BasicPasswordEncryptor passwordEncryptor = new BasicPasswordEncryptor();
+
         return passwordEncryptor.encryptPassword(keyRing.getKeyRingPassword());
     }
 
@@ -81,22 +83,20 @@ public class JtotusCrypt {
     public String encryptWithKeyRing(String plainText, String hashedKeyRingPassword) {
         JtotusKeyRingPassword keyRing = JtotusKeyRingPassword.getInstance();
 
-        if(this.checkKeyRingPassword(keyRing.getKeyRingPassword(), hashedKeyRingPassword)) {
+        if (this.checkKeyRingPassword(keyRing.getKeyRingPassword(), hashedKeyRingPassword)) {
             return this.encrypt(plainText, keyRing.getKeyRingPassword());
         }
-        
+
         return null;
     }
-
 
     public String decryptWithKeyRing(String encryptedText, String hashedKeyRingPassword) {
         JtotusKeyRingPassword keyRing = JtotusKeyRingPassword.getInstance();
 
-        if(this.checkKeyRingPassword(keyRing.getKeyRingPassword(), hashedKeyRingPassword)) {
+        if (this.checkKeyRingPassword(keyRing.getKeyRingPassword(), hashedKeyRingPassword)) {
             return this.decrypt(encryptedText, keyRing.getKeyRingPassword());
         }
-        
+
         return null;
     }
-
 }

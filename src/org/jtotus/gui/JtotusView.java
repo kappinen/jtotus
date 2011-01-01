@@ -38,7 +38,10 @@ import javax.swing.Timer;
 import javax.swing.Icon;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
+import org.jtotus.crypt.JtotusKeyRingPassword;
 import org.jtotus.engine.Engine;
+import org.jtotus.gui.passwords.JtotusPasswordGUI;
+import org.jtotus.gui.passwords.JtotusSetPasswordsGUI;
 
  
     
@@ -63,12 +66,24 @@ public class JtotusView extends FrameView {
    }
 
 
+   public void checkKeyRingPassword() {
+        //Ask for Keyring password first
+        JtotusPasswordGUI keyRingGUI = new JtotusPasswordGUI(mainFrame, true);
+        keyRingGUI.askForKeyRing();
+
+        JtotusKeyRingPassword password = JtotusKeyRingPassword.getInstance();
+        if(password.getKeyRingPassword() == null) {
+            keyRingGUI.dispose();
+            System.exit(-1);
+        }
+   }
 
     public JtotusView(SingleFrameApplication app) {
         super(app);
         mainFrame=app.getMainFrame();
-        
-        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        this.checkKeyRingPassword();
+        //mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         initComponents();
 
@@ -194,6 +209,7 @@ public class JtotusView extends FrameView {
         javax.swing.JMenu configMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem configMenuItem = new javax.swing.JMenuItem();
         jMenuItem1 = new javax.swing.JMenuItem();
+        jMenuItem2 = new javax.swing.JMenuItem();
         statusPanel = new javax.swing.JPanel();
         javax.swing.JSeparator statusPanelSeparator = new javax.swing.JSeparator();
         statusMessageLabel = new javax.swing.JLabel();
@@ -299,6 +315,18 @@ public class JtotusView extends FrameView {
         });
         configMenu.add(jMenuItem1);
 
+        jMenuItem2.setText(resourceMap.getString("jMenuItem2.text")); // NOI18N
+        jMenuItem2.setName("jMenuItem2"); // NOI18N
+        jMenuItem2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                jMenuItem2MousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                jMenuItem2MouseReleased(evt);
+            }
+        });
+        configMenu.add(jMenuItem2);
+
         menuBar.add(configMenu);
 
         statusPanel.setName("statusPanel"); // NOI18N
@@ -391,6 +419,14 @@ public class JtotusView extends FrameView {
 
     }//GEN-LAST:event_jMenuItem1MousePressed
 
+    private void jMenuItem2MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenuItem2MousePressed
+    }//GEN-LAST:event_jMenuItem2MousePressed
+
+    private void jMenuItem2MouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenuItem2MouseReleased
+       JtotusSetPasswordsGUI passwords = new JtotusSetPasswordsGUI(mainFrame, false);
+        passwords.doShow();
+    }//GEN-LAST:event_jMenuItem2MouseReleased
+
    
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -398,6 +434,7 @@ public class JtotusView extends FrameView {
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButtonRunScripts;
     private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JMenuBar menuBar;

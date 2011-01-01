@@ -25,6 +25,7 @@
 package org.jtotus.gui;
 
 import java.awt.Component;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
@@ -33,6 +34,7 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractCellEditor;
+import javax.swing.JDialog;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerDateModel;
 import javax.swing.SpinnerModel;
@@ -247,7 +249,7 @@ public class ConfigView extends javax.swing.JDialog {
         configTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         configTree.addTreeSelectionListener(new FileSelectionlListener());
         configTree.setModel(model);
-
+        this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
         
     }
@@ -284,7 +286,6 @@ public class ConfigView extends javax.swing.JDialog {
         cancelButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 cancelButtonMouseClicked(evt);
-                cancelButtonMouseClicked1(evt);
             }
         });
 
@@ -361,12 +362,11 @@ public class ConfigView extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cancelButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancelButtonMouseClicked
-
+         this.processWindowEvent(
+            new WindowEvent(
+                  this, WindowEvent.WINDOW_CLOSING));
+          dispose();
     }//GEN-LAST:event_cancelButtonMouseClicked
-
-    private void cancelButtonMouseClicked1(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancelButtonMouseClicked1
-        dispose();
-    }//GEN-LAST:event_cancelButtonMouseClicked1
 
     private void saveButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_saveButtonMouseClicked
 

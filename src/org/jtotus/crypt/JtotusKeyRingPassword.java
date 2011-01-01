@@ -27,11 +27,15 @@ public class JtotusKeyRingPassword {
 
     private String keyRingPassword = null;
     private static JtotusKeyRingPassword instance = null;
+    private boolean cancel = false;
     private Object passLock = new Object();
 
     private JtotusKeyRingPassword() {
     }
 
+
+
+    //FIXME:re-check if it is safe to keep password in signleton ?
     public synchronized static JtotusKeyRingPassword getInstance() {
 
         if (instance == null) {
@@ -48,11 +52,14 @@ public class JtotusKeyRingPassword {
             synchronized (passLock) {
                 if (keyRingPassword != null) {
                     keyFound = true;
+                }else if (cancel) {
+                    return null;
                 }
             }
 
             if (keyFound == false) {
                 try {
+                    System.out.println("Sleepings...");
                     Thread.sleep(1000);
                     defaultSleepingTime--;
                 } catch (InterruptedException ex) {
@@ -67,6 +74,12 @@ public class JtotusKeyRingPassword {
     public synchronized void putKeyRingPassword(String password) {
         synchronized (passLock) {
             keyRingPassword = new String(password);
+        }
+    }
+
+    public synchronized void cancel() {
+        synchronized (passLock) {
+            cancel = true;
         }
     }
 }

@@ -40,6 +40,7 @@ public class GUIConfig {
     public String keyRingPassword = null;
     
     public int day_period = 5;
+    private boolean debug = false;
 
     public GUIConfig(){
         if (names==null) {
@@ -61,7 +62,15 @@ public class GUIConfig {
         return  engine.getMethods();
     }
 
-    
+
+    private JtotusCrypt keyRing() {
+      JtotusCrypt keyRing = new JtotusCrypt();
+
+      if (keyRingPassword == null) {
+           keyRingPassword = keyRing.createKeyRing();
+      }
+      return keyRing;
+    }
 
     public String getBrokerLogin() {
         return this.keyRing().decryptWithKeyRing(brokerLogin, keyRingPassword);
@@ -79,30 +88,27 @@ public class GUIConfig {
         return this.keyRing().decryptWithKeyRing(gmailPassword, keyRingPassword);
     }
 
-
-    private JtotusCrypt keyRing() {
-      JtotusCrypt keyRing = new JtotusCrypt();
-
-      if (keyRingPassword == null) {
-           keyRingPassword = keyRing.createKeyRing();
-      }
-      return keyRing;
-    }
-
     public void setBrokerLogin(String brokerLogin) {
         this.brokerLogin = this.keyRing().encryptWithKeyRing(brokerLogin, keyRingPassword);
     }
 
     public void setBrokerPassword(String brokerPassword) {
         this.brokerPassword = this.keyRing().encryptWithKeyRing(brokerPassword, keyRingPassword);
+
     }
 
     public void setGmailLogin(String gmailLogin) {
         this.gmailLogin = this.keyRing().encryptWithKeyRing(gmailLogin, keyRingPassword);
+        if (debug) {
+            System.out.printf("Gmail login before:%s :after %s", this.gmailLogin, gmailLogin);
+        }
     }
 
     public void setGmailPassword(String gmailPassword) {
         this.gmailPassword = this.keyRing().encryptWithKeyRing(gmailPassword, keyRingPassword);
+        if (debug) {
+            System.out.printf("Gmail pass before:%s :after :%s", gmailPassword, this.gmailPassword);
+        }
     }
 }
 

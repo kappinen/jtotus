@@ -20,6 +20,7 @@ is divided into following sections:
 
         -->
 <project xmlns:j2seproject1="http://www.netbeans.org/ns/j2se-project/1" xmlns:j2seproject3="http://www.netbeans.org/ns/j2se-project/3" xmlns:jaxrpc="http://www.netbeans.org/ns/j2se-project/jax-rpc" basedir=".." default="default" name="jtotus-impl">
+    <import file="ivy-impl.xml"/>
     <import file="groovy-build.xml"/>
     <fail message="Please build using Ant 1.7.1 or higher.">
         <condition>
@@ -54,7 +55,7 @@ is divided into following sections:
         <property file="nbproject/configs/${config}.properties"/>
         <property file="nbproject/project.properties"/>
     </target>
-    <target depends="-pre-init,-init-private,-init-user,-init-project,-init-macrodef-property" name="-do-init">
+    <target depends="-pre-init,-init-private,-init-user,-init-project,-init-macrodef-property,-ivy-retrieve" name="-do-init">
         <available file="${manifest.file}" property="manifest.available"/>
         <available file="${application.splash}" property="splashscreen.available"/>
         <condition property="main.class.available">
@@ -292,15 +293,18 @@ is divided into following sections:
             <attribute default="${build.classes.dir}" name="destdir"/>
             <sequential>
                 <fail unless="javac.includes">Must set javac.includes</fail>
-                <pathconvert pathsep="," property="javac.includes.binary">
+                <pathconvert pathsep="${line.separator}" property="javac.includes.binary">
                     <path>
                         <filelist dir="@{destdir}" files="${javac.includes}"/>
                     </path>
                     <globmapper from="*.java" to="*.class"/>
                 </pathconvert>
+                <tempfile deleteonexit="true" property="javac.includesfile.binary"/>
+                <echo file="${javac.includesfile.binary}" message="${javac.includes.binary}"/>
                 <delete>
-                    <files includes="${javac.includes.binary}"/>
+                    <files includesfile="${javac.includesfile.binary}"/>
                 </delete>
+                <delete file="${javac.includesfile.binary}"/>
             </sequential>
         </macrodef>
     </target>
@@ -618,7 +622,7 @@ is divided into following sections:
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
     </target>
-    <target depends="init,compile,-pre-jar,-do-jar-with-manifest,-do-jar-without-manifest,-do-jar-with-mainclass,-do-jar-with-libraries-and-splashscreen,-do-jar-with-libraries,-post-jar" description="Build JAR." name="jar"/>
+    <target depends="init,compile,-pre-jar,-do-jar-with-manifest,-do-jar-without-manifest,-do-jar-with-mainclass,-do-jar-with-libraries-and-splashscreen,-do-jar-with-libraries,-post-jar,-ivy-publish" description="Build JAR." name="jar"/>
     <!--
                 =================
                 EXECUTION SECTION
@@ -868,7 +872,7 @@ is divided into following sections:
         <delete dir="${build.dir}"/>
         <delete dir="${dist.dir}" followsymlinks="false" includeemptydirs="true"/>
     </target>
-    <target name="-post-clean">
+    <target depends="-ivy-clean" name="-post-clean">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
     </target>
