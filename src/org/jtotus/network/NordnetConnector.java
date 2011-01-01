@@ -14,26 +14,19 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.httpclient.Cookie;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.http.ConnectionReuseStrategy;
-import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HttpContext;
 
 /**
  *
@@ -56,7 +49,6 @@ public class NordnetConnector {
         }
 
         httpclient = new DefaultHttpClient();
-
         
         Properties prop = System.getProperties();
         if (prop.getProperty("https.proxyHost") != null
@@ -88,9 +80,19 @@ public class NordnetConnector {
         return this.fetchPage(this.getMethod(url));
     }
 
+    public String getPage(String pattern, Object... arg) {
+        //System.out.printf("Fetching-->:%s\n", String.format(pattern, arg));
+        return this.fetchPage(this.getMethod(String.format(pattern, arg)));
+    }
+
+
     public String fetchPage(HttpUriRequest url) {
 
-        System.out.printf("fetching:%s\n", url.toString());
+        System.out.printf("fetching: %s:%s?%s\n",
+                url.getURI().getHost(),
+                url.getURI().getRawPath(),
+                url.getURI().getQuery());
+
         StringBuffer respond = new StringBuffer();
         HttpResponse response = null;
 
@@ -105,7 +107,7 @@ public class NordnetConnector {
                     new InputStreamReader(instream));
 
             // do something useful with the response
-            System.out.printf("done:%s : %s\n", url, response.getStatusLine().toString());
+          //  System.out.printf("done:%s : %s\n", url, response.getStatusLine().toString());
             String line = null;
 
             while ((line = reader.readLine()) != null) {

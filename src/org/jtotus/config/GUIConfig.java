@@ -50,7 +50,7 @@ public class GUIConfig {
         StockNames = names.getNames();
     }
 
-    public String []fetchStockName() {
+    public String []fetchStockNames() {
         if (names==null)
             names = new StockNames();
         

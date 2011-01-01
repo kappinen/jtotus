@@ -46,7 +46,7 @@ public class MethodConfig implements Iterable<String>, Iterator<String>{
             loader.storeConfig(config);
         }
 
-        StockNames = config.fetchStockName();
+        StockNames = config.fetchStockNames();
 
         help.debug(this.getClass().getName(),
                 "Totally stocks:%d\n", StockNames.length-1);

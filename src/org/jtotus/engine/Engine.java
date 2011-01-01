@@ -16,6 +16,8 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.engine;
 
+import brokerwatcher.BrokerWatcher;
+import brokerwatcher.TickListenerImpl;
 import org.jtotus.methods.MethodEntry;
 import org.jtotus.methods.DecisionScript;
 import org.jtotus.methods.DummyMethod;
@@ -26,12 +28,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.joda.time.DateTime;
 import org.jtotus.gui.JtotusView;
 import org.jtotus.common.Helper;
+import org.jtotus.crypt.JtotusCrypt;
 import org.jtotus.common.StateIterator;
 import org.jtotus.config.MethodConfig;
 import org.jtotus.database.AutoUpdateStocks;
@@ -86,14 +88,17 @@ public class Engine {
 
     }
 
+
+    //Constructor, singleton
     protected Engine() {
         help = Helper.getInstance();
+
         portfolioDecision = new PortfolioDecision();
 
         graphAccessPoints = new HashMap<String, LinkedBlockingDeque>();
         methodList = new LinkedList<MethodEntry>();
 
-        prepareMethodsList();
+        this.prepareMethodsList();
     }
 
     public static Engine getInstance() {
@@ -136,13 +141,20 @@ public class Engine {
 
     private void testRun() {
 
-        DateTime date = new DateTime();
+
+        BrokerWatcher watcher = new BrokerWatcher();
+        watcher.addStatement("select * from StockTick", new TickListenerImpl());
         
-        System.out.printf("\nTime:%s\n", date.toString());
+        watcher.call();
+
         
-        for (StateIterator iter = new StateIterator().addParam("Param2", "int[6-8]{1}"); iter.hasNext() != StateIterator.END_STATE; iter.nextState()) {
-            System.out.printf("Param2: %d\n", iter.nextInt("Param2"));
-        }
+//        DateTime date = new DateTime();
+//
+//        System.out.printf("\nTime:%s\n", date.toString());
+//
+//        for (StateIterator iter = new StateIterator().addParam("Param2", "int[6-8]{1}"); iter.hasNext() != StateIterator.END_STATE; iter.nextState()) {
+//            System.out.printf("Param2: %d\n", iter.nextInt("Param2"));
+//        }
 
 
     }

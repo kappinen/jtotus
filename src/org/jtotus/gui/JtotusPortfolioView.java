@@ -72,7 +72,7 @@ public class JtotusPortfolioView extends JTabbedPane {
 
         //Load configuration for GUI
        
-         String listOfStocks[] = uiConfig.fetchStockName();
+         String listOfStocks[] = uiConfig.fetchStockNames();
          StockType stock = new StockType();
          for (int i = 0;i<listOfStocks.length;i++) {
              if (i>=portfolioModel.getRowCount()){

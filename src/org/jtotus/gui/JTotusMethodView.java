@@ -150,7 +150,7 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
 
 
         GUIConfig uiConfig = new GUIConfig();
-        String listOfStocks[] = uiConfig.fetchStockName();
+        String listOfStocks[] = uiConfig.fetchStockNames();
 
         for (int i = 0; i < listOfStocks.length; i++) {
             methodModel.addColumn(listOfStocks[i]);

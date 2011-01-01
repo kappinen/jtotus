@@ -56,7 +56,8 @@ public class DayisHoliday {
                                     "19.06.2009",
                                     "24.12.2009",
                                     "25.12.2009",
-                                    "31.12.2009"
+                                    "31.12.2009",
+                                    "31.12.2010"
                                    };
 
             for (int i = 0; i < holidayList.length; i++) {
@@ -69,11 +70,8 @@ public class DayisHoliday {
         } catch (ParseException ex) {
             Logger.getLogger(DayisHoliday.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-
-
-
     }
+    
 
      public boolean isSameDay(Calendar cal1, Calendar cal2) {
         if (cal1 == null || cal2 == null) {
@@ -86,6 +84,7 @@ public class DayisHoliday {
 
     public boolean isHoliday(Calendar date) {
         Iterator <Calendar>dateIter = holidays.iterator();
+
         
         while(dateIter.hasNext()) {
             Calendar holidayDay = dateIter.next();
