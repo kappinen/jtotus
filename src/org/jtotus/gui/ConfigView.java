@@ -263,6 +263,9 @@ public class ConfigView extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPopupMenu1 = new javax.swing.JPopupMenu();
+        jMenuItem1 = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
         jScrollPane1 = new javax.swing.JScrollPane();
         configTree = new javax.swing.JTree();
         cancelButton = new javax.swing.JButton();
@@ -272,6 +275,16 @@ public class ConfigView extends javax.swing.JDialog {
         confTable = new javax.swing.JTable();
         confLabel = new javax.swing.JLabel();
 
+        jPopupMenu1.setName("jPopupMenu1"); // NOI18N
+
+        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(org.jtotus.gui.JtotusApp.class).getContext().getResourceMap(ConfigView.class);
+        jMenuItem1.setText(resourceMap.getString("jMenuItem1.text")); // NOI18N
+        jMenuItem1.setName("jMenuItem1"); // NOI18N
+        jPopupMenu1.add(jMenuItem1);
+
+        jSeparator1.setName("jSeparator1"); // NOI18N
+        jPopupMenu1.add(jSeparator1);
+
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setName("Form"); // NOI18N
 
@@ -280,7 +293,6 @@ public class ConfigView extends javax.swing.JDialog {
         configTree.setName("ConfigView");
         jScrollPane1.setViewportView(configTree);
 
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(org.jtotus.gui.JtotusApp.class).getContext().getResourceMap(ConfigView.class);
         cancelButton.setText(resourceMap.getString("cancelButton.text")); // NOI18N
         cancelButton.setName("cancelButton"); // NOI18N
         cancelButton.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -434,8 +446,11 @@ public class ConfigView extends javax.swing.JDialog {
     private javax.swing.JLabel confLabel;
     private javax.swing.JTable confTable;
     private javax.swing.JTree configTree;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JButton saveAndRunButton;
     private javax.swing.JButton saveButton;
     // End of variables declaration//GEN-END:variables

@@ -17,6 +17,8 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 package org.jtotus.database;
 
 import java.util.Calendar;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jtotus.common.Helper;
 import org.jtotus.common.StockType;
 
