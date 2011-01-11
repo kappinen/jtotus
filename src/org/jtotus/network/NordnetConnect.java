@@ -23,7 +23,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.jtotus.common.StockTick;
+import brokerwatcher.eventtypes.StockTick;
 import org.jtotus.config.ConfigLoader;
 import org.jtotus.config.GUIConfig;
 import org.jtotus.crypt.JtotusKeyRingPassword;
@@ -150,7 +150,7 @@ public class NordnetConnect implements NetworkTickConnector {
             for (int count = 0; iter.hasNext();count++) {
                 Element elem = iter.next();
 
-                //System.out.printf("Element value (%d):%s\n", count, elem.text());
+               // System.out.printf("Element value (%d):%s\n", count, elem.text());
                 switch (count) {
                     case 3:
                         if (!elem.text().equalsIgnoreCase("OMX Helsinki")) {
@@ -179,9 +179,13 @@ public class NordnetConnect implements NetworkTickConnector {
                     case 12://latest Lowest
                         tick.setTradesSum(Double.parseDouble(elem.text().replace(" ", "").trim()));
                         break;
+                    case 14://Time
+                        tick.setTime(elem.text().trim());
+                        break;
 
                     //TODO:currency and time
                     default:
+                        //System.out.printf("Not matched(%d) = %s \n", count,elem.text());
                         break;
                 }
             }

@@ -5,7 +5,7 @@
 
 package org.jtotus.network;
 
-import org.jtotus.common.StockTick;
+import brokerwatcher.eventtypes.StockTick;
 
 /**
  *
