@@ -15,11 +15,10 @@
     along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package brokerwatcher;
+package brokerwatcher.generators;
 
 import com.espertech.esper.client.EPRuntime;
-import java.util.concurrent.Callable;
-import org.jtotus.common.StockTick;
+import brokerwatcher.eventtypes.StockTick;
 import org.jtotus.config.ConfTickGenerator;
 import org.jtotus.config.ConfigLoader;
 import org.jtotus.config.GUIConfig;
@@ -30,12 +29,14 @@ import org.jtotus.network.NordnetConnect;
  *
  * @author Evgeni Kappinen
  */
-public class TickGenerator implements Callable <String>{
+public class TickGenerator implements EsperEventGenerator{
     private EPRuntime esperEngine = null;
     private NetworkTickConnector networkTicks = null;
     private ConfTickGenerator config = null;
     private String []stockList = null;
-    
+
+
+
     public TickGenerator(EPRuntime cepRT) {
         esperEngine = cepRT;
     }
@@ -66,19 +67,17 @@ public class TickGenerator implements Callable <String>{
             return null;
         }
 
-
+        while(true) {
             for (String stockName: stockList) {
                 tick = networkTicks.getTick(stockName);
                 if (tick != null) {
                     esperEngine.sendEvent(tick);
                 }
             }
-            
-            Thread.sleep(config.sleepBetweenTicks);
-            System.out.printf("Sleeping..\n");
-        
 
-        return null;
+            System.out.printf("Sleeping (%d) ...\n", config.sleepBetweenTicks);
+            Thread.sleep(config.sleepBetweenTicks);
+        }
     }
 
 

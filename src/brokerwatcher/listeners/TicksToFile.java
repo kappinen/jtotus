@@ -15,19 +15,47 @@
     along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package brokerwatcher;
+package brokerwatcher.listeners;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.UpdateListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import brokerwatcher.eventtypes.StockTick;
 
 /**
  *
  * @author Evgeni Kappinen
  */
-public class TickListenerImpl implements UpdateListener{
+public class TicksToFile implements UpdateListener{
+
+    private PrintWriter writer = null;
+
+    public PrintWriter getWriter() {
+
+        if (writer == null) {
+            try {
+                File file = new File("TicksToFile.txt");
+                writer = new PrintWriter(file);
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(TicksToFile.class.getName()).log(Level.SEVERE, null, ex);
+                return null;
+            }
+        }
+
+        return writer;
+    }
+
+
 
     public void update(EventBean[] ebs, EventBean[] ebs1) {
-        System.out.println("Event received: " + ebs[0].getUnderlying());
+         StockTick tick = (StockTick) ebs[0].getUnderlying();
+         getWriter().write(tick+"\n");
+         getWriter().flush();
     }
+
 
 }
