@@ -56,6 +56,8 @@ public class EvaluateMethodSignals {
      * @return boolean  Currently, Always returns true
      *
      */
+
+    //FIXME: recheck stockGraph usage??
     public boolean initialize(String reviewTarget,
                               String seriesName,
                               Double originalCapital,
@@ -228,8 +230,9 @@ public class EvaluateMethodSignals {
 
         System.out.printf("[----------\n");
         System.out.printf("%s : BestCapital:%f WinRatio:%f\n",
-                graphSender.getMainReviewTarget(),
-                currentBestCapital.doubleValue(), this.getWinRatio());
+                graphSender == null ? "None" : graphSender.getMainReviewTarget(),
+                currentBestCapital.doubleValue(),
+                this.getWinRatio());
 
         System.out.printf("wining trades:%f losing trades:%f\n",
                 this.bestNumberOfWinningTrades,

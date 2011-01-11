@@ -17,7 +17,9 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 package org.jtotus.engine;
 
 import brokerwatcher.BrokerWatcher;
-import brokerwatcher.TickListenerImpl;
+import brokerwatcher.listeners.ListenerRsiIndicator;
+import brokerwatcher.listeners.TickListenerPrinter;
+import brokerwatcher.listeners.TicksToFile;
 import org.jtotus.methods.MethodEntry;
 import org.jtotus.methods.DecisionScript;
 import org.jtotus.methods.DummyMethod;
@@ -30,11 +32,8 @@ import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.joda.time.DateTime;
 import org.jtotus.gui.JtotusView;
 import org.jtotus.common.Helper;
-import org.jtotus.crypt.JtotusCrypt;
-import org.jtotus.common.StateIterator;
 import org.jtotus.config.MethodConfig;
 import org.jtotus.database.AutoUpdateStocks;
 import org.jtotus.gui.MethodResultsPrinter;
@@ -62,6 +61,8 @@ public class Engine {
 
     private void prepareMethodsList() {
         // Available methods
+        
+
         methodList.add(new DummyMethod(portfolioDecision));
         methodList.add(new PotentialWithIn());
         methodList.add(new TaLibRSI());
@@ -92,7 +93,7 @@ public class Engine {
     //Constructor, singleton
     protected Engine() {
         help = Helper.getInstance();
-
+        
         portfolioDecision = new PortfolioDecision();
 
         graphAccessPoints = new HashMap<String, LinkedBlockingDeque>();
@@ -120,7 +121,6 @@ public class Engine {
     }
 
     public void run() {
-
         if (portfolioDecision.setList(methodList)) {
             help.debug(1, "Dispatcher is already full");
             return;
@@ -143,8 +143,14 @@ public class Engine {
 
 
         BrokerWatcher watcher = new BrokerWatcher();
-        watcher.addStatement("select * from StockTick", new TickListenerImpl());
-        
+        //TickListenerPrinter printer = new TickListenerPrinter();
+        //printer.sendEventsToGui();
+        //watcher.addPattern("every tick=StockTick(stockName='Kemira')", printer);
+        //watcher.addStatement("select * from StockTick", new TickListenerPrinter());
+        //watcher.addStatement("select * from EsperEventRsi", new TickListenerPrinter());
+        //watcher.addStatement("select * from StockTick", new ListenerRsiIndicator());
+
+        watcher.addStatement("select * from StockTick", new TicksToFile());
         watcher.call();
 
         
