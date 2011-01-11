@@ -24,7 +24,10 @@ import java.util.Set;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
+import javax.swing.JDialog;
+import javax.swing.JInternalFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
@@ -98,6 +101,37 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
 
         }
     }
+
+    public JDesktopPane getMainPane() {
+        return drawDesktopPane;
+    }
+    public JInternalFrame addComponentToInternalWindow(JComponent component, String title) {
+
+        JInternalFrame tempGraph = new JInternalFrame();
+
+        tempGraph.setClosable(true);
+        tempGraph.setIconifiable(true);
+        tempGraph.setMaximizable(true);
+        tempGraph.setDoubleBuffered(true);
+        tempGraph.setInheritsPopupMenu(true);
+        tempGraph.setLayer(5);
+        tempGraph.setName("tempFrameGraph"); // NOI18N
+        tempGraph.setOpaque(false);
+        tempGraph.setVisible(true);
+        tempGraph.setBounds(10, 10, 590, 460);
+        tempGraph.setResizable(true);
+
+        if(component != null) {
+            tempGraph.getContentPane().add(component);
+        }
+        
+        tempGraph.setTitle(title);
+
+        drawDesktopPane.add(tempGraph, javax.swing.JLayeredPane.DEFAULT_LAYER);
+
+        return tempGraph;
+    }
+
 
     public synchronized LinkedBlockingDeque createIntFrame(String reviewTarget) {
 
@@ -189,7 +223,6 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
         jScrollPane1.setName("jScrollPane1");
         
 
-
         methodTable = createMethodTable();
         jScrollPane1.setViewportView(methodTable);
 
@@ -201,13 +234,11 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
         this.addTab("Methods", jScrollPane1);
 
         //Second tab - Graphs
-        this.addTab("Graphs", drawDesktopPane);
+        this.addTab("Desktop", drawDesktopPane);
 
         drawDesktopPane.setAutoscrolls(false);
         drawDesktopPane.setName("drawDesktopPane");
         methodTable.setShowGrid(true);
-
-
 
     }
 
@@ -221,8 +252,6 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
 
         this.configureMethodTab();
         jScrollPane1.setHorizontalScrollBarPolicy(jScrollPane1.HORIZONTAL_SCROLLBAR_ALWAYS);
-       
-
 
     }
 

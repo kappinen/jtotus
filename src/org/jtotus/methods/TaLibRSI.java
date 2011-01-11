@@ -115,7 +115,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
                                         decRSIPeriod);
 
         DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                config.inputEndingDate.getTime());
+                                                     config.inputEndingDate.getTime());
 
         dateIterator.move(outBegIdx.value);
         for (int elem = 0; elem < outNbElement.value && dateIterator.hasNext(); elem++) {

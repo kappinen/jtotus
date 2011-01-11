@@ -23,6 +23,7 @@ package org.jtotus.gui;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JInternalFrame;
 import javax.swing.UnsupportedLookAndFeelException;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
@@ -55,8 +56,15 @@ public class JtotusView extends FrameView {
    
    public void initialize()
     {
-       ((JtotusPortfolioView)portfolioTabbedPane).initialize();
        ((JTotusMethodView)methodTabbedPane).initialize();
+
+       JtotusPortfolioView portTabTable = new JtotusPortfolioView();
+       portTabTable.initialize();
+
+       portTabTable.setMainPane(((JTotusMethodView)methodTabbedPane).getMainPane());
+       ((JTotusMethodView)methodTabbedPane).addComponentToInternalWindow(portTabTable, "PortfolioView");
+       
+
     }
 
    public LinkedList<String> getMethodList() {
@@ -201,7 +209,6 @@ public class JtotusView extends FrameView {
         jSplitPane1 = new javax.swing.JSplitPane();
         jButton1 = new javax.swing.JButton();
         jButtonRunScripts = new javax.swing.JButton();
-        portfolioTabbedPane = new org.jtotus.gui.JtotusPortfolioView();
         methodTabbedPane = new org.jtotus.gui.JTotusMethodView();
         menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
@@ -241,9 +248,6 @@ public class JtotusView extends FrameView {
         });
         jSplitPane1.setRightComponent(jButtonRunScripts);
 
-        portfolioTabbedPane.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        portfolioTabbedPane.setName("portfolioTabbedPane"); // NOI18N
-
         methodTabbedPane.setBorder(new javax.swing.border.MatteBorder(null));
         methodTabbedPane.setTabLayoutPolicy(javax.swing.JTabbedPane.SCROLL_TAB_LAYOUT);
         methodTabbedPane.setAutoscrolls(true);
@@ -254,28 +258,20 @@ public class JtotusView extends FrameView {
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(portfolioTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 661, Short.MAX_VALUE)
-                    .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(481, Short.MAX_VALUE))
             .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(mainPanelLayout.createSequentialGroup()
-                    .addGap(13, 13, 13)
-                    .addComponent(methodTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 658, Short.MAX_VALUE)
-                    .addGap(14, 14, 14)))
+                .addComponent(methodTabbedPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 685, Short.MAX_VALUE))
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
-                .addComponent(portfolioTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 565, Short.MAX_VALUE)
+                .addContainerGap(769, Short.MAX_VALUE)
                 .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(mainPanelLayout.createSequentialGroup()
-                    .addGap(207, 207, 207)
-                    .addComponent(methodTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 513, Short.MAX_VALUE)
-                    .addGap(76, 76, 76)))
+                    .addComponent(methodTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 764, Short.MAX_VALUE)
+                    .addGap(32, 32, 32)))
         );
 
         menuBar.setName("menuBar"); // NOI18N
@@ -439,7 +435,6 @@ public class JtotusView extends FrameView {
     private javax.swing.JPanel mainPanel;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JTabbedPane methodTabbedPane;
-    public javax.swing.JTabbedPane portfolioTabbedPane;
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JLabel statusAnimationLabel;
     private javax.swing.JLabel statusMessageLabel;
