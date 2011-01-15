@@ -22,7 +22,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import org.jtotus.config.ConfTickGenerator;
 import org.jtotus.config.ConfigLoader;
-import org.jtotus.network.NetworkTickConnector;
 /**
  *
  * @author Evgeni Kappinen
@@ -98,7 +97,7 @@ public class HistoryTicksFromFile implements EsperEventGenerator {
             
             esperRuntime.sendEvent(tick);
             //Thread.sleep(config.sleepBetweenTicks / 10);
-            Thread.sleep(100);
+            Thread.sleep(200);
         }
 
         return null;

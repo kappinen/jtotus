@@ -32,6 +32,9 @@ import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.LocalTime;
 import org.jtotus.gui.JtotusView;
 import org.jtotus.common.Helper;
 import org.jtotus.config.MethodConfig;
@@ -148,8 +151,9 @@ public class Engine {
         //watcher.addPattern("every tick=StockTick(stockName='Kemira')", printer);
         //watcher.addStatement("select * from StockTick", new TickListenerPrinter());
         //watcher.addStatement("select * from EsperEventRsi", new TickListenerPrinter());
-        //watcher.addStatement("select * from StockTick", new ListenerRsiIndicator());
 
+
+        watcher.addStatement("select * from StockTick", new ListenerRsiIndicator());
         watcher.addStatement("select * from StockTick", new TicksToFile());
         watcher.call();
 

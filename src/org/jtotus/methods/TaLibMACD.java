@@ -233,8 +233,7 @@ public class TaLibMACD extends TaLibAbstract implements MethodEntry {
 
                 budjetCounter.initialize(stockType.getStockName(),
                                         "DecisionMACD",
-                                        super.inputAssumedBudjet,
-                                        sender);
+                                        super.inputAssumedBudjet);
 
                 this.performDecisionTest(budjetCounter,
                                         stockName,

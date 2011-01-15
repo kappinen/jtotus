@@ -235,8 +235,7 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
 
                 budjetCounter.initialize(stockType.getStockName(),
                         "DecisionSMA",
-                        super.inputAssumedBudjet,
-                        sender);
+                        super.inputAssumedBudjet);
 
                 this.performDecisionTest(budjetCounter,
                         stockName,

@@ -57,11 +57,9 @@ public class EvaluateMethodSignals {
      *
      */
 
-    //FIXME: recheck stockGraph usage??
     public boolean initialize(String reviewTarget,
                               String seriesName,
-                              Double originalCapital,
-                              GraphSender stockGraph) {
+                              Double originalCapital) {
 
         setCurrentCapital(BigDecimal.valueOf(originalCapital));
         assumedCapital = BigDecimal.valueOf(originalCapital);
@@ -74,6 +72,7 @@ public class EvaluateMethodSignals {
         /*All points, which lead to signal are stored
            in Graph container. 
          */
+         
         graphSender = new GraphSender(reviewTarget);
         graphSender.setSeriesName(seriesName);
         this.numberOfLosingTrades = 0.0;

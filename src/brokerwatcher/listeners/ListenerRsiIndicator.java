@@ -18,6 +18,7 @@ package brokerwatcher.listeners;
 
 import brokerwatcher.BrokerWatcher;
 import brokerwatcher.eventtypes.EsperEventRsi;
+import brokerwatcher.eventtypes.IndicatorData;
 import brokerwatcher.eventtypes.StockTick;
 import com.espertech.esper.client.EPRuntime;
 import com.espertech.esper.client.EventBean;
@@ -68,8 +69,7 @@ public class ListenerRsiIndicator implements UpdateListener {
             eval = new EvaluateMethodSignals();
             eval.initialize(stockName,
                     "DecisionRSI",
-                    assumedBudjet,
-                    null);
+                    assumedBudjet);
 
             budjetCounter.put(stockName, eval);
         }
@@ -86,6 +86,8 @@ public class ListenerRsiIndicator implements UpdateListener {
         return esperRuntime;
     }
 
+
+    //FIXME: see at original RSI implementation
     public ConfTaLibRSI getConfig(String stockName) {
         ConfTaLibRSI config = null;
 
@@ -182,8 +184,17 @@ public class ListenerRsiIndicator implements UpdateListener {
                 EsperEventRsi rsiEvent = new EsperEventRsi();
                 rsiEvent.setStockName(tick.getStockName());
                 rsiEvent.setRsi(output[output.length - 1]);
+                
                 this.getEngine().sendEvent(rsiEvent);
 
+                //Sending Indicator Data
+                IndicatorData data = new IndicatorData();
+                data.setStockName(tick.getStockName());
+                data.setIndicatorValue(output[output.length - 1]);
+                data.setIndicatorName("RSI");
+
+                this.getEngine().sendEvent(data);
+                
 
                 getBudjetCounter(tick.getStockName()).dumpResults();
             }
@@ -201,8 +212,7 @@ public class ListenerRsiIndicator implements UpdateListener {
 
             budjetCounter.initialize(stockName,
                                     "DecisionRSI",
-                                    assumedBudjet,
-                                    null);
+                                    assumedBudjet);
 
             this.performDecisionTest(budjetCounter,
                                     input,

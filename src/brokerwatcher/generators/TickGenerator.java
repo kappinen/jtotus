@@ -18,7 +18,6 @@ package brokerwatcher.generators;
 
 import com.espertech.esper.client.EPRuntime;
 import brokerwatcher.eventtypes.StockTick;
-import com.espertech.esper.epl.generated.EsperEPL2GrammarParser.startEPLExpressionRule_return;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.jtotus.config.ConfTickGenerator;
@@ -59,7 +58,6 @@ public class TickGenerator implements EsperEventGenerator {
         return networkTicks.connect();
     }
 
-
     public String call() throws Exception {
         StockTick tick = null;
         DateTimeZone timeZone = null;
@@ -67,30 +65,30 @@ public class TickGenerator implements EsperEventGenerator {
         long startTickerTime = 0;
         long endTickerTime = 0;
 
-        
+
         if (!this.initialize()) {
             return null;
         }
 
         timeZone = DateTimeZone.forID(config.timeZone);
-        
-        startTickerTime = config.start_hour*60+config.start_minute;
-        endTickerTime = config.end_hour*60+config.end_minute;
-        
+
+        startTickerTime = config.start_hour * 60 + config.start_minute;
+        endTickerTime = config.end_hour * 60 + config.end_minute;
+
         while (true) {
             time = new DateTime(timeZone);
-            if (time.getMinuteOfDay()<startTickerTime &&
-                time.getMinuteOfDay()>endTickerTime) {
+            if (time.getMinuteOfDay() < startTickerTime
+                    && time.getMinuteOfDay() > endTickerTime) {
 
-                if (time.getMinuteOfDay()<startTickerTime){
+                if (time.getMinuteOfDay() < startTickerTime) {
                     long minutesToSleep = time.getMinuteOfDay() - startTickerTime;
                     System.out.printf("Sleeping (%d) minutes ...\n", minutesToSleep);
                     Thread.sleep(minutesToSleep * 60 * 1000);
                     continue;
                 }
 
-                if (time.getMinuteOfDay()>endTickerTime){
-                    long minutesToSleep = 24*60 - time.getMinuteOfDay();
+                if (time.getMinuteOfDay() > endTickerTime) {
+                    long minutesToSleep = 24 * 60 - time.getMinuteOfDay();
                     minutesToSleep += time.getMinuteOfDay() - startTickerTime;
                     System.out.printf("Sleeping (%d) minutes ...\n", minutesToSleep);
                     Thread.sleep(minutesToSleep * 60 * 1000);

@@ -35,7 +35,6 @@ import org.jtotus.engine.Engine;
 public final class GraphSender {
     private String mainReviewTarget = null;
     private Engine mainEngine = null;
-    private LinkedBlockingDeque<GraphPacket> mainPort = null;
     private ArrayList<StockUnit> listOfValues = null;
 
 
@@ -44,13 +43,15 @@ public final class GraphSender {
     private String seriesName = null;
     private String plotName = null;
     
-    
+
+    private LinkedBlockingDeque<GraphPacket> getPort(){
+        return mainEngine.fetchGraph(mainReviewTarget);
+    }
     public GraphSender(String reviewTarget) {
         mainReviewTarget = reviewTarget;
         mainEngine = Engine.getInstance();
-
         listOfValues = new ArrayList<StockUnit>();
-        mainPort = mainEngine.fetchGraph(mainReviewTarget);
+        
     }
 
     public void reset() {
@@ -95,7 +96,7 @@ public final class GraphSender {
                 return false;
             }
         }else {
-            queue = mainPort;
+            queue = getPort();
         }
         
         try {

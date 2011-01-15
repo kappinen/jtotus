@@ -243,8 +243,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
 
                 budjetCounter.initialize(stockType.getStockName(),
                                         "DecisionRSI",
-                                        super.inputAssumedBudjet,
-                                        sender);
+                                        super.inputAssumedBudjet);
 
                 this.performDecisionTest(budjetCounter,
                                         stockName,

@@ -17,6 +17,7 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 package brokerwatcher;
 
 import brokerwatcher.eventtypes.EsperEventRsi;
+import brokerwatcher.eventtypes.IndicatorData;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPAdministrator;
 import com.espertech.esper.client.EPServiceProvider;
@@ -58,6 +59,7 @@ public class BrokerWatcher implements Callable {
         Configuration cepConfig = new Configuration();
 
         cepConfig.addEventType("StockTick", StockTick.class.getName());
+        cepConfig.addEventType("IndicatorData", IndicatorData.class.getName());
         cepConfig.addEventType("EsperEventRsi", EsperEventRsi.class.getName());
 
         provider = EPServiceProviderManager.getProvider(mainEngine, cepConfig);
@@ -90,8 +92,8 @@ public class BrokerWatcher implements Callable {
     public Object call() {
 
         //EsperEventGenerator tickGenerator = new TickGenerator(cep.getEPRuntime());
-        //EsperEventGenerator tickGenerator = new HistoryTicksFromFile(cep.getEPRuntime(), "7.01.2010Ticks.txt");
-        EsperEventGenerator tickGenerator = new TickGenerator(cep.getEPRuntime());
+        EsperEventGenerator tickGenerator = new HistoryTicksFromFile(cep.getEPRuntime(), "7.01.2010Ticks.txt");
+        //EsperEventGenerator tickGenerator = new TickGenerator(cep.getEPRuntime());
         futureTask = new MethodFuture<String>(tickGenerator);
         threadExecutor.execute(futureTask);
 
