@@ -1,24 +1,26 @@
 /*
-    This file is part of jTotus.
+This file is part of jTotus.
 
-    jTotus is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+jTotus is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    jTotus is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+jTotus is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
+You should have received a copy of the GNU General Public License
+along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package brokerwatcher.generators;
 
 import com.espertech.esper.client.EPRuntime;
 import brokerwatcher.eventtypes.StockTick;
+import com.espertech.esper.epl.generated.EsperEPL2GrammarParser.startEPLExpressionRule_return;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.jtotus.config.ConfTickGenerator;
 import org.jtotus.config.ConfigLoader;
 import org.jtotus.config.GUIConfig;
@@ -29,18 +31,16 @@ import org.jtotus.network.NordnetConnect;
  *
  * @author Evgeni Kappinen
  */
-public class TickGenerator implements EsperEventGenerator{
+public class TickGenerator implements EsperEventGenerator {
+
     private EPRuntime esperEngine = null;
     private NetworkTickConnector networkTicks = null;
     private ConfTickGenerator config = null;
-    private String []stockList = null;
-
-
+    private String[] stockList = null;
 
     public TickGenerator(EPRuntime cepRT) {
         esperEngine = cepRT;
     }
-
 
     boolean initialize() {
 
@@ -53,22 +53,52 @@ public class TickGenerator implements EsperEventGenerator{
 
         ConfigLoader<GUIConfig> stockLoader = new ConfigLoader<GUIConfig>("GUIConfig");
         stockList = stockLoader.getConfig().fetchStockNames();
-        
+
         networkTicks = new NordnetConnect();
 
         return networkTicks.connect();
     }
 
-    
+
     public String call() throws Exception {
         StockTick tick = null;
+        DateTimeZone timeZone = null;
+        DateTime time = null;
+        long startTickerTime = 0;
+        long endTickerTime = 0;
 
-        if(!this.initialize()) {
+        
+        if (!this.initialize()) {
             return null;
         }
 
-        while(true) {
-            for (String stockName: stockList) {
+        timeZone = DateTimeZone.forID(config.timeZone);
+        
+        startTickerTime = config.start_hour*60+config.start_minute;
+        endTickerTime = config.end_hour*60+config.end_minute;
+        
+        while (true) {
+            time = new DateTime(timeZone);
+            if (time.getMinuteOfDay()<startTickerTime &&
+                time.getMinuteOfDay()>endTickerTime) {
+
+                if (time.getMinuteOfDay()<startTickerTime){
+                    long minutesToSleep = time.getMinuteOfDay() - startTickerTime;
+                    System.out.printf("Sleeping (%d) minutes ...\n", minutesToSleep);
+                    Thread.sleep(minutesToSleep * 60 * 1000);
+                    continue;
+                }
+
+                if (time.getMinuteOfDay()>endTickerTime){
+                    long minutesToSleep = 24*60 - time.getMinuteOfDay();
+                    minutesToSleep += time.getMinuteOfDay() - startTickerTime;
+                    System.out.printf("Sleeping (%d) minutes ...\n", minutesToSleep);
+                    Thread.sleep(minutesToSleep * 60 * 1000);
+                    continue;
+                }
+            }
+
+            for (String stockName : stockList) {
                 tick = networkTicks.getTick(stockName);
                 if (tick != null) {
                     esperEngine.sendEvent(tick);
@@ -79,6 +109,4 @@ public class TickGenerator implements EsperEventGenerator{
             Thread.sleep(config.sleepBetweenTicks);
         }
     }
-
-
 }

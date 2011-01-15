@@ -25,4 +25,13 @@ public class ConfTickGenerator {
 
     public int sleepBetweenTicks = 1;
 
+
+    //Start and end time to generate ticks
+    public String timeZone = "Europe/Helsinki";
+    public int start_hour = 10;
+    public int start_minute = 00;
+    public int end_hour = 18;
+    public int end_minute = 30;
+
+
 }
