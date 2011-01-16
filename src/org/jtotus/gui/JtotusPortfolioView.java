@@ -194,7 +194,7 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
                 if (valueType != null) {
                     dynChart.registerForEvents("select " + valueType + " as valueForGUI from StockTick where stockName='" + stockName + "'");
                 }else {
-                    dynChart.registerForEvents("select indicatorValue as valueForGUI from IndicatorData where stockName='" + stockName + "'");
+                    dynChart.registerForEvents("select indicatorValue as valueForGUI from IndicatorData where stockName='" + stockName + "' and indicatorName='"+colName+"'");
                 }
 
                 interFrame.setTitle(stockName + " (" + colName + ")");

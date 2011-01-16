@@ -32,6 +32,9 @@ public class StockIndicator <V>{
 
 
     public V getTick(int index) {
+        if (index >ticks.size()) {
+            return null;
+        }
         return ticks.get(index);
     }
 
@@ -40,9 +43,8 @@ public class StockIndicator <V>{
     }
 
 
-    public void getSize() {
-        ticks.size();
+    public int getSize() {
+        return ticks.size();
     }
-    
     
 }
