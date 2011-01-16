@@ -17,6 +17,7 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 package org.jtotus.engine;
 
 import brokerwatcher.BrokerWatcher;
+import brokerwatcher.generators.VrocGenerator;
 import brokerwatcher.listeners.ListenerRsiIndicator;
 import brokerwatcher.listeners.TickListenerPrinter;
 import brokerwatcher.listeners.TicksToFile;
@@ -153,7 +154,8 @@ public class Engine {
         //watcher.addStatement("select * from EsperEventRsi", new TickListenerPrinter());
 
 
-        watcher.addStatement("select * from StockTick", new ListenerRsiIndicator());
+        watcher.addStatement("select * from StockTick", new VrocGenerator());
+        //watcher.addStatement("select * from StockTick", new ListenerRsiIndicator());
         watcher.addStatement("select * from StockTick", new TicksToFile());
         watcher.call();
 

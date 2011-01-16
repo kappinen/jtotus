@@ -36,8 +36,16 @@ public class SimpleTechnicalIndicators extends StockIndicator<StockTick> {
         return super.getTick(i).getLatestPrice();
     }
 
+    public double LATESTHIGH(int i) {
+        return super.getTick(i).getLatestHighest();
+    }
+
+    public double LATESTLOW(int i) {
+        return super.getTick(i).getLatestLowest();
+    }
+
     // Volume Rate of Change (VROC)
-    // Source: http://ta.mql4.com/indicators/volumes/rate_of_change
+    // Source: http://www.mysmp.com/technical-analysis/volume-rate-of-change.html
     public double vroc(int iIndex, int n) {
         if (iIndex - n <= 0) {
             return 0;
@@ -61,13 +69,52 @@ public class SimpleTechnicalIndicators extends StockIndicator<StockTick> {
     }
 
     // Price and Volume Trend, for dayily data
-    // Source: http://ta.mql4.com/indicators/volumes/price_trend
-    public double pvtRecursive(int ithIndex) {
+    // Source: http://en.wikipedia.org/wiki/Volume_Price_Trend
+    public double vptRecursive(int ithIndex) {
+        if (ithIndex - 1 < 0) {
+            return 0.0d;
+        }
+        return ((LATESTPRICE(ithIndex) - LATESTPRICE(ithIndex - 1)) / LATESTPRICE(ithIndex - 1)) / VOLUME(ithIndex) + vptRecursive(ithIndex - 1);
+    }
+
+    //Accumulation/distribution index
+    //Source: http://en.wikipedia.org/wiki/Accumulation/distribution_index
+    public double accdistIndexRecursive(int ithIndex) {
         if (ithIndex - 1 < 0) {
             return 0.0d;
         }
 
-        return ((LATESTPRICE(ithIndex) - LATESTPRICE(ithIndex - 1)) / LATESTPRICE(ithIndex - 1)) / VOLUME(ithIndex) + pvtRecursive(ithIndex - 1);
+        double clv = ((LATESTPRICE(ithIndex) - LATESTLOW(ithIndex))
+                      - (LATESTHIGH(ithIndex) - LATESTPRICE(ithIndex)))
+                      / (LATESTHIGH(ithIndex) - LATESTLOW(ithIndex));
+
+        double accdist = accdistIndexRecursive(ithIndex - 1) + VOLUME(ithIndex)*clv;
+        
+        return accdist;
     }
+
+    public double accdistIndexRecursiveVolumeDiff(int ithIndex) {
+        if (ithIndex - 1 < 0) {
+            return 0.0d;
+        }
+
+        double clv = ((LATESTPRICE(ithIndex) - LATESTLOW(ithIndex))
+                      - (LATESTHIGH(ithIndex) - LATESTPRICE(ithIndex)))
+                      / (LATESTHIGH(ithIndex) - LATESTLOW(ithIndex));
+
+        double accdist = accdistIndexRecursiveVolumeDiff(ithIndex - 1) + (VOLUME(ithIndex) - VOLUME(ithIndex-1))*clv;
+
+        return accdist;
+    }
+
+
+
+
+    //TODO:
+    //http://en.wikipedia.org/wiki/Rate_of_change_%28technical_analysis%29
+    //http://tadoc.org/indicator/ADOSC.htm
+    //http://stockcharts.com/help/doku.php?id=chart_school:technical_indicators:force_index
+    
+    
 
 }
