@@ -39,8 +39,7 @@ import org.apache.http.message.BasicNameValuePair;
  * 
  */
 public class NordnetConnector {
-    private int failures = 0;
-    DefaultHttpClient httpclient = null;
+    private DefaultHttpClient httpclient = null;
 
     private DefaultHttpClient getClient() {
 
@@ -66,7 +65,6 @@ public class NordnetConnector {
             httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
         }
 
-        failures=0;
         return httpclient;
     }
 
@@ -119,14 +117,8 @@ public class NordnetConnector {
 
         } catch (IOException ex) {
             //Logger.getLogger(NordnetConnector.class.getName()).log(Level.SEVERE, null, ex);
-            httpclient = null; failures++;
-            System.err.printf("Connection failure (%d)\n", failures);
-            if ( failures > 5) {
-                System.err.printf("Connection is closed (%d)\n", failures);
-                return null;
-            }
-            return this.fetchPage(url);
-
+            System.err.printf("Connection failure ...\n");
+            return null;
         }
     }
 

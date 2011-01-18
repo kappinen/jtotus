@@ -43,6 +43,7 @@ public class NordnetConnect implements NetworkTickConnector {
     // Connects to login page, get seeds for user and password
     // POST data to server, by calling NordnetConnector
     private void fillStockNamesConverter() {
+
         if (stockNameToIndex != null) {
             return;
         }
@@ -75,14 +76,17 @@ public class NordnetConnect implements NetworkTickConnector {
 
     }
 
-    public boolean connectAndAuth(String user, String password) {
+    private boolean connectAndAuth(String user, String password) {
         boolean result = true;
         ArrayList<String> inputList = new ArrayList();
 
         connector = new NordnetConnector();
 
         String loginPage = connector.getPage(_LOGIN_URL_);
-
+        if (loginPage == null) {
+            return false;
+        }
+        
         Document doc = Jsoup.parse(loginPage);
         Elements element = doc.select("input");
 
@@ -97,8 +101,14 @@ public class NordnetConnect implements NetworkTickConnector {
                 inputList.get(inputList.size() - 2), user,
                 inputList.get(inputList.size() - 1), password);
 
-
+        if (loginPage == null) {
+            return false;
+        }
+        
         loginPage = connector.getPage(_PORTFOLIO_URL_);
+        if (loginPage == null) {
+            return false;
+        }
 
 //            System.out.printf("Data from jsoup:%s last index:%s and :%s\n",
 //                        loginPage, inputList.get(inputList.size() - 2),
@@ -109,6 +119,7 @@ public class NordnetConnect implements NetworkTickConnector {
     }
 
     public boolean connect() {
+        
         ConfigLoader<GUIConfig> loader = new ConfigLoader<GUIConfig>("GUIConfig");
         GUIConfig config = loader.getConfig();
         if (config == null) {
@@ -118,7 +129,7 @@ public class NordnetConnect implements NetworkTickConnector {
         this.fillStockNamesConverter();
 
         return this.connectAndAuth(config.getBrokerLogin(),
-                config.getBrokerPassword());
+                                   config.getBrokerPassword());
 
     }
 
@@ -135,6 +146,18 @@ public class NordnetConnect implements NetworkTickConnector {
         String infoPage = connector.getPage("%s?identifier=%d&marketid=%d",
                 _STOCK_INFO_URL_, index.intValue(), 24);
 
+        //Try to reconnect to server once.
+        if (infoPage == null) {
+            if (!this.connect()) {
+                return null;
+            } else {
+                infoPage = connector.getPage("%s?identifier=%d&marketid=%d",
+                                            _STOCK_INFO_URL_, index.intValue(), 24);
+                if (infoPage == null) {
+                    return null;
+                }
+            }
+        }
 
         Document doc = Jsoup.parse(infoPage);
         Elements elements = doc.select("tr[class=first]");
@@ -154,7 +177,7 @@ public class NordnetConnect implements NetworkTickConnector {
                 switch (count) {
                     case 3:
                         if (!elem.text().equalsIgnoreCase("OMX Helsinki")) {
-                            System.err.printf("Data corruption in broker site? :%s for: %s\n", elem.text(),stockName);
+                            System.err.printf("Data corruption in broker site? :%s for: %s\n", elem.text(), stockName);
                             return null;
                         }
                         break;
