@@ -177,6 +177,15 @@
             </MenuItem>
           </SubComponents>
         </Menu>
+        <Menu class="javax.swing.JMenu" name="indicatorsMenu">
+          <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="indicatorsMenu.text"/>
+            <Property name="name" type="java.lang.String" value="indicatorsMenu" noResource="true"/>
+          </Properties>
+          <Events>
+            <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="indicatorsMenuMousePressed"/>
+          </Events>
+        </Menu>
       </SubComponents>
     </Container>
     <Container class="javax.swing.JPanel" name="statusPanel">

@@ -21,9 +21,11 @@
 package org.jtotus.gui;
 
 
+import brokerwatcher.BrokerWatcher;
+import brokerwatcher.generators.TickInterface;
+import com.espertech.esper.client.EPServiceProvider;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JInternalFrame;
 import javax.swing.UnsupportedLookAndFeelException;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
@@ -33,11 +35,16 @@ import org.jdesktop.application.Task;
 import org.jdesktop.application.TaskMonitor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
 import javax.swing.Timer;
 import javax.swing.Icon;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
+import javax.swing.JMenuItem;
 import javax.swing.UIManager;
 import org.jtotus.crypt.JtotusKeyRingPassword;
 import org.jtotus.engine.Engine;
@@ -53,6 +60,7 @@ public class JtotusView extends FrameView {
 
    private Engine mainEngine = null;
    private JFrame mainFrame = null;
+
    
    public void initialize()
     {
@@ -91,7 +99,7 @@ public class JtotusView extends FrameView {
         mainFrame=app.getMainFrame();
 
         this.checkKeyRingPassword();
-        //mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         initComponents();
 
@@ -217,6 +225,7 @@ public class JtotusView extends FrameView {
         javax.swing.JMenuItem configMenuItem = new javax.swing.JMenuItem();
         jMenuItem1 = new javax.swing.JMenuItem();
         jMenuItem2 = new javax.swing.JMenuItem();
+        indicatorsMenu = new javax.swing.JMenu();
         statusPanel = new javax.swing.JPanel();
         javax.swing.JSeparator statusPanelSeparator = new javax.swing.JSeparator();
         statusMessageLabel = new javax.swing.JLabel();
@@ -325,6 +334,15 @@ public class JtotusView extends FrameView {
 
         menuBar.add(configMenu);
 
+        indicatorsMenu.setText(resourceMap.getString("indicatorsMenu.text")); // NOI18N
+        indicatorsMenu.setName("indicatorsMenu"); // NOI18N
+        indicatorsMenu.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                indicatorsMenuMousePressed(evt);
+            }
+        });
+        menuBar.add(indicatorsMenu);
+
         statusPanel.setName("statusPanel"); // NOI18N
 
         statusPanelSeparator.setName("statusPanelSeparator"); // NOI18N
@@ -423,9 +441,47 @@ public class JtotusView extends FrameView {
         passwords.doShow();
     }//GEN-LAST:event_jMenuItem2MouseReleased
 
+    public void fetchGeneratorList() {
+        this.indicatorsMenuMousePressed(null);
+    }
+
+    private void indicatorsMenuMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_indicatorsMenuMousePressed
+
+       Engine engine = Engine.getInstance();
+       Map<String, HashMap<String, TickInterface>> listOfGen = engine.getListOfGenerators();
+       
+       Iterator<String> iter = listOfGen.keySet().iterator();
+       while(iter.hasNext()) {
+           String itemName = iter.next();
+           boolean itemFound = false;
+           int count=indicatorsMenu.getItemCount();
+           for (int i=0;i<count;i++) {
+               JMenuItem item = indicatorsMenu.getItem(i);
+               if (item.getText().equalsIgnoreCase(itemName)){
+                   itemFound=true;
+                   break;
+               }
+           }
+           
+           if (itemFound) {
+               continue;
+           }
+
+           HashMap<String, TickInterface> generator = listOfGen.get(itemName);
+
+           JCheckBoxMenuItem menu = new JCheckBoxMenuItem();
+           ActionListener aListener = new GeneratorActionListener(generator);
+           menu.setSelected(false);
+           menu.setText(itemName);
+           menu.addActionListener(aListener);
+           indicatorsMenu.add(menu);
+       }
+    }//GEN-LAST:event_indicatorsMenuMousePressed
+
    
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenu indicatorsMenu;
     private javax.swing.JLabel infoLable;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButtonRunScripts;

@@ -77,23 +77,17 @@ public class TickGenerator implements EsperEventGenerator {
 
         while (true) {
             time = new DateTime(timeZone);
-            if (time.getMinuteOfDay() < startTickerTime
-                    && time.getMinuteOfDay() > endTickerTime) {
-
-                if (time.getMinuteOfDay() < startTickerTime) {
-                    long minutesToSleep = time.getMinuteOfDay() - startTickerTime;
-                    System.out.printf("Sleeping (%d) minutes ...\n", minutesToSleep);
-                    Thread.sleep(minutesToSleep * 60 * 1000);
-                    continue;
-                }
-
-                if (time.getMinuteOfDay() > endTickerTime) {
-                    long minutesToSleep = 24 * 60 - time.getMinuteOfDay();
-                    minutesToSleep += time.getMinuteOfDay() - startTickerTime;
-                    System.out.printf("Sleeping (%d) minutes ...\n", minutesToSleep);
-                    Thread.sleep(minutesToSleep * 60 * 1000);
-                    continue;
-                }
+            if (time.getMinuteOfDay() < startTickerTime) {
+                long minutesToSleep = Math.abs(time.getMinuteOfDay() - startTickerTime);
+                System.out.printf("Sleeping (%d) minutes ... Starting 1 at:%d:%d\n", minutesToSleep, config.start_hour, config.start_minute);
+                Thread.sleep(minutesToSleep * 60 * 1000);
+                continue;
+            } else if (time.getMinuteOfDay() > endTickerTime) {
+                long minutesToSleep = 24 * 60 - time.getMinuteOfDay();
+                minutesToSleep += startTickerTime;
+                System.out.printf("Sleeping (%d) minutes ... Starting 2 at:%d:%d\n", minutesToSleep, config.start_hour, config.start_minute);
+                Thread.sleep(minutesToSleep * 60 * 1000);
+                continue;
             }
 
             for (String stockName : stockList) {

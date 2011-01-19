@@ -26,10 +26,11 @@ import java.util.HashMap;
  *
  * @author Evgeni Kappinen
  */
-public class VrocGenerator extends TickAnalyzer{
+public class AccdistGenerator extends TickAnalyzer{
     private HashMap<String, SimpleTechnicalIndicators> stockIndec = null;
 
-    public VrocGenerator() {
+
+    public AccdistGenerator() {
         super();
         stockIndec = new HashMap<String, SimpleTechnicalIndicators>();
     }
@@ -45,13 +46,11 @@ public class VrocGenerator extends TickAnalyzer{
         }
 
         indicator.pushTick(tick);
-        double vroc = indicator.vrocMultPrice(indicator.getSize()-1, 25);
-        System.out.printf("Vroc: %s:%f\n", tick.getStockName(), vroc);
-        sendEvent(tick.getStockName(), vroc);
+        double value = indicator.accdistIndexRecursiveVolumeDiff(indicator.getSize()-1);
+        sendEvent(getName(), tick.getStockName(), value);
     }
 
     public String getName(){
-        return "Vroc";
+        return "AccDist";
     }
-
 }

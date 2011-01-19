@@ -130,8 +130,8 @@ public class NordnetConnector {
                                String pass) {
         try {
             HttpPost httpPost = new HttpPost(url);
-
-
+            
+            
             List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
             nameValuePairs.add(new BasicNameValuePair("checksum", ""));
             nameValuePairs.add(new BasicNameValuePair("referer", "%2Fmux%2Fweb%2Fnordnet%2Findex.html"));
@@ -150,5 +150,11 @@ public class NordnetConnector {
         return null;
     }
 
+
+    public void close() {
+        if (httpclient != null) {
+            httpclient.getConnectionManager().shutdown();
+        }
+    }
     
 }

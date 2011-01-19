@@ -23,7 +23,7 @@ package org.jtotus.config;
  */
 public class ConfTickGenerator {
 
-    public int sleepBetweenTicks = 1;
+    public int sleepBetweenTicks = 8;
 
 
     //Start and end time to generate ticks

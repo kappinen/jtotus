@@ -38,7 +38,7 @@ import org.jtotus.threads.MethodFuture;
  *
  * @author Evgeni Kappinen
  */
-public class BrokerWatcher implements Callable {
+public class BrokerWatcher implements Callable, Runnable{
 
     private ExecutorService threadExecutor = null;
     private MethodFuture<String> futureTask = null;
@@ -111,9 +111,12 @@ public class BrokerWatcher implements Callable {
     }
 
     public static void addStatement(EPServiceProvider provider, String statement, UpdateListener listener) {
-
         EPAdministrator cepAdm = provider.getEPAdministrator();
         EPStatement stmt = cepAdm.createEPL(statement);
         stmt.addListener(listener);
+    }
+
+    public void run() {
+        this.call();
     }
 }

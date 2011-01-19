@@ -17,9 +17,10 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 package org.jtotus.engine;
 
 import brokerwatcher.BrokerWatcher;
+import brokerwatcher.generators.AccdistGenerator;
+import brokerwatcher.generators.TickInterface;
+import brokerwatcher.generators.VPTGenerator;
 import brokerwatcher.generators.VrocGenerator;
-import brokerwatcher.listeners.ListenerRsiIndicator;
-import brokerwatcher.listeners.TickListenerPrinter;
 import brokerwatcher.listeners.TicksToFile;
 import org.jtotus.methods.MethodEntry;
 import org.jtotus.methods.DecisionScript;
@@ -33,9 +34,6 @@ import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.LocalTime;
 import org.jtotus.gui.JtotusView;
 import org.jtotus.common.Helper;
 import org.jtotus.config.MethodConfig;
@@ -61,11 +59,21 @@ public class Engine {
     private Helper help = null;
     private JtotusView mainWindow = null;
     private HashMap<String, LinkedBlockingDeque> graphAccessPoints = null;
+
+    //GenearatorName, StatementString, Object
+    private HashMap<String, HashMap<String, TickInterface>> listOfGenerators = null;
+
+    public HashMap<String, HashMap<String, TickInterface>> getListOfGenerators() {
+        return listOfGenerators;
+    }
+
     private MethodResultsPrinter resultsPrinter = null;
 
     private void prepareMethodsList() {
         // Available methods
-        
+
+
+        listOfGenerators = new HashMap<String, HashMap<String, TickInterface>>();
 
         methodList.add(new DummyMethod(portfolioDecision));
         methodList.add(new PotentialWithIn());
@@ -143,6 +151,14 @@ public class Engine {
         testRun();
     }
 
+
+    private void addGeneratorToList(String stmt, TickInterface ticker) {
+        HashMap<String, TickInterface> tickerMap = new HashMap<String, TickInterface>();
+        tickerMap.put(stmt, ticker);
+        listOfGenerators.put(ticker.getName(), tickerMap);
+    }
+    
+
     private void testRun() {
 
 
@@ -154,9 +170,15 @@ public class Engine {
         //watcher.addStatement("select * from EsperEventRsi", new TickListenerPrinter());
 
 
-        watcher.addStatement("select * from StockTick", new VrocGenerator());
-        //watcher.addStatement("select * from StockTick", new ListenerRsiIndicator());
+        //watcher.addStatement("select * from StockTick", new VrocGenerator());
+        //addGeneratorToList("select * from StockTick", new ListenerRsiIndicator());
+        addGeneratorToList("select * from StockTick", new VrocGenerator());
+        addGeneratorToList("select * from StockTick", new AccdistGenerator());
+        addGeneratorToList("select * from StockTick", new VPTGenerator());
         watcher.addStatement("select * from StockTick", new TicksToFile());
+
+        mainWindow.fetchGeneratorList();
+
         watcher.call();
 
         

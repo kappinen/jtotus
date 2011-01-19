@@ -214,7 +214,9 @@ public class NordnetConnect implements NetworkTickConnector {
             }
             System.out.printf("StockTick:%s\n",tick.toString());
         }else {
-            System.err.printf("Data corruption in broker site size of elements? :%d for:%s\n", elements.size(),stockName);
+            System.err.printf("Data corruption in broker site size of elements? :%d for:%s\n", elements.size(), stockName);
+            //reconnect
+            connector.close();
             return null;
         }
 

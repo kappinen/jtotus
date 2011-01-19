@@ -21,18 +21,19 @@ import brokerwatcher.eventtypes.IndicatorData;
 import com.espertech.esper.client.EPRuntime;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.UpdateListener;
+
 
 /**
  *
  * @author Evgeni Kappinen
  */
-public abstract class TickAnalyzer implements UpdateListener{
+public abstract class TickAnalyzer implements TickInterface{
     protected EPRuntime esperRuntime = null;
     
     public TickAnalyzer() {
-        subscribeForTicks();
+        //subscribeForTicks();
     }
+    
 
     public void subscribeForTicks() {
         EPServiceProvider provider = BrokerWatcher.getMainEngine();
@@ -49,11 +50,24 @@ public abstract class TickAnalyzer implements UpdateListener{
         return esperRuntime;
     }
 
+    public String getName(){
+        return this.getClass().getSimpleName();
+    }
+
     public void sendEvent(String stockName, double value) {
         IndicatorData data = new IndicatorData();
         data.setStockName(stockName);
         data.setIndicatorValue(value);
-        data.setIndicatorName(this.getClass().getSimpleName());
+        data.setIndicatorName(getName());
+
+        this.getEngine().sendEvent(data);
+    }
+
+    public void sendEvent(String genName, String stockName, double value) {
+        IndicatorData data = new IndicatorData();
+        data.setStockName(stockName);
+        data.setIndicatorValue(value);
+        data.setIndicatorName(genName);
 
         this.getEngine().sendEvent(data);
     }
