@@ -183,16 +183,16 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
 
         methodResults.putResult(stockType.getStockName(), output[output.length - 1]);
 
-        sender = new GraphSender(stockType.getStockName());
-        for (int elem = 0; elem <= outNbElement.value; elem++) {
-            DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                    config.inputEndingDate.getTime());
-            dateIterator.move(elem + outBegIdx.value);
-            sender.setSeriesName("Original");
-            sender.addForSending(dateIterator.getCurrent(), input[elem + outBegIdx.value]);
-
-        }
-        sender.sendAllStored();
+//        sender = new GraphSender(stockType.getStockName());
+//        for (int elem = 0; elem <= outNbElement.value; elem++) {
+//            DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
+//                    config.inputEndingDate.getTime());
+//            dateIterator.move(elem + outBegIdx.value);
+//            sender.setSeriesName("Original");
+//            sender.addForSending(dateIterator.getCurrent(), input[elem + outBegIdx.value]);
+//
+//        }
+//        sender.sendAllStored();
         
 
         if (config.inputPrintResults) {

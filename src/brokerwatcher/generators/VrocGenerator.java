@@ -53,5 +53,4 @@ public class VrocGenerator extends TickAnalyzer{
     public String getName(){
         return "Vroc";
     }
-
 }

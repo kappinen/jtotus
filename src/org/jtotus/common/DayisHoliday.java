@@ -22,7 +22,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -33,71 +32,34 @@ import java.util.logging.Logger;
  * @author Evgeni Kappinen
  */
 public class DayisHoliday {
-    private  HashMultiset <Calendar> holidays = null;
-
-    public DayisHoliday() {
-        DateFormat dayFormat = new SimpleDateFormat("dd.MM.yyyy");
-        holidays = HashMultiset.create();
-        
-        try {//Finnish Holidays
-            String[] holidayList = {
-                                    "01.01.2010",
-                                    "06.01.2010",
-                                    "02.04.2010",
-                                    "05.04.2010",
-                                    "13.05.2010",
-                                    "06.12.2010",
-                                    "25.06.2010",
-                                    //2009 Year
-                                    "10.04.2009",
-                                    "13.04.2009",
-                                    "01.05.2009",
-                                    "21.05.2009",
-                                    "19.06.2009",
-                                    "24.12.2009",
-                                    "25.12.2009",
-                                    "31.12.2009",
-                                    "24.12.2010",
-                                    "31.12.2010"
-                                   };
-
-            for (int i = 0; i < holidayList.length; i++) {
-                Date dateTmp = dayFormat.parse(holidayList[i]);
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(dateTmp);
-                holidays.add(cal);
-            }
-            
-        } catch (ParseException ex) {
-            Logger.getLogger(DayisHoliday.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
-
-     public boolean isSameDay(Calendar cal1, Calendar cal2) {
-        if (cal1 == null || cal2 == null) {
-            throw new IllegalArgumentException("The date must not be null");
-        }
-        return (cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH) &&
-                cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) &&
-                cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR));
-    }
+    private int[]  days= {1012010, 6012010, 2042010, 5042010,
+                          13052010, 6122010, 25062010, 10042009, 13042009,
+                          1052009, 21052009, 19062009, 24122009, 25122009,
+                          31122009, 24122010, 31122010, 6012011};
 
     public boolean isHoliday(Calendar date) {
-        Iterator <Calendar>dateIter = holidays.iterator();
 
-        
-        while(dateIter.hasNext()) {
-            Calendar holidayDay = dateIter.next();
-
-            if(this.isSameDay(date, holidayDay)) {
-               //  System.out.printf("MATCH:"+date+" "+holidayDay.getTime()+"\n");
+        int toSearch =  date.get(Calendar.DATE)*1000000+(date.get(Calendar.MONTH)+1)*10000+date.get(Calendar.YEAR);
+        //System.out.printf("To search:%d == %d:%d:%d\n", toSearch, date.get(Calendar.DATE), date.get(Calendar.MONTH)+1, date.get(Calendar.YEAR));
+        for (int i = 0;i < days.length;i++) {
+            if (days[i] == toSearch) {
                 return true;
             }
         }
         return false;
     }
 
-    
 
+    public static void main(String []argv) {
+        DayisHoliday holiday = new DayisHoliday();
+        Calendar cal = Calendar.getInstance();
+        //cal.set(2010, 12, 32);
+        
+
+        if (holiday.isHoliday(cal)) {
+            System.out.printf("Is holiday!\n");
+        }else {
+            System.out.printf("Is not holiday!\n");
+        }
+    }
 }

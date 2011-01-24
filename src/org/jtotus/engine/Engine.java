@@ -178,7 +178,6 @@ public class Engine {
         watcher.addStatement("select * from StockTick", new TicksToFile());
 
         mainWindow.fetchGeneratorList();
-
         watcher.call();
 
         

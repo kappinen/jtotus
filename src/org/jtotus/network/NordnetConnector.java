@@ -152,9 +152,9 @@ public class NordnetConnector {
 
 
     public void close() {
-        if (httpclient != null) {
-            httpclient.getConnectionManager().shutdown();
-        }
+//        if (httpclient != null) {
+//            httpclient.getConnectionManager().shutdown();
+//        }
     }
     
 }
