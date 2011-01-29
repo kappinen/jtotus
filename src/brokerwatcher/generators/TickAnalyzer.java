@@ -21,6 +21,8 @@ import brokerwatcher.eventtypes.IndicatorData;
 import com.espertech.esper.client.EPRuntime;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPStatement;
+import org.jtotus.config.ConfSimpleTechnicalIndicators;
+import org.jtotus.config.ConfigLoader;
 
 
 /**
@@ -29,15 +31,39 @@ import com.espertech.esper.client.EPStatement;
  */
 public abstract class TickAnalyzer implements TickInterface{
     protected EPRuntime esperRuntime = null;
+    protected EPServiceProvider provider = null;
+    protected EPStatement eps = null;
+    protected ConfSimpleTechnicalIndicators config = null;
     
     public TickAnalyzer() {
         //subscribeForTicks();
+        ConfigLoader<ConfSimpleTechnicalIndicators> loader =
+                new ConfigLoader<ConfSimpleTechnicalIndicators>("ConfSimpleTechnicalIndicators");
+        config = loader.getConfig();
+        if (config == null) {
+            config = new ConfSimpleTechnicalIndicators();
+        }
+    }
+
+    private EPServiceProvider getProvider() {
+        if (provider == null) {
+            provider = BrokerWatcher.getMainEngine();
+        }
+        return provider;
+    }
+
+    protected EPStatement patternForEvents(String pattern) {
+        eps = getProvider().getEPAdministrator().createPattern(pattern);
+        return eps;
+    }
+
+    public void statementForEvents(String stmt) {
+        eps = getProvider().getEPAdministrator().createEPL(stmt);
+        eps.addListener(this);
     }
     
-
     public void subscribeForTicks() {
-        EPServiceProvider provider = BrokerWatcher.getMainEngine();
-        EPStatement eps = provider.getEPAdministrator().createEPL("select * from StockTick");
+        eps = getProvider().getEPAdministrator().createEPL("select * from StockTick");
         eps.addListener(this);
     }
 

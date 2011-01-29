@@ -17,12 +17,26 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 package brokerwatcher.indicators;
 
 import brokerwatcher.eventtypes.StockTick;
+import com.tictactec.ta.lib.Core;
+import com.tictactec.ta.lib.MInteger;
+import com.tictactec.ta.lib.RetCode;
 
 /**
  *
  * @author Evgeni Kappinen
  */
 public class SimpleTechnicalIndicators extends StockIndicator<StockTick> {
+
+    public static DataTypes dataTypes;
+    public enum DataTypes {
+        VOLUME,
+        LATESTPRICE,
+        LATESTBUY,
+        LATESTSELL,
+        LATESTHIGH,
+        LATESTLOW,
+        REVENUE
+    }
 
     public SimpleTechnicalIndicators() {
         super();
@@ -93,7 +107,7 @@ public class SimpleTechnicalIndicators extends StockIndicator<StockTick> {
         return accdist;
     }
 
-    public double accdistIndexRecursiveVolumeDiff(int ithIndex) {
+    public double accdistIndexRecursiveVroc(int ithIndex, int n) {
         if (ithIndex - 1 < 0) {
             return 0.0d;
         }
@@ -102,12 +116,43 @@ public class SimpleTechnicalIndicators extends StockIndicator<StockTick> {
                       - (LATESTHIGH(ithIndex) - LATESTPRICE(ithIndex)))
                       / (LATESTHIGH(ithIndex) - LATESTLOW(ithIndex));
 
-        double accdist = accdistIndexRecursiveVolumeDiff(ithIndex - 1) + (VOLUME(ithIndex) - VOLUME(ithIndex-1))*clv;
+        double accdist = accdistIndexRecursiveVroc(ithIndex - 1, n) + (vrocMultPrice(ithIndex, n))*clv;
 
         return accdist;
     }
 
+    public double[] RSI(double[] input,
+                        MInteger outBegIdxDec,
+                        MInteger outNbElementDec,
+                        int decRSIPeriod) {
 
+        int intput_size = input.length - 1;
+        final Core core = new Core();
+        final int allocationSizeDecision = intput_size - core.rsiLookback(decRSIPeriod);
+
+
+        if (allocationSizeDecision <= 0) {
+            System.err.printf("No data for period (%d)\n", allocationSizeDecision);
+            return null;
+        }
+
+        double[] outputDec = new double[allocationSizeDecision];
+
+
+        RetCode decCode = core.rsi(0, intput_size - 1,
+                input, decRSIPeriod,
+                outBegIdxDec, outNbElementDec,
+                outputDec);
+
+        if (decCode.compareTo(RetCode.Success) != 0) {
+            //Error return empty method results
+            throw new java.lang.IllegalStateException("RSI failed:" + decRSIPeriod
+                    + " Begin:" + outBegIdxDec.value
+                    + " NumElem:" + outNbElementDec.value + "\n");
+        }
+
+        return outputDec;
+    }
 
 
     //TODO:

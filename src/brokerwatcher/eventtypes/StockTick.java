@@ -30,7 +30,7 @@ public class StockTick {
     private double latestHighest = 0.0f;
     private double latestLowest = 0.0f;
     private double volume = 0.0f;
-    private double tradesSum = 0.0f;
+    private double revenue = 0.0f;
     private String time = null;
 
     public String getTime() {
@@ -91,11 +91,11 @@ public class StockTick {
     }
 
     public double getTradesSum() {
-        return tradesSum;
+        return revenue;
     }
 
     public void setTradesSum(double tradesSum) {
-        this.tradesSum = tradesSum;
+        this.revenue = tradesSum;
     }
 
     public double getVolume() {

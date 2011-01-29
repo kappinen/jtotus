@@ -18,9 +18,12 @@ package org.jtotus.engine;
 
 import brokerwatcher.BrokerWatcher;
 import brokerwatcher.generators.AccdistGenerator;
+import brokerwatcher.generators.IndicatorIndexGenerator;
+import brokerwatcher.generators.RsiGenerator;
 import brokerwatcher.generators.TickInterface;
 import brokerwatcher.generators.VPTGenerator;
 import brokerwatcher.generators.VrocGenerator;
+import brokerwatcher.listeners.ListenerRsiIndicator;
 import brokerwatcher.listeners.TicksToFile;
 import org.jtotus.methods.MethodEntry;
 import org.jtotus.methods.DecisionScript;
@@ -71,7 +74,6 @@ public class Engine {
 
     private void prepareMethodsList() {
         // Available methods
-
 
         listOfGenerators = new HashMap<String, HashMap<String, TickInterface>>();
 
@@ -175,6 +177,8 @@ public class Engine {
         addGeneratorToList("select * from StockTick", new VrocGenerator());
         addGeneratorToList("select * from StockTick", new AccdistGenerator());
         addGeneratorToList("select * from StockTick", new VPTGenerator());
+        addGeneratorToList("select * from StockTick", new RsiGenerator());
+        addGeneratorToList("select * from indicatorData=IndicatorData(indicatorName='Vroc')", new IndicatorIndexGenerator());
         watcher.addStatement("select * from StockTick", new TicksToFile());
 
         mainWindow.fetchGeneratorList();

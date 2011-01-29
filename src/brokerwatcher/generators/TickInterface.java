@@ -14,6 +14,9 @@ import com.espertech.esper.client.UpdateListener;
 public interface TickInterface extends UpdateListener{
 
     public void subscribeForTicks();
+    public void statementForEvents(String stmt);
+    
     public String getName();
+    public String getListnerInfo();
 
 }

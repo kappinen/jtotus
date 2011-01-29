@@ -92,7 +92,7 @@ public class NordnetConnector {
                 url.getURI().getRawPath(),
                 url.getURI().getQuery());
 
-        StringBuffer respond = new StringBuffer();
+        StringBuilder respond = new StringBuilder();
         HttpResponse response = null;
 
 

@@ -26,7 +26,8 @@ import java.util.HashMap;
  *
  * @author Evgeni Kappinen
  */
-public class VrocGenerator extends TickAnalyzer{
+public class VrocGenerator extends TickAnalyzer {
+
     private HashMap<String, SimpleTechnicalIndicators> stockIndec = null;
 
     public VrocGenerator() {
@@ -45,12 +46,22 @@ public class VrocGenerator extends TickAnalyzer{
         }
 
         indicator.pushTick(tick);
-        double vroc = indicator.vrocMultPrice(indicator.getSize()-1, 25);
-        System.out.printf("Vroc: %s:%f\n", tick.getStockName(), vroc);
+        double vroc = indicator.vrocMultPrice(indicator.getSize() - 1, config.vrocPeriod);
+        //System.out.printf("Vroc: %s:%f\n", tick.getStockName(), vroc);
         sendEvent(tick.getStockName(), vroc);
     }
 
-    public String getName(){
+    public String getName() {
         return "Vroc";
+    }
+
+    public String getListnerInfo() {
+        return "<html>"
+                + "Modified : Volume Rate of Change (VROC) \n<br>"
+                + "volume = ((VOLUME(iIndex) - VOLUME(iIndex - n)) / VOLUME(iIndex - n)) * 100 \n<br>"
+                + "curPrice = ((LATESTPRICE(iIndex) - LATESTPRICE(iIndex - n)) / LATESTPRICE(iIndex - n)) * 100\n<br>"
+                + "vroc = volume * curPrice\n <br>"
+                + "Source: http://www.mysmp.com/technical-analysis/volume-rate-of-change.html<br>"
+                + "</html>";
     }
 }

@@ -14,7 +14,6 @@
     You should have received a copy of the GNU General Public License
     along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 package brokerwatcher.generators;
 
 import brokerwatcher.eventtypes.StockTick;
@@ -26,9 +25,9 @@ import java.util.HashMap;
  *
  * @author Evgeni Kappinen
  */
-public class AccdistGenerator extends TickAnalyzer{
-    private HashMap<String, SimpleTechnicalIndicators> stockIndec = null;
+public class AccdistGenerator extends TickAnalyzer {
 
+    private HashMap<String, SimpleTechnicalIndicators> stockIndec = null;
 
     public AccdistGenerator() {
         super();
@@ -46,11 +45,22 @@ public class AccdistGenerator extends TickAnalyzer{
         }
 
         indicator.pushTick(tick);
-        double value = indicator.accdistIndexRecursiveVolumeDiff(indicator.getSize()-1);
+        double value = indicator.accdistIndexRecursiveVroc(indicator.getSize() - 1, config.accDistVroc);
         sendEvent(getName(), tick.getStockName(), value);
     }
 
-    public String getName(){
-        return "AccDist";
+    public String getName() {
+        return "AccDistVroc";
+    }
+
+    public String getListnerInfo() {
+        return "<html>"
+                + "Modified: Accumulation/distribution index\n<br>"
+                + "clv = ((LATESTPRICE(ithIndex) - LATESTLOW(ithIndex))\n<br>"
+                + "- (LATESTHIGH(ithIndex) - LATESTPRICE(ithIndex)))\n<br>"
+                + "/ (LATESTHIGH(ithIndex) - LATESTLOW(ithIndex))\n<br>"
+                + "accdist = accdistIndexRecursive(ithIndex - 1) + VOLUME(ithIndex)*clv\n<br>"
+                + "Source: http://en.wikipedia.org/wiki/Accumulation/distribution_index\n<br>"
+                + "</html>";
     }
 }

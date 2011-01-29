@@ -53,4 +53,14 @@ public class VPTGenerator extends TickAnalyzer{
     public String getName(){
         return "VPT";
     }
+
+    public String getListnerInfo() {
+        return "<html>"
+                + "Price and Volume Trend, for dayily data\n<br>"
+                + "vpt = ((LATESTPRICE(ithIndex) - LATESTPRICE(ithIndex - 1)) / LATESTPRICE(ithIndex - 1)) \n<br>"
+                + "/ VOLUME(ithIndex) + vptRecursive(ithIndex - 1)\n<br>"
+                + "\n<br>"
+                + "Source: http://en.wikipedia.org/wiki/Volume_Price_Trend<br>"
+                + "</html>";
+    }
 }

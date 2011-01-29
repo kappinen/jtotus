@@ -469,10 +469,17 @@ public class JtotusView extends FrameView {
 
            HashMap<String, TickInterface> generator = listOfGen.get(itemName);
 
+           //FIXME: add other statements
+           Iterator<String> stmts = generator.keySet().iterator();
+           TickInterface tickGen = generator.get(stmts.next());
+
            JCheckBoxMenuItem menu = new JCheckBoxMenuItem();
            ActionListener aListener = new GeneratorActionListener(generator);
+
            menu.setSelected(false);
            menu.setText(itemName);
+           menu.setToolTipText(tickGen.getListnerInfo());
+           
            menu.addActionListener(aListener);
            indicatorsMenu.add(menu);
        }
