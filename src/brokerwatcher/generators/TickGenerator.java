@@ -39,19 +39,26 @@ public class TickGenerator implements EsperEventGenerator {
 
     public TickGenerator(EPRuntime cepRT) {
         esperEngine = cepRT;
-    }
 
-    boolean initialize() {
-
-        ConfigLoader<ConfTickGenerator> loader = new ConfigLoader<ConfTickGenerator>("ConfTickGenerator");
+        ConfigLoader<ConfTickGenerator> loader
+                = new ConfigLoader<ConfTickGenerator>("ConfTickGenerator");
+        
         config = loader.getConfig();
         if (config == null) {
             config = new ConfTickGenerator();
             loader.storeConfig(config);
         }
+    }
 
+    boolean initialize() {
+
+        if (networkTicks != null) {
+            return true;
+        }
+        
         ConfigLoader<GUIConfig> stockLoader = new ConfigLoader<GUIConfig>("GUIConfig");
         stockList = stockLoader.getConfig().fetchStockNames();
+
 
         networkTicks = new NordnetConnect();
 
@@ -64,11 +71,6 @@ public class TickGenerator implements EsperEventGenerator {
         DateTime time = null;
         long startTickerTime = 0;
         long endTickerTime = 0;
-
-
-        if (!this.initialize()) {
-            return null;
-        }
 
         timeZone = DateTimeZone.forID(config.timeZone);
 
@@ -88,6 +90,10 @@ public class TickGenerator implements EsperEventGenerator {
                 System.out.printf("Sleeping (%d) minutes ... Starting 2 at:%d:%d\n", minutesToSleep, config.start_hour, config.start_minute);
                 Thread.sleep(minutesToSleep * 60 * 1000);
                 continue;
+            }
+
+            if (!this.initialize()) {
+                return null;
             }
 
             for (String stockName : stockList) {

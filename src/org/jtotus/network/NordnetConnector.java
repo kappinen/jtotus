@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -48,7 +49,10 @@ public class NordnetConnector {
         }
 
         httpclient = new DefaultHttpClient();
-        
+
+        httpclient.getParams().setParameter(HttpClientParams.CONNECTION_MANAGER_TIMEOUT, new Long(15000));
+        httpclient.getParams().setParameter(HttpClientParams.SO_TIMEOUT, new Integer(15000));
+
         Properties prop = System.getProperties();
         if (prop.getProperty("https.proxyHost") != null
                 && prop.getProperty("https.proxyPort") != null) {
@@ -152,9 +156,10 @@ public class NordnetConnector {
 
 
     public void close() {
-//        if (httpclient != null) {
-//            httpclient.getConnectionManager().shutdown();
-//        }
+        if (httpclient != null) {
+            //httpclient.getConnectionManager().shutdown();
+            httpclient.getConnectionManager().closeExpiredConnections();
+        }
     }
     
 }

@@ -119,7 +119,7 @@ public class NordnetConnect implements NetworkTickConnector {
     }
 
     public boolean connect() {
-        
+
         ConfigLoader<GUIConfig> loader = new ConfigLoader<GUIConfig>("GUIConfig");
         GUIConfig config = loader.getConfig();
         if (config == null) {
@@ -215,8 +215,10 @@ public class NordnetConnect implements NetworkTickConnector {
             System.out.printf("StockTick:%s\n",tick.toString());
         }else {
             System.err.printf("Data corruption in broker site size of elements? :%d for:%s\n", elements.size(), stockName);
-            //reconnect
+            //Clean
             connector.close();
+            //Re-authenticate
+            this.connect();
             return null;
         }
 
