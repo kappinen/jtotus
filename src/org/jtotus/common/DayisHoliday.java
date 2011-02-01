@@ -39,6 +39,10 @@ public class DayisHoliday {
 
     public boolean isHoliday(Calendar date) {
 
+        if (date == null) {
+            return false;
+        }
+
         int toSearch =  date.get(Calendar.DATE)*1000000+(date.get(Calendar.MONTH)+1)*10000+date.get(Calendar.YEAR);
         //System.out.printf("To search:%d == %d:%d:%d\n", toSearch, date.get(Calendar.DATE), date.get(Calendar.MONTH)+1, date.get(Calendar.YEAR));
         for (int i = 0;i < days.length;i++) {
@@ -47,19 +51,5 @@ public class DayisHoliday {
             }
         }
         return false;
-    }
-
-
-    public static void main(String []argv) {
-        DayisHoliday holiday = new DayisHoliday();
-        Calendar cal = Calendar.getInstance();
-        //cal.set(2010, 12, 32);
-        
-
-        if (holiday.isHoliday(cal)) {
-            System.out.printf("Is holiday!\n");
-        }else {
-            System.out.printf("Is not holiday!\n");
-        }
     }
 }

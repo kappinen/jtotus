@@ -25,20 +25,45 @@ import java.io.PrintWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import brokerwatcher.eventtypes.StockTick;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 /**
  *
  * @author Evgeni Kappinen
  */
 public class TicksToFile implements UpdateListener{
-
+    private final String fileWithTicks = "TicksToFile.txt";
     private PrintWriter writer = null;
 
+
+    private File fileName() {
+        Calendar today = Calendar.getInstance();
+        SimpleDateFormat todayFormat = new SimpleDateFormat("dd_MM_yyyy");
+
+        String format = todayFormat.format(today.getTime());
+        File file = new File(format+"_"+fileWithTicks);
+        if (file.exists()) {
+            for (int i = 0; i <= 1000; i++) {
+                file = new File(format+"_"+fileWithTicks+"."+i);
+                if (!file.exists()) {
+                    break;
+                }
+                if (i==1000) {
+                    System.err.printf("Failure to write ticks to file\n");
+                    return null;
+                }
+            }
+        }
+
+        System.out.printf("Writting ticks to file:%s\n", file.getPath());
+        return file;
+    }
     public PrintWriter getWriter() {
 
         if (writer == null) {
             try {
-                File file = new File("TicksToFile.txt");
+                File file = fileName();
                 writer = new PrintWriter(file);
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(TicksToFile.class.getName()).log(Level.SEVERE, null, ex);

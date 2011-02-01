@@ -60,7 +60,6 @@ public class HistoryTicksFromFile implements EsperEventGenerator {
             loader.storeConfig(config);
         }
 
-
         BufferedReader in = new BufferedReader(new FileReader(fileWithTicks));
 
         while((line = in.readLine()) != null){

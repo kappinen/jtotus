@@ -32,6 +32,9 @@ public class RsiGenerator extends TickAnalyzer {
     SimpleTechnicalIndicators indicators = new SimpleTechnicalIndicators();
     HashMap<String, Double[]> stockIndx = new HashMap<String, Double[]>();
 
+    public RsiGenerator() {
+        super();
+    }
 
      private Double[] storeValue(Double table[], double newValue) {
         Double newTable[] = new Double[table.length + 1];
