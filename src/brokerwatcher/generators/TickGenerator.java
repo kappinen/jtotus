@@ -77,6 +77,10 @@ public class TickGenerator implements EsperEventGenerator {
         startTickerTime = config.start_hour * 60 + config.start_minute;
         endTickerTime = config.end_hour * 60 + config.end_minute;
 
+        if (!this.initialize()) {
+            return null;
+        }
+
         while (true) {
             time = new DateTime(timeZone);
             if (time.getMinuteOfDay() < startTickerTime) {
@@ -90,10 +94,6 @@ public class TickGenerator implements EsperEventGenerator {
                 System.out.printf("Sleeping (%d) minutes ... Starting 2 at:%d:%d\n", minutesToSleep, config.start_hour, config.start_minute);
                 Thread.sleep(minutesToSleep * 60 * 1000);
                 continue;
-            }
-
-            if (!this.initialize()) {
-                return null;
             }
 
             for (String stockName : stockList) {

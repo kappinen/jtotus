@@ -9,12 +9,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.httpclient.params.HttpClientParams;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -28,6 +30,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 
 /**
  *
@@ -69,12 +72,26 @@ public class NordnetConnector {
             httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
         }
 
+        
         return httpclient;
+    }
+
+
+    private void dumpHeaders(HttpGet url) {
+        Header [] headers = url.getAllHeaders();
+        for (int i = 0;i < headers.length; i++ ) {
+            Header tmp = headers[i];
+            System.out.printf("Name: %s Value:%s\n", tmp.getName(), tmp.getValue());
+        }
     }
 
     public HttpGet getMethod(String url) {
         HttpGet httpget = new HttpGet(url);
-
+//        httpget.addHeader("Content-Type","application/x-www-form-urlencoded;charset=UTF-8");
+//        httpget.setHeader("Content-Type","text/html;charset=UTF-8");
+//        httpget.setHeader("Accept-Charset", "utf-8;q=0.7,*;q=0.7");
+//
+//        dumpHeaders(httpget);
         
         return httpget;
     }
@@ -92,32 +109,36 @@ public class NordnetConnector {
     public String fetchPage(HttpUriRequest url) {
 
         System.out.printf("fetching: %s:%s?%s\n",
-                url.getURI().getHost(),
-                url.getURI().getRawPath(),
-                url.getURI().getQuery());
+                          url.getURI().getHost(),
+                          url.getURI().getRawPath(),
+                          url.getURI().getQuery());
 
         StringBuilder respond = new StringBuilder();
         HttpResponse response = null;
 
 
         try {
+
             response = this.getClient().execute(url);
             HttpEntity entity = response.getEntity();
+            //Fixme: encoding!!!
+            return EntityUtils.toString(entity, "UTF-8");
 
-            
-            InputStream instream = entity.getContent();
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(instream));
-
-            // do something useful with the response
-          //  System.out.printf("done:%s : %s\n", url, response.getStatusLine().toString());
-            String line = null;
-
-            while ((line = reader.readLine()) != null) {
-                respond.append(line);
-            }
-
-            return respond.toString();
+//
+//            InputStream instream = entity.getContent();
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
+//
+//            // do something useful with the response
+//            System.out.printf("done:%s : %s content type:%s\n", url, response.getStatusLine().toString(), entity.getContentType());
+//            String line = null;
+//
+//
+//            while ((line = reader.readLine()) != null) {
+//                respond.append(line);
+//                //System.out.printf("got:%s\n", line);
+//            }
+//
+//            return respond.toString();
 
         } catch (IOException ex) {
             //Logger.getLogger(NordnetConnector.class.getName()).log(Level.SEVERE, null, ex);
@@ -134,7 +155,6 @@ public class NordnetConnector {
                                String pass) {
         try {
             HttpPost httpPost = new HttpPost(url);
-            
             
             List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
             nameValuePairs.add(new BasicNameValuePair("checksum", ""));

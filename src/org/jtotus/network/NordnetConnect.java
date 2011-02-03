@@ -16,9 +16,12 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.network;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -76,8 +79,31 @@ public class NordnetConnect implements NetworkTickConnector {
 
     }
 
+
+    public boolean authenticated() {
+        String loginPage = null;
+        if (connector==null) {
+            return false;
+        }
+
+        loginPage = connector.getPage(_PORTFOLIO_URL_);
+        if (loginPage == null) {
+            return false;
+        }
+
+        Document doc = Jsoup.parse(loginPage);
+        Elements elements = doc.select("title");
+
+
+        //FIXME: UTF-8 for httpclient!
+        if (elements.html().equals("Salkun yleisn&auml;kym&auml; - Nordnet")) {
+            return true;
+        }
+        
+        return false;
+    }
+
     private boolean connectAndAuth(String user, String password) {
-        boolean result = true;
         ArrayList<String> inputList = new ArrayList();
 
         connector = new NordnetConnector();
@@ -96,6 +122,10 @@ public class NordnetConnect implements NetworkTickConnector {
             inputList.add(elem.attr("name"));
         }
 
+        if (inputList.size()<2) {
+            System.err.printf("Failure: \n %s \n", loginPage);
+            return false;
+        }
 
         loginPage = connector.authenticate(_LOGIN_URL_,
                 inputList.get(inputList.size() - 2), user,
@@ -104,17 +134,8 @@ public class NordnetConnect implements NetworkTickConnector {
         if (loginPage == null) {
             return false;
         }
-        
-        loginPage = connector.getPage(_PORTFOLIO_URL_);
-        if (loginPage == null) {
-            return false;
-        }
 
-//            System.out.printf("Data from jsoup:%s last index:%s and :%s\n",
-//                        loginPage, inputList.get(inputList.size() - 2),
-//                        inputList.get(inputList.size() - 1));
-
-        return result;
+        return authenticated();
 
     }
 
@@ -144,7 +165,7 @@ public class NordnetConnect implements NetworkTickConnector {
         }
 
         String infoPage = connector.getPage("%s?identifier=%d&marketid=%d",
-                _STOCK_INFO_URL_, index.intValue(), 24);
+                                            _STOCK_INFO_URL_, index.intValue(), 24);
 
         //Try to reconnect to server once.
         if (infoPage == null) {
@@ -215,25 +236,17 @@ public class NordnetConnect implements NetworkTickConnector {
             System.out.printf("StockTick:%s\n",tick.toString());
         }else {
             System.err.printf("Data corruption in broker site size of elements? :%d for:%s\n", elements.size(), stockName);
-            //Clean
-            connector.close();
-            //Re-authenticate
-            this.connect();
+            if (!authenticated()) {
+                //Clean
+                connector.close();
+                //Re-authenticate
+                this.connect();
+            }
+            
             return null;
         }
 
         return tick;
     }
 
-    public static void main(String args[]) {
-
-        JtotusKeyRingPassword pass = JtotusKeyRingPassword.getInstance();
-        pass.putKeyRingPassword("test");
-
-        NordnetConnect test = new NordnetConnect();
-        test.connect();
-        test.getTick("Nokia Oyj");
-
-
-    }
 }
