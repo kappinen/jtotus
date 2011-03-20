@@ -24,6 +24,7 @@ public class JtotusPasswordGUI extends javax.swing.JDialog {
     public static final int RET_CANCEL = 0;
     /** A return status code - returned if OK button has been pressed */
     public static final int RET_OK = 1;
+    public static boolean firstClickCleanUp = true;
 
     /** Creates new form JtotusPasswordGUI */
     public JtotusPasswordGUI(java.awt.Frame parent, boolean modal) {
@@ -95,7 +96,10 @@ public class JtotusPasswordGUI extends javax.swing.JDialog {
         jLabel1.setName("jLabel1"); // NOI18N
         jPanel1.add(jLabel1);
 
+        jPasswordField1.setColumns(14);
+        jPasswordField1.setHorizontalAlignment(javax.swing.JTextField.LEFT);
         jPasswordField1.setText(resourceMap.getString("jPasswordField1.text")); // NOI18N
+        jPasswordField1.setToolTipText(resourceMap.getString("jPasswordField1.toolTipText")); // NOI18N
         jPasswordField1.setName("jPasswordField1"); // NOI18N
         jPasswordField1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -113,16 +117,14 @@ public class JtotusPasswordGUI extends javax.swing.JDialog {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addContainerGap(98, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
                         .addComponent(okButton, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cancelButton))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(cancelButton)))
                 .addContainerGap())
         );
 
@@ -132,8 +134,8 @@ public class JtotusPasswordGUI extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(43, 43, 43)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cancelButton)
                     .addComponent(okButton))
@@ -157,7 +159,12 @@ public class JtotusPasswordGUI extends javax.swing.JDialog {
     }//GEN-LAST:event_closeDialog
 
     private void jPasswordField1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPasswordField1MouseClicked
-        jPasswordField1.setText("");
+
+        if (firstClickCleanUp) {
+            firstClickCleanUp = false;
+            jPasswordField1.setText("");
+        }
+        
     }//GEN-LAST:event_jPasswordField1MouseClicked
 
     private void cancelButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancelButtonMousePressed
