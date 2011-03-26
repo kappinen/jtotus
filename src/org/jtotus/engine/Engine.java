@@ -170,13 +170,13 @@ public class Engine {
 
         BrokerWatcher watcher = new BrokerWatcher();
         //TickListenerPrinter printer = new TickListenerPrinter();
+
         //printer.sendEventsToGui();
         //watcher.addPattern("every tick=StockTick(stockName='Kemira')", printer);
         //watcher.addStatement("select * from StockTick", new TickListenerPrinter());
         //watcher.addStatement("select * from EsperEventRsi", new TickListenerPrinter());
 
 
-        //watcher.addStatement("select * from StockTick", new VrocGenerator());
         //addGeneratorToList("select * from StockTick", new ListenerRsiIndicator());
         addGeneratorToList("select * from StockTick", new VrocGenerator());
         addGeneratorToList("select * from StockTick", new AccdistGenerator());

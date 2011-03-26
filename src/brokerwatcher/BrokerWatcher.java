@@ -44,7 +44,7 @@ public class BrokerWatcher implements Callable, Runnable{
     private MethodFuture<String> futureTask = null;
     private HashMap<String, EPStatement> statements = null;
     private EPServiceProvider cep = null;
-    private final static String mainEngineName = "BrokerWatcher";
+    private static final String mainEngineName = "BrokerWatcher";
 
     public BrokerWatcher() {
         statements = new HashMap<String, EPStatement>();
@@ -91,11 +91,10 @@ public class BrokerWatcher implements Callable, Runnable{
 
     public Object call() {
 
+        EsperEventGenerator tickGenerator = new HistoryTicksFromFile(cep.getEPRuntime());
         //EsperEventGenerator tickGenerator = new TickGenerator(cep.getEPRuntime());
-        //EsperEventGenerator tickGenerator = new HistoryTicksFromFile(cep.getEPRuntime(), "today.txt");
-        EsperEventGenerator tickGenerator = new TickGenerator(cep.getEPRuntime());
         futureTask = new MethodFuture<String>(tickGenerator);
-        threadExecutor.execute(futureTask);
+        threadExecutor.submit(futureTask);
 
         return null;
     }

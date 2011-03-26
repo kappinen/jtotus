@@ -47,12 +47,12 @@ import javax.mail.internet.MimeMessage;
 
 public class JtotusGmailClient implements Callable {
 
-    public int port = 465;
-    public String host = "smtp.gmail.com";
-    public String defaultDomain = "gmail.com";
-    public String defaultLogin = null;
-    public String defaultPassword = null;
-    public String subject = "Jtotus stock report";
+    private int port = 465;
+    private String host = "smtp.gmail.com";
+    private String defaultDomain = "gmail.com";
+    private String defaultLogin = null;
+    private String defaultPassword = null;
+    private String subject = "Jtotus stock report";
     private StringBuffer mailBuffer = null;
     private boolean enableTimestamp = true;
 
@@ -95,7 +95,7 @@ public class JtotusGmailClient implements Callable {
         }
 
         if (login.lastIndexOf("@") == -1) {
-            login = login + "@" + defaultDomain;
+            login = login + "@" + getDefaultDomain();
         }
 
         Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
@@ -136,7 +136,7 @@ public class JtotusGmailClient implements Callable {
             message.setText(mesg);
 
             Transport transport = session.getTransport("smtp");
-            transport.connect(host, port, login, password);
+            transport.connect(getHost(), getPort(),login, password);
             transport.sendMessage(message, message.getAllRecipients());
             transport.close();
 
