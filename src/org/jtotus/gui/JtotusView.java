@@ -450,9 +450,8 @@ public class JtotusView extends FrameView {
        Engine engine = Engine.getInstance();
        Map<String, HashMap<String, TickInterface>> listOfGen = engine.getListOfGenerators();
        
-       Iterator<String> iter = listOfGen.keySet().iterator();
-       while(iter.hasNext()) {
-           String itemName = iter.next();
+       for(Map.Entry <String, HashMap<String, TickInterface>>entry : listOfGen.entrySet()) {
+           String itemName = entry.getKey();
            boolean itemFound = false;
            int count=indicatorsMenu.getItemCount();
            for (int i=0;i<count;i++) {
@@ -467,7 +466,7 @@ public class JtotusView extends FrameView {
                continue;
            }
 
-           HashMap<String, TickInterface> generator = listOfGen.get(itemName);
+           HashMap<String, TickInterface> generator = entry.getValue();
 
            //FIXME: add other statements
            Iterator<String> stmts = generator.keySet().iterator();

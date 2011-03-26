@@ -40,7 +40,7 @@ public class MainMethodConfig {
 
    public MainMethodConfig() {
 
-        inputPortfolio = new String("OMXHelsinki");
+        inputPortfolio = "OMXHelsinki";
 
         inputEndingDate = Calendar.getInstance();
         inputStartingDate = Calendar.getInstance();

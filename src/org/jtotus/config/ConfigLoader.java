@@ -16,7 +16,6 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.config;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
@@ -45,6 +44,8 @@ public class ConfigLoader<T> {
         if (config != null && configName.lastIndexOf(File.separator) != -1) {
             File dir = new File(configName.substring(0, configName.lastIndexOf(File.separator)));
 
+
+            //FIXME:...
             if (!dir.exists()) {
                 dir.mkdirs();
             }
@@ -58,11 +59,9 @@ public class ConfigLoader<T> {
 
         File dir = new File(configDir);
 
-
-        if (!dir.exists()) {
-            dir.mkdirs();
+        if (!dir.exists() && !dir.mkdirs()) {
             System.err.printf("directory %s does not exists\n", configDir);
-            return true;
+            return false;
         }
 
         if (!dir.isDirectory()) {
@@ -86,6 +85,7 @@ public class ConfigLoader<T> {
             //xstream.alias("methodConfig", MainMethodConfig.class);
             xstream.toXML(obj, fos);
             fos.flush();
+            fos.close();
         } catch (IOException ex) {
             Logger.getLogger(ConfigLoader.class.getName()).log(Level.SEVERE, null, ex);
             return false;
@@ -106,9 +106,11 @@ public class ConfigLoader<T> {
             fis = new FileInputStream(path);
            //xstream.alias("methodConfig", MainMethodConfig.class);
             retObj = (T) xstream.fromXML(fis);
-        } catch (FileNotFoundException ex) {
+            
+            fis.close();
+        } catch (IOException ex) {
             System.err.printf("Failure to read config:%s\n", configName);
-            //Logger.getLogger(ConfigLoader.class.getName()).log(Level.SEVERE, null, ex);
+//            Logger.getLogger(ConfigLoader.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
 

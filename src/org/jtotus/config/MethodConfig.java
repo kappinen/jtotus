@@ -31,7 +31,7 @@ import org.jtotus.common.Helper;
 public class MethodConfig implements Iterable<String>, Iterator<String>{
     private int iterPoint = 0;
     private GUIConfig config = null;
-    public String []StockNames = null;
+    public String []stockNames = null;
     public int day_period = 5; /*Default value */
     private Helper help = Helper.getInstance();
 
@@ -46,17 +46,17 @@ public class MethodConfig implements Iterable<String>, Iterator<String>{
             loader.storeConfig(config);
         }
 
-        StockNames = config.fetchStockNames();
+        stockNames = config.fetchStockNames();
 
         help.debug(this.getClass().getName(),
-                "Totally stocks:%d\n", StockNames.length-1);
+                "Totally stocks:%d\n", stockNames.length-1);
 
         day_period = config.day_period;
     }
 
 
     public String []fetchStockNames() {
-        return StockNames;
+        return stockNames;
     }
 
     public Date getStartTime() {
@@ -76,7 +76,7 @@ public class MethodConfig implements Iterable<String>, Iterator<String>{
     }
 
     public boolean hasNext() {
-        if(iterPoint < StockNames.length) {
+        if(iterPoint < stockNames.length) {
             return true;
         }
 
@@ -85,9 +85,9 @@ public class MethodConfig implements Iterable<String>, Iterator<String>{
 
     public String next() {
          help.debug(this.getClass().getName(),"Totally iterpoint:%d\n", iterPoint);
-        if (iterPoint < StockNames.length) {
-            help.debug(this.getClass().getName(), "Totally stocks3:%s\n", StockNames[iterPoint]);
-            String ret = StockNames[iterPoint];
+        if (iterPoint < stockNames.length) {
+            help.debug(this.getClass().getName(), "Totally stocks3:%s\n", stockNames[iterPoint]);
+            String ret = stockNames[iterPoint];
             iterPoint++;
             return ret;
         }

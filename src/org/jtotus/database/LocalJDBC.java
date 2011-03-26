@@ -91,6 +91,7 @@ public class LocalJDBC implements InterfaceDataBase {
 //            System.out.printf("Results:%d :%d :%s (%d)\n",results.getType(), results.findColumn(column), results.getMetaData().getColumnLabel(1),java.sql.Types.DOUBLE);
 
             results.next();
+            
             retValue = results.getBigDecimal(column);
 
         } catch (SQLException ex) {
@@ -100,6 +101,10 @@ public class LocalJDBC implements InterfaceDataBase {
 
 
         try {
+            if (pstm != null) {
+                pstm.close();
+            }
+
             if (!connection.isClosed())
                 connection.close();
         } catch (SQLException ex) {
@@ -134,6 +139,7 @@ public class LocalJDBC implements InterfaceDataBase {
             pstm.setDouble(3, value.doubleValue());
             pstm.execute();
 
+            pstm.close();
             connection.close();
         } catch (SQLException ex) {
             Logger.getLogger(LocalJDBC.class.getName()).log(Level.SEVERE, null, ex);
@@ -164,8 +170,11 @@ public class LocalJDBC implements InterfaceDataBase {
 
             ResultSet results = pstm.executeQuery();
             if (results.next()) {
+                pstm.close();
                 return results.getLong(1);
             }
+            
+            pstm.close();
 
         } catch (SQLException ex) {
             Logger.getLogger(LocalJDBC.class.getName()).log(Level.SEVERE, null, ex);

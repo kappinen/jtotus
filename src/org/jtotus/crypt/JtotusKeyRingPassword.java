@@ -73,7 +73,7 @@ public class JtotusKeyRingPassword {
 
     public synchronized void putKeyRingPassword(String password) {
         synchronized (passLock) {
-            keyRingPassword = new String(password);
+            keyRingPassword = password;
         }
     }
 

@@ -19,7 +19,6 @@
 
 package org.jtotus.methods;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -107,7 +106,6 @@ private void StatisticsForFreqPeriod(ArrayList<String> stockList,
                
         BigDecimal previousDay = null;
         BigDecimal searchDady = null;
-        SimpleDateFormat dayFormat = new SimpleDateFormat();
 
         int mainCurrent = 0;
         double localCurrent = 0;

@@ -53,7 +53,6 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
     private JDesktopPane desktopPane = null;
     private HashMap <String, String>titleMap = null;
     private GUIConfig uiConfig = null;
-    private int nextFreeColumn = 1;
     
 
 
@@ -92,8 +91,6 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
     }
 
     private void update(StockTick tick) {
-
-        DefaultTableModel model = (DefaultTableModel) portfolioTable.getModel();
 
         upsertValue(tick.getStockName(), "Price", tick.getLatestPrice());
         upsertValue(tick.getStockName(), "Buy", tick.getLatestBuy());

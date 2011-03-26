@@ -44,7 +44,7 @@ public class CacheServer {
 
     }
 
-    public static CacheServer getInstance() {
+    public synchronized static CacheServer getInstance() {
         if (cache == null) {
             cache = new CacheServer();
         }

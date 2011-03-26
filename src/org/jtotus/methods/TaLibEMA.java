@@ -70,7 +70,6 @@ public class TaLibEMA extends TaLibAbstract implements MethodEntry {
     private double avgSuccessRate = 0.0f;
     private int totalStocksAnalyzed = 0;
     //INPUTS TO METHOD:
-    public Calendar inputEndingDate = null;
     public Calendar inputStartingDate = null;
     public ConfTaLibEMA config = null;
     ConfigLoader<ConfTaLibEMA> configFile = null;

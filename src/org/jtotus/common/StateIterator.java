@@ -177,7 +177,7 @@ public class StateIterator {
 
     public Integer nextInteger(String paramName) {
         Double retDouble = this.nextDouble(paramName);
-        Integer nextInt = new Integer(retDouble.intValue());
+        Integer nextInt = Integer.valueOf(retDouble.intValue());
         return nextInt;
     }
 

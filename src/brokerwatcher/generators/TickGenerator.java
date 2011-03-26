@@ -18,6 +18,8 @@ package brokerwatcher.generators;
 
 import com.espertech.esper.client.EPRuntime;
 import brokerwatcher.eventtypes.StockTick;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.jtotus.config.ConfTickGenerator;
@@ -59,7 +61,6 @@ public class TickGenerator implements EsperEventGenerator {
         ConfigLoader<GUIConfig> stockLoader = new ConfigLoader<GUIConfig>("GUIConfig");
         stockList = stockLoader.getConfig().fetchStockNames();
 
-
         networkTicks = new NordnetConnect();
 
         return networkTicks.connect();
@@ -67,34 +68,18 @@ public class TickGenerator implements EsperEventGenerator {
 
     public String call() throws Exception {
         StockTick tick = null;
-        DateTimeZone timeZone = null;
-        DateTime time = null;
-        long startTickerTime = 0;
-        long endTickerTime = 0;
-
-        timeZone = DateTimeZone.forID(config.timeZone);
-
-        startTickerTime = config.start_hour * 60 + config.start_minute;
-        endTickerTime = config.end_hour * 60 + config.end_minute;
 
         if (!this.initialize()) {
+            System.err.printf("Failed to initialize..\n");
             return null;
         }
 
+        System.out.printf("Stargin TickGenerator..\n");
         while (true) {
-            time = new DateTime(timeZone);
-            if (time.getMinuteOfDay() < startTickerTime) {
-                long minutesToSleep = Math.abs(time.getMinuteOfDay() - startTickerTime);
-                System.out.printf("Sleeping (%d) minutes ... Starting 1 at:%d:%d\n", minutesToSleep, config.start_hour, config.start_minute);
-                Thread.sleep(minutesToSleep * 60 * 1000);
-                continue;
-            } else if (time.getMinuteOfDay() > endTickerTime) {
-                long minutesToSleep = 24 * 60 - time.getMinuteOfDay();
-                minutesToSleep += startTickerTime;
-                System.out.printf("Sleeping (%d) minutes ... Starting 2 at:%d:%d\n", minutesToSleep, config.start_hour, config.start_minute);
-                Thread.sleep(minutesToSleep * 60 * 1000);
-                continue;
-            }
+
+//            if (timeout()) {
+//                continue;
+//            }
 
             for (String stockName : stockList) {
                 tick = networkTicks.getTick(stockName);
@@ -107,4 +92,40 @@ public class TickGenerator implements EsperEventGenerator {
             Thread.sleep(config.sleepBetweenTicks);
         }
     }
+
+    private boolean timeout() {
+        DateTimeZone timeZone = null;
+        DateTime time = null;
+        long startTickerTime = 0;
+        long endTickerTime = 0;
+        boolean toContinue = false;
+
+        timeZone = DateTimeZone.forID(config.timeZone);
+        
+        startTickerTime = config.start_hour * 60 + config.start_minute;
+        endTickerTime = config.end_hour * 60 + config.end_minute;
+        try {
+            time = new DateTime(timeZone);
+            if (time.getMinuteOfDay() < startTickerTime) {
+
+                long minutesToSleep = Math.abs(time.getMinuteOfDay() - startTickerTime);
+                System.out.printf("Sleeping (%d) minutes ... Starting 1 at:%d:%d\n", minutesToSleep, config.start_hour, config.start_minute);
+                Thread.sleep(minutesToSleep * 60 * 1000);
+                toContinue = true;
+
+            } else if (time.getMinuteOfDay() > endTickerTime) {
+                long minutesToSleep = 24 * 60 - time.getMinuteOfDay();
+                minutesToSleep += startTickerTime;
+                System.out.printf("Sleeping (%d) minutes ... Starting 2 at:%d:%d\n", minutesToSleep, config.start_hour, config.start_minute);
+                Thread.sleep(minutesToSleep * 60 * 1000);
+                toContinue = true;
+            }
+
+        } catch (InterruptedException ex) {
+            Logger.getLogger(TickGenerator.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return toContinue;
+    }
+
 }

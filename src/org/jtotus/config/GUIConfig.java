@@ -29,7 +29,7 @@ import org.jtotus.methods.MethodEntry;
  */
 public class GUIConfig {
     public StockNames names = null;
-    public String []StockNames = null;
+    public String []stockNames = null;
 
     public String gmailLogin = null;
     public String gmailPassword = null;
@@ -47,7 +47,7 @@ public class GUIConfig {
             names = new StockNames();
         }
         
-        StockNames = names.getNames();
+        stockNames = names.getNames();
     }
 
     public String []fetchStockNames() {

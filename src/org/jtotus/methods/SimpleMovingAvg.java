@@ -65,7 +65,7 @@ public class SimpleMovingAvg implements MethodEntry {
         Calendar calendar = null;
 
         //FIXME:ensure that asked period will be fetched
-        String[] stocks = config.StockNames;
+        String[] stocks = config.stockNames;
         for (int i = stocks.length - 1; i >= 0; i--) {
             calendar = Calendar.getInstance();
             calendar.setTime(date);

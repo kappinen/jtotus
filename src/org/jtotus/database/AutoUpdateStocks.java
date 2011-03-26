@@ -17,8 +17,6 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 package org.jtotus.database;
 
 import java.util.Calendar;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jtotus.common.Helper;
 import org.jtotus.common.StockType;
 
@@ -29,8 +27,6 @@ import org.jtotus.common.StockType;
 public class AutoUpdateStocks implements Runnable {
 
     private String stockName = null;
-    private Helper help = Helper.getInstance();
-    private int maxSearch = 30; //Maximum search of moth
     private LocalJDBC javadb = null;
     private int stepToRemove = 0;
 

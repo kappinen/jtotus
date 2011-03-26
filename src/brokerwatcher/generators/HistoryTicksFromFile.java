@@ -99,6 +99,8 @@ public class HistoryTicksFromFile implements EsperEventGenerator {
             Thread.sleep(100);
         }
 
+        in.close();
+
         return null;
     }
 

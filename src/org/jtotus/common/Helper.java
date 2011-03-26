@@ -45,7 +45,7 @@ public class Helper {
 
     }
 
-    public static Helper getInstance() {
+    public synchronized static Helper getInstance() {
 
         if (help == null) {
             help = new Helper();
@@ -53,7 +53,7 @@ public class Helper {
         return help;
     }
 
-    public void setDebugLvl(int lvl){
+    public synchronized void setDebugLvl(int lvl){
         debugLvl = lvl;
     }
 

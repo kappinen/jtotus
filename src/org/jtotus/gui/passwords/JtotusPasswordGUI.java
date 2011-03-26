@@ -111,6 +111,11 @@ public class JtotusPasswordGUI extends javax.swing.JDialog {
                 jPasswordField1FocusGained(evt);
             }
         });
+        jPasswordField1.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jPasswordField1KeyPressed(evt);
+            }
+        });
         jPanel1.add(jPasswordField1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -123,7 +128,7 @@ public class JtotusPasswordGUI extends javax.swing.JDialog {
                     .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(okButton, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(cancelButton)))
                 .addContainerGap())
         );
@@ -187,6 +192,15 @@ public class JtotusPasswordGUI extends javax.swing.JDialog {
     private void jPasswordField1FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jPasswordField1FocusGained
         
     }//GEN-LAST:event_jPasswordField1FocusGained
+
+    private void jPasswordField1KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jPasswordField1KeyPressed
+        
+        if (evt.getKeyCode() == 10) {
+            JtotusKeyRingPassword pass =  JtotusKeyRingPassword.getInstance();
+            pass.putKeyRingPassword(new String(jPasswordField1.getPassword()).trim());
+            doClose(RET_OK);
+        }
+    }//GEN-LAST:event_jPasswordField1KeyPressed
 
     private void doClose(int retStatus) {
         returnStatus = retStatus;

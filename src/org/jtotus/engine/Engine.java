@@ -70,7 +70,7 @@ public class Engine {
         return listOfGenerators;
     }
 
-    private MethodResultsPrinter resultsPrinter = null;
+    private MethodResultsPrinter  resultsPrinter = null;
 
     private void prepareMethodsList() {
         // Available methods
@@ -114,9 +114,13 @@ public class Engine {
         methodList = new LinkedList<MethodEntry>();
 
         this.prepareMethodsList();
+
+        //Load ScriptEngine for JavaScript
+        StartUpLoader loader = StartUpLoader.getInstance();
+        loader.load("js");
     }
 
-    public static Engine getInstance() {
+    public synchronized static Engine getInstance() {
 
         if (singleton == null) {
             singleton = new Engine();
@@ -143,7 +147,7 @@ public class Engine {
         MethodConfig config = new MethodConfig();
 
         //Auto-update stock values
-        String[] stocks = config.StockNames;
+        String[] stocks = config.stockNames;
         for (int i = stocks.length - 1; i >= 0; i--) {
             Thread updateThread = new Thread(new AutoUpdateStocks(stocks[i]));
             updateThread.start();
@@ -269,7 +273,7 @@ public class Engine {
 
     }
 
-    public void registerResultsPrinter(MethodResultsPrinter printer) {
+    public synchronized void registerResultsPrinter(MethodResultsPrinter printer) {
         System.out.printf("Registering result printer\n");
         resultsPrinter = printer;
 

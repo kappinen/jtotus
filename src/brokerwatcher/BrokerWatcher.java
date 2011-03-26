@@ -92,7 +92,7 @@ public class BrokerWatcher implements Callable, Runnable{
     public Object call() {
 
         //EsperEventGenerator tickGenerator = new TickGenerator(cep.getEPRuntime());
-        //EsperEventGenerator tickGenerator = new HistoryTicksFromFile(cep.getEPRuntime(), "7.01.2010Ticks.txt");
+        //EsperEventGenerator tickGenerator = new HistoryTicksFromFile(cep.getEPRuntime(), "today.txt");
         EsperEventGenerator tickGenerator = new TickGenerator(cep.getEPRuntime());
         futureTask = new MethodFuture<String>(tickGenerator);
         threadExecutor.execute(futureTask);
