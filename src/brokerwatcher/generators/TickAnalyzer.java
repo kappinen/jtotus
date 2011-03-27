@@ -42,6 +42,7 @@ public abstract class TickAnalyzer implements TickInterface{
         config = loader.getConfig();
         if (config == null) {
             config = new ConfSimpleTechnicalIndicators();
+            loader.storeConfig(config);
         }
     }
 
@@ -62,9 +63,18 @@ public abstract class TickAnalyzer implements TickInterface{
         eps.addListener(this);
     }
     
-    public void subscribeForTicks() {
+    public boolean subscribeForTicks() {
         eps = getProvider().getEPAdministrator().createEPL("select * from StockTick");
         eps.addListener(this);
+        
+        return eps.isStarted();
+    }
+
+    public boolean unsubscribeForTicks() {
+        eps.removeAllListeners();
+        eps.destroy();
+
+        return eps.isDestroyed();
     }
 
     private EPRuntime getEngine() {

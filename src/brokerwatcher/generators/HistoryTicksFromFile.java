@@ -60,7 +60,7 @@ public class HistoryTicksFromFile implements EsperEventGenerator {
         this.debug = debug;
     }
 
-    private class NameComparator implements Comparator {
+    private static class NameComparator implements Comparator {
 
         public int compare(Object o1, Object o2) {
             int retValue = 0;
@@ -86,13 +86,8 @@ public class HistoryTicksFromFile implements EsperEventGenerator {
             }
 
             retValue += Integer.parseInt(splitName1[0]) - Integer.parseInt(splitName2[0]);
-            if (retValue != 0) {
-                return retValue;
-            }
-
-            return 1;
+            return retValue;
         }
-
     }
 
     private void readFileNames() {
@@ -151,6 +146,7 @@ public class HistoryTicksFromFile implements EsperEventGenerator {
         for (int fileIndx = 0; fileIndx < filesWithTicks.size(); fileIndx++) {
             fileWithTicks = filesWithTicks.get(fileIndx);
 
+            System.out.printf("Starting to read ticks from %s\n", fileWithTicks);
             BufferedReader in = new BufferedReader(new FileReader(pathToTicks + File.separator + fileWithTicks));
 
             while ((line = in.readLine()) != null) {
@@ -185,9 +181,13 @@ public class HistoryTicksFromFile implements EsperEventGenerator {
                     }
                 }
 
+                if (tick.getVolume() == 0 && tick.getTradesSum() == 0) {
+                        continue;
+                    }
+                
                 esperRuntime.sendEvent(tick);
                 //Thread.sleep(config.sleepBetweenTicks / 10);
-                Thread.sleep(100);
+                Thread.sleep(5);
             }
 
             System.out.printf("Done with %s\n", fileWithTicks);

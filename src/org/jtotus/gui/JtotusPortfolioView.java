@@ -132,16 +132,16 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
     private void upsertValue(String stockName, String columnName, Object value) {
         int columnIndex = -1;
         int rowIndex = -1;
-        
+
         try {
             columnIndex = portfolioTable.getColumnModel().getColumnIndex(columnName);
-        }catch(IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ex) {
             columnIndex = insertColumn(columnName);
         }
 
-        for (int count=portfolioTable.getRowCount(), i=0; i < count;i++) {
+        for (int count = portfolioTable.getRowCount(), i = 0; i < count; i++) {
             Object rowValue = portfolioTable.getModel().getValueAt(i, 0);
-            if (rowValue != null && rowValue.toString().equalsIgnoreCase(stockName)){
+            if (rowValue != null && rowValue.toString().equalsIgnoreCase(stockName)) {
                 rowIndex = i;
                 break;
             }
@@ -150,7 +150,7 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
         if (rowIndex == -1) {
             rowIndex = insertRow(stockName);
         }
-        
+
         portfolioTable.getModel().setValueAt(value, rowIndex, columnIndex);
     }
 

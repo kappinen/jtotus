@@ -13,7 +13,8 @@ import com.espertech.esper.client.UpdateListener;
  */
 public interface TickInterface extends UpdateListener{
 
-    public void subscribeForTicks();
+    public boolean subscribeForTicks();
+    public boolean unsubscribeForTicks();
     public void statementForEvents(String stmt);
     
     public String getName();

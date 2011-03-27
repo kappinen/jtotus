@@ -46,7 +46,7 @@ import org.jtotus.config.MethodConfig;
 public class PortfolioDecision implements Runnable {
 
     private Helper help = null;
-    private LinkedList<MethodEntry> threadList;
+    private LinkedList<MethodEntry> threadList = null;
     private ExecutorService threadExecutor = null;
 
     private void init() {
@@ -79,11 +79,6 @@ public class PortfolioDecision implements Runnable {
 
     public boolean setList(LinkedList<MethodEntry> threads) {
 
-
-        if (threadList == null) {
-            threadList = new LinkedList<MethodEntry>();
-        }
-
         help.debug("PortfolioDecision", "setting list with size:%d\n",
                 threads.size());
 
@@ -111,8 +106,7 @@ public class PortfolioDecision implements Runnable {
 
         help.debug("PortfolioDecision", "Dispatcher started..\n");
 
-        if (threadList == null
-                || threadList.isEmpty()) {
+        if (threadList.isEmpty()) {
             System.err.printf("Not tasks for Portfolio Decision\n");
         }
 

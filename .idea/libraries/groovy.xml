@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="groovy">
+    <CLASSES>
+      <root url="jar:///usr/local/netbeans-6.9.1/groovy/modules/ext/groovy-all.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

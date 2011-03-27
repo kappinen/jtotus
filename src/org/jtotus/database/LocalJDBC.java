@@ -90,26 +90,29 @@ public class LocalJDBC implements InterfaceDataBase {
 
 //            System.out.printf("Results:%d :%d :%s (%d)\n",results.getType(), results.findColumn(column), results.getMetaData().getColumnLabel(1),java.sql.Types.DOUBLE);
 
-            results.next();
-            
-            retValue = results.getBigDecimal(column);
+            if (results.next()) {
+                retValue = results.getBigDecimal(column);
+            }
 
         } catch (SQLException ex) {
             System.err.printf("LocalJDBC Unable to find date for:'%s' from'%s' Time"+date.getTime()+"\n", column,tableName);
-             //   Logger.getLogger(LocalJDBC.class.getName()).log(Level.SEVERE, null, ex);
-        }
+            //   Logger.getLogger(LocalJDBC.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                if (pstm != null) {
+                    pstm.close();
+                }
 
-
-        try {
-            if (pstm != null) {
-                pstm.close();
+                if (connection != null && !connection.isClosed()) {
+                    connection.close();
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(LocalJDBC.class.getName()).log(Level.SEVERE, null, ex);
             }
-
-            if (!connection.isClosed())
-                connection.close();
-        } catch (SQLException ex) {
-            Logger.getLogger(LocalJDBC.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+
+        
 
         return retValue;
     }
@@ -139,10 +142,17 @@ public class LocalJDBC implements InterfaceDataBase {
             pstm.setDouble(3, value.doubleValue());
             pstm.execute();
 
-            pstm.close();
             connection.close();
         } catch (SQLException ex) {
             Logger.getLogger(LocalJDBC.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (pstm != null) {
+                try {
+                    pstm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(LocalJDBC.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
 
     }
@@ -159,10 +169,12 @@ public class LocalJDBC implements InterfaceDataBase {
     }
 
     public long entryExists(Connection con, String stockName, Calendar date) {
+        long retValue = 0;
+        PreparedStatement pstm = null;
         try {
             String statement = "SELECT ID FROM " + this.normTableName(stockName) + " WHERE DATE=?";
 
-            PreparedStatement pstm = con.prepareStatement(statement);
+            pstm = con.prepareStatement(statement);
 
             java.sql.Date sqlDate = new java.sql.Date(date.getTimeInMillis());
 
@@ -170,16 +182,23 @@ public class LocalJDBC implements InterfaceDataBase {
 
             ResultSet results = pstm.executeQuery();
             if (results.next()) {
-                pstm.close();
-                return results.getLong(1);
+                retValue = results.getLong(1);
             }
             
-            pstm.close();
-
         } catch (SQLException ex) {
             Logger.getLogger(LocalJDBC.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (pstm != null) {
+                try {
+                    pstm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(LocalJDBC.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            
         }
-        return -1;
+        
+        return retValue;
     }
 
 

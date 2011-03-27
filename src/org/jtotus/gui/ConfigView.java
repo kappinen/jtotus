@@ -92,19 +92,18 @@ public class ConfigView extends javax.swing.JDialog {
 
     }
 
+     // Implement the one method defined by TableCellEditor.
+     public Component getTableCellEditorComponent(javax.swing.JTable table,
+                                                  Object value,
+                                                  boolean isSelected,
+                                                  int row, int column) {
+//         DateFieldTableEditor editor = new DateFieldTableEditor();
+//         if (value.getClass() == Date.class);
 
-    // Implement the one method defined by TableCellEditor.
-    public Component getTableCellEditorComponent(javax.swing.JTable table, Object value,
-            boolean isSelected, int row, int column) {
-        DateFieldTableEditor editor = new DateFieldTableEditor();
-        if(value.getClass() == Date.class)
-            ;
-        
-        currentDate = (Date)value;
-        spinner.setValue(value);
-        return spinner;
-
-    }
+         currentDate = (Date) value;
+         spinner.setValue(value);
+         return spinner;
+     }
 
 }
 

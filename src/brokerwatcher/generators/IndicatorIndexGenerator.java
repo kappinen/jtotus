@@ -26,7 +26,7 @@ import java.util.Iterator;
  *
  * @author Evgeni Kappinen
  */
-public class IndicatorIndexGenerator extends TickAnalyzer{
+public class IndicatorIndexGenerator extends TickAnalyzer {
     private String indicator =  "Vroc";
     private HashMap <String, Double>indicatorMap = new HashMap <String, Double>();
 

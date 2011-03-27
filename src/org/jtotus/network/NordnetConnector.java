@@ -151,7 +151,7 @@ public class NordnetConnector implements BrokerConnector {
 //        httpget.setHeader("Accept-Charset", "utf-8;q=0.7,*;q=0.7");
 //        httpget.setHeader("Keep-Alive", "9000");
 //
-        dumpHeaders(httpget);
+//        dumpHeaders(httpget);
         
         return httpget;
     }

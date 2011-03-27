@@ -25,6 +25,7 @@ public class JtotusSetPasswordsGUI extends javax.swing.JDialog {
     public static final int RET_CANCEL = 0;
     /** A return status code - returned if OK button has been pressed */
     public static final int RET_OK = 1;
+    
 
     /** Creates new form JtotusSetPasswordsGUI */
     public JtotusSetPasswordsGUI(java.awt.Frame parent, boolean modal) {
@@ -208,18 +209,33 @@ public class JtotusSetPasswordsGUI extends javax.swing.JDialog {
     }//GEN-LAST:event_cancelButtonMousePressed
 
     private void okButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_okButtonMouseClicked
-
+        String forComparison = null;
         //Store Password
         ConfigLoader<GUIConfig> loader = new ConfigLoader<GUIConfig>("GUIConfig");
         GUIConfig config = loader.getConfig();
         
-        config.setBrokerLogin(brokerLoginTextField.getText());
-        String brokerPass = new String(brokerPasswordTextField.getPassword()).trim();
-        config.setBrokerPassword(brokerPass);
+        forComparison = brokerLoginTextField.getText();
+        if (!forComparison.equals("Login") && forComparison.length() != 0){
+            config.setBrokerLogin(forComparison);
+        }
+
+        forComparison = new String(brokerPasswordTextField.getPassword()).trim();
+        if (!forComparison.equals("Password") && forComparison.length() != 0){
+            config.setBrokerPassword(forComparison);
+        }
+
+
+        forComparison = gmailLoginTextField.getText();
+        if (!forComparison.equals("Login") && forComparison.length() != 0){
+            config.setGmailLogin(forComparison);
+        }
+
+        forComparison = new String(gmailPasswordTextField.getPassword()).trim();;
+        if (!forComparison.equals("Password") && forComparison.length() != 0){
+            config.setGmailPassword(forComparison);
+        }
         
-        config.setGmailLogin(gmailLoginTextField.getText());
-        String gmailPass = new String(gmailPasswordTextField.getPassword()).trim();
-        config.setGmailPassword(gmailPass);
+        
 
         loader.storeConfig(config);
         

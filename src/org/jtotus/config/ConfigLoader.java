@@ -44,7 +44,6 @@ public class ConfigLoader<T> {
         if (config != null && configName.lastIndexOf(File.separator) != -1) {
             File dir = new File(configName.substring(0, configName.lastIndexOf(File.separator)));
 
-
             //FIXME:...
             if (!dir.exists()) {
                 dir.mkdirs();
@@ -85,10 +84,15 @@ public class ConfigLoader<T> {
             //xstream.alias("methodConfig", MainMethodConfig.class);
             xstream.toXML(obj, fos);
             fos.flush();
-            fos.close();
         } catch (IOException ex) {
             Logger.getLogger(ConfigLoader.class.getName()).log(Level.SEVERE, null, ex);
             return false;
+        } finally {
+            try {
+                fos.close();
+            } catch (IOException ex) {
+                Logger.getLogger(ConfigLoader.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
         return true;
