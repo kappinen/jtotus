@@ -28,6 +28,13 @@ public class IndicatorData {
     public String stockName = null;
     public String indicatorName = null;
     public double indicatorValue = 0.0;
+    public DrawType type = DrawType.PORTFOLIO_TABLE;
+
+    public static enum DrawType {
+        PORTFOLIO_TABLE,
+        STANDALONE_INDICATOR_TABLE
+    }
+
 
     public String getIndicatorName() {
         return indicatorName;

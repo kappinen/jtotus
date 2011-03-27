@@ -63,7 +63,12 @@ public class IndicatorIndexGenerator extends TickAnalyzer {
             indicatorMap.put(data.getStockName(), data.getIndicatorValue());
         }
 
-        sendEvent("Index"+indicator, calculateIndex());
+        IndicatorData data = new IndicatorData();
+        data.setStockName("Index"+indicator);
+        data.setIndicatorValue(calculateIndex());
+        data.setIndicatorName(getName());
+        data.type = IndicatorData.DrawType.STANDALONE_INDICATOR_TABLE;
+        getEngine().sendEvent(data);
     }
 
     public String getName() {

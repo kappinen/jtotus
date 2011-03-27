@@ -121,7 +121,7 @@ public class PortfolioDecision implements Runnable {
             if (task.isCallable()) {
                 //Callable<MethodResults> callableTmp = task;
                 futureTask = new MethodFuture<MethodResults>(task);
-                methodListener = new org.jtotus.threads.MethodListener();
+                methodListener = new MethodListener();
                 futureTask.addListener(methodListener);
 
                 threadExecutor.execute(futureTask);

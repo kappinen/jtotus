@@ -28,6 +28,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
+import java.util.Vector;
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.JMenuItem;
@@ -49,11 +50,13 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
 
     private JScrollPane jScrollPane4 = null;
     private JTable portfolioTable = null;
+    private JTable standAloneTable = null;
     DefaultTableModel portfolioModel = null;
     private JDesktopPane desktopPane = null;
     private HashMap <String, String>titleMap = null;
     private GUIConfig uiConfig = null;
-    
+    private boolean debug = true;
+    JInternalFrame standAloneFrame = new JInternalFrame();
 
 
     public void loadStoredView() {
@@ -74,7 +77,7 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
         String listOfStocks[] = uiConfig.fetchStockNames();
         
         for (int i = 0; i < listOfStocks.length; i++) {
-            insertRow(listOfStocks[i]);
+            insertRow(portfolioTable, listOfStocks[i]);
         }
 
 //            portfolioModel.setValueAt(listOfStocks[i], i, 0);
@@ -92,55 +95,69 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
 
     private void update(StockTick tick) {
 
-        upsertValue(tick.getStockName(), "Price", tick.getLatestPrice());
-        upsertValue(tick.getStockName(), "Buy", tick.getLatestBuy());
-        upsertValue(tick.getStockName(), "Sell", tick.getLatestSell());
-        upsertValue(tick.getStockName(), "High", tick.getLatestHighest());
-        upsertValue(tick.getStockName(), "Low", tick.getLatestLowest());
-        upsertValue(tick.getStockName(), "Volume", tick.getVolume());
-        upsertValue(tick.getStockName(), "TradeSum", tick.getTradesSum());
-        upsertValue(tick.getStockName(), "Time", tick.getTime());
+        upsertValue(portfolioTable, tick.getStockName(), "Price", tick.getLatestPrice());
+        upsertValue(portfolioTable, tick.getStockName(), "Buy", tick.getLatestBuy());
+        upsertValue(portfolioTable, tick.getStockName(), "Sell", tick.getLatestSell());
+        upsertValue(portfolioTable, tick.getStockName(), "High", tick.getLatestHighest());
+        upsertValue(portfolioTable, tick.getStockName(), "Low", tick.getLatestLowest());
+        upsertValue(portfolioTable, tick.getStockName(), "Volume", tick.getVolume());
+        upsertValue(portfolioTable, tick.getStockName(), "TradeSum", tick.getTradesSum());
+        upsertValue(portfolioTable, tick.getStockName(), "Time", tick.getTime());
 
     }
 
-   private int insertRow(String columnHeader) {
-       Object []row = new Object[portfolioTable.getColumnCount()+1];
-       row[0] = columnHeader;
-       DefaultTableModel tableModel= (DefaultTableModel) portfolioTable.getModel();
-       tableModel.addRow(row);
+   private int insertRow(JTable table, String columnHeader) {
+       if (debug) {
+            System.out.printf("Inserting row:%s row count:%d\n",
+                    columnHeader, table.getRowCount());
+        }
+
+//       Object []row = new Object[table.getColumnCount()+1];
+//       row[0] = columnHeader;
+
+       DefaultTableModel tableModel= (DefaultTableModel) table.getModel();
+       Vector<String> vector = new Vector<String>();
+       vector.addElement(columnHeader);
        
-       return portfolioTable.getRowCount();
+       tableModel.addRow(vector);
+
+       if (debug) {
+            System.out.printf("After inserting row:%s row count:%d\n",
+                    columnHeader, table.getRowCount());
+        }
+       return table.getRowCount() - 1;
    }
 
 
-    private int insertColumn(String columnHeader) {
+    private int insertColumn(JTable table, String columnHeader) {
 
-        DefaultTableModel model = (DefaultTableModel)portfolioTable.getModel();
+        if (debug) {
+            System.out.printf("Inserting column:%s\n", columnHeader);
+        }
+
+        DefaultTableModel model = (DefaultTableModel)table.getModel();
         TableColumn column = new TableColumn(model.getColumnCount());
 
-        if (portfolioTable.getAutoCreateColumnsFromModel()) {
+        if (table.getAutoCreateColumnsFromModel()) {
             throw new IllegalStateException();
         }
 
         column.setHeaderValue(columnHeader);
-        portfolioTable.addColumn(column);
+        table.addColumn(column);
         model.addColumn(column);
 
-        return portfolioTable.getColumnModel().getColumnIndex(columnHeader);
+//        Vector vector = model.getDataVector();
+//        vector.addElement(columnHeader);
+
+        return table.getColumnModel().getColumnIndex(columnHeader);
     }
 
-    private void upsertValue(String stockName, String columnName, Object value) {
+    private void upsertValue(JTable table, String stockName, String columnName, Object value) {
         int columnIndex = -1;
         int rowIndex = -1;
 
-        try {
-            columnIndex = portfolioTable.getColumnModel().getColumnIndex(columnName);
-        } catch (IllegalArgumentException ex) {
-            columnIndex = insertColumn(columnName);
-        }
-
-        for (int count = portfolioTable.getRowCount(), i = 0; i < count; i++) {
-            Object rowValue = portfolioTable.getModel().getValueAt(i, 0);
+        for (int count = table.getRowCount(), i = 0; i < count; i++) {
+            Object rowValue = table.getModel().getValueAt(i, 0);
             if (rowValue != null && rowValue.toString().equalsIgnoreCase(stockName)) {
                 rowIndex = i;
                 break;
@@ -148,10 +165,17 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
         }
 
         if (rowIndex == -1) {
-            rowIndex = insertRow(stockName);
+            rowIndex = insertRow(table, stockName);
         }
 
-        portfolioTable.getModel().setValueAt(value, rowIndex, columnIndex);
+        try {
+            columnIndex = table.getColumnModel().getColumnIndex(columnName);
+        } catch (IllegalArgumentException ex) {
+            columnIndex = insertColumn(table, columnName);
+        }
+
+        table.addNotify();
+        table.getModel().setValueAt(value, rowIndex, columnIndex);
     }
 
     protected void monitorStock() {
@@ -248,18 +272,54 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
         }
     }
 
+    private void initStandAloneTable() {
 
+        if (standAloneTable != null) {
+            return;
+        }
 
+        
+        DefaultTableModel standAloneTableModel = null;
+        standAloneTable = new JTable();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        standAloneTableModel = new DefaultTableModel(0,1);
 
+        standAloneTable.setModel(standAloneTableModel);
+        standAloneTable.setName("Indicators");
+        standAloneTable.setColumnSelectionAllowed(true);
+        standAloneTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        standAloneTable.setAutoCreateColumnsFromModel(false);
+        standAloneTable.setVisible(true);
+
+        standAloneFrame.setClosable(true);
+        standAloneFrame.setIconifiable(true);
+        standAloneFrame.setMaximizable(true);
+        standAloneFrame.setDoubleBuffered(true);
+        standAloneFrame.setInheritsPopupMenu(true);
+        standAloneFrame.setLayer(5);
+        standAloneFrame.setName("Stand-Alone Indicators"); // NOI18N
+        standAloneFrame.setOpaque(false);
+        standAloneFrame.setBounds(10, 10, 250, 150);
+        standAloneFrame.setResizable(true);
+
+        standAloneFrame.setVisible(true);
+        standAloneFrame.setTitle("Stand-Alone Indicators");
+
+        jScrollPane4.setViewportView(standAloneTable);
+        standAloneFrame.add(jScrollPane4);
+
+        standAloneFrame.setVisible(true);
+        
+        desktopPane.add(standAloneFrame, javax.swing.JLayeredPane.POPUP_LAYER);
+    }
 
 
     public void initialize() {
         jScrollPane4 = new javax.swing.JScrollPane();
         portfolioTable = new JTable();
+        
         portfolioModel = new DefaultTableModel(0,1);
-//                new Object[][]{ new Object[100],}, new Object[100]
-//        );
-
+        
         portfolioTable.setModel(portfolioModel);
         portfolioTable.setName("portfolioTable"); // NOI18N
         portfolioTable.setColumnSelectionAllowed(true);
@@ -285,7 +345,6 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
         titleMap.put("Volume", "volume");
         titleMap.put("TradeSum", "tradesSum");
         titleMap.put("Time", "time");
-        
 
         EPServiceProvider provider = BrokerWatcher.getMainEngine();
         EPStatement eps = provider.getEPAdministrator().createEPL("select * from StockTick");
@@ -296,7 +355,7 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
     }
 
     public void update(EventBean[] ebs, EventBean[] ebs1) {
-
+        JTable tableToUpdate = null;
 
         for (int i = 0; i < ebs.length; i++) {
             if (ebs[i].getEventType().getName().equals("StockTick")) {
@@ -306,7 +365,19 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
                 }
             }else if (ebs[i].getEventType().getName().equals("IndicatorData")){
                 IndicatorData data = (IndicatorData) ebs[i].getUnderlying();
-                upsertValue(data.getStockName(), data.getIndicatorName(), data.getIndicatorValue());
+                switch(data.type) {
+                    case STANDALONE_INDICATOR_TABLE:
+                        initStandAloneTable();
+                        tableToUpdate = standAloneTable;
+                        break;
+                     case PORTFOLIO_TABLE:
+                     default:
+                        tableToUpdate = portfolioTable;
+                        break;
+                }
+                
+                upsertValue(tableToUpdate, data.getStockName(),
+                            data.getIndicatorName(), data.getIndicatorValue());
             }
         }
 

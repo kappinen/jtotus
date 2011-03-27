@@ -22,7 +22,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import org.jtotus.config.ConfTickGenerator;
@@ -187,7 +186,7 @@ public class HistoryTicksFromFile implements EsperEventGenerator {
                 
                 esperRuntime.sendEvent(tick);
                 //Thread.sleep(config.sleepBetweenTicks / 10);
-                Thread.sleep(5);
+                Thread.sleep(40);
             }
 
             System.out.printf("Done with %s\n", fileWithTicks);

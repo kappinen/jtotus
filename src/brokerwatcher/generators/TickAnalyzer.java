@@ -77,7 +77,7 @@ public abstract class TickAnalyzer implements TickInterface{
         return eps.isDestroyed();
     }
 
-    private EPRuntime getEngine() {
+    public EPRuntime getEngine() {
 
         if (esperRuntime == null) {
             esperRuntime = BrokerWatcher.getMainEngine().getEPRuntime();
