@@ -178,21 +178,21 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
         table.getModel().setValueAt(value, rowIndex, columnIndex);
     }
 
-    protected void monitorStock() {
+    protected void monitorStock(JTable table) {
         
-        int[] selectedRows = portfolioTable.getSelectedRows();
+        int[] selectedRows = table.getSelectedRows();
 
 
         for (int row = 0; row < selectedRows.length; row++) {
-            int[] selectedColumns = portfolioTable.getSelectedColumns();
+            int[] selectedColumns = table.getSelectedColumns();
             for (int col = 0; col < selectedColumns.length; col++) {
                 
-                if (!portfolioTable.isCellSelected(selectedRows[row], selectedColumns[col]) ||
+                if (!table.isCellSelected(selectedRows[row], selectedColumns[col]) ||
                     selectedColumns[col] == 0) {
                     continue;
                 }
 
-                String stockName = portfolioTable.getModel().getValueAt(selectedRows[row], 0).toString();
+                String stockName = table.getModel().getValueAt(selectedRows[row], 0).toString();
                 JInternalFrame interFrame = new JInternalFrame();
                 interFrame.setClosable(true);
                 interFrame.setIconifiable(true);
@@ -209,8 +209,9 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
 
                 DynamicCharting dynChart = new DynamicCharting();
 
-                String colName = (String) portfolioTable.getColumnModel().getColumn(selectedColumns[col]).getHeaderValue();
+                String colName = (String) table.getColumnModel().getColumn(selectedColumns[col]).getHeaderValue();
                 String valueType = titleMap.get(colName);
+                
 
                 if (valueType != null) {
                     dynChart.registerForEvents("select " + valueType + " as valueForGUI from StockTick where stockName='" + stockName + "'");
@@ -231,8 +232,12 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
 
     //http://download.oracle.com/javase/tutorial/uiswing/components/menu.html
     class PopupListener extends MouseAdapter {
-
+        JTable table = null;
         JPopupMenu popup = null;
+
+        public PopupListener(JTable table) {
+            this.table =  table;
+        }
 
         public JPopupMenu getStockPortfolioPopupMenu() {
             if (popup != null) {
@@ -241,14 +246,13 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
 
             popup = new JPopupMenu();
             JMenuItem item = new JMenuItem("Monitor");
-
             popup.add(item);
 
             item.addActionListener(new ActionListener() {
 
                 @Override
                 public void actionPerformed(ActionEvent evt) {
-                    monitorStock();
+                    monitorStock(table);
                 }
             });
 
@@ -290,6 +294,7 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
         standAloneTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         standAloneTable.setAutoCreateColumnsFromModel(false);
         standAloneTable.setVisible(true);
+        standAloneTable.addMouseListener(new PopupListener(standAloneTable));
 
         standAloneFrame.setClosable(true);
         standAloneFrame.setIconifiable(true);
@@ -324,7 +329,7 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
         portfolioTable.setName("portfolioTable"); // NOI18N
         portfolioTable.setColumnSelectionAllowed(true);
         portfolioTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        portfolioTable.addMouseListener(new PopupListener());
+        portfolioTable.addMouseListener(new PopupListener(portfolioTable));
         portfolioTable.setAutoCreateColumnsFromModel(false);
 
         createPortfolioTable();
