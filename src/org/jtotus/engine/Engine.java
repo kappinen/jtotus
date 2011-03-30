@@ -282,18 +282,4 @@ public class Engine {
     public synchronized MethodResultsPrinter getResultsPrinter() {
         return resultsPrinter;
     }
-
-    public synchronized LinkedBlockingDeque fetchGraph(String reviewTarget) {
-        LinkedBlockingDeque tmp = graphAccessPoints.get(reviewTarget);
-
-        if (tmp == null) {
-            //FIXME: create new internal frame
-            tmp = mainWindow.createIntFrame(reviewTarget);
-            if (tmp != null) {
-                this.registerGraph(reviewTarget, tmp);
-            }
-        }
-
-        return tmp;
-    }
 }

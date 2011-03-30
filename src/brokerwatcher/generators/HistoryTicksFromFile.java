@@ -236,7 +236,7 @@ public class HistoryTicksFromFile implements EsperEventGenerator {
                 
                 esperRuntime.sendEvent(tick);
                 //Thread.sleep(config.sleepBetweenTicks / 10);
-                Thread.sleep(40);
+                Thread.sleep(30);
             }
             System.out.printf("Done with %s\n", fileWithTicks);
             in.close();

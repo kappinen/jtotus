@@ -40,7 +40,6 @@ import org.jtotus.common.MethodResults;
 import org.jtotus.config.ConfigLoader;
 import org.jtotus.config.GUIConfig;
 import org.jtotus.engine.Engine;
-import org.jtotus.gui.graph.JTotusGraph;
 import org.jtotus.gui.mail.JtotusGmailClient;
 import org.jtotus.methods.MethodEntry;
 
@@ -133,28 +132,6 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
     }
 
 
-    public synchronized LinkedBlockingDeque createIntFrame(String reviewTarget) {
-
-        JTotusGraph tempGraph = new JTotusGraph(reviewTarget);
-
-        tempGraph.setClosable(true);
-        tempGraph.setIconifiable(true);
-        tempGraph.setMaximizable(true);
-        tempGraph.setDoubleBuffered(true);
-        tempGraph.setInheritsPopupMenu(true);
-        tempGraph.setLayer(5);
-        tempGraph.setName("tempFrameGraph"); // NOI18N
-        tempGraph.setOpaque(false);
-        tempGraph.setVisible(true);
-        tempGraph.setBounds(10, 10, 590, 460);
-
-        
-        drawDesktopPane.add(tempGraph, javax.swing.JLayeredPane.DEFAULT_LAYER);
-
-        drawDesktopPane.setAutoscrolls(false);
-
-        return tempGraph.getQueue();
-    }
 
     public LinkedList<String> getSelectedMethods() {
         LinkedList<String> selectedRows = new LinkedList<String>();

@@ -509,9 +509,6 @@ public class JtotusView extends FrameView {
     private final Icon[] busyIcons = new Icon[15];
     private int busyIconIndex = 0;
 
-    public LinkedBlockingDeque createIntFrame(String reviewTarget) {
-        return ((JTotusMethodView)methodTabbedPane).createIntFrame(reviewTarget);
-    }
 
     @Action
     public Task configMenuItemMouseClicked() {

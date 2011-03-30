@@ -40,17 +40,10 @@ public final class GraphSender {
     private Engine mainEngine = null;
     private ArrayList<StockUnit> listOfValues = null;
 
-
-
     private GraphSeriesType type = GraphSeriesType.SIMPLELINE;
     private String seriesName = null;
     private String plotName = null;
     
-
-    private LinkedBlockingDeque<GraphPacket> getPort(){
-        return mainEngine.fetchGraph(mainReviewTarget);
-    }
-
     public GraphSender(String reviewTarget) {
         mainReviewTarget = reviewTarget;
         mainEngine = Engine.getInstance();
@@ -89,30 +82,6 @@ public final class GraphSender {
         esperRuntime.sendEvent(packet);
 //        this.sentPacket(getMainReviewTarget(),packet);
         this.reset();
-    }
-    
-
-    private boolean sentPacket(String reviewTarget, GraphPacket packetObj) {
-        LinkedBlockingDeque<GraphPacket> queue = null;
-        
-        if (getMainReviewTarget().compareTo(reviewTarget) != 0){
-            queue = mainEngine.fetchGraph(reviewTarget);
-            if (queue == null) {
-                System.err.printf("Unable to fetch Graph port!\n");
-                return false;
-            }
-        }else {
-            queue = getPort();
-        }
-        
-        try {
-            
-            queue.putFirst(packetObj);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(GraphSender.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        return true;
     }
 
     /**
