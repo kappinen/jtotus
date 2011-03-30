@@ -106,17 +106,30 @@ public class StockTick {
         this.volume = volume;
     }
 
+
+
+    public String getHeader() {
+        return "StockName"
+                + ",GetLastestBuy"
+                + ",GetLastestHighest"
+                + ",GetLastestLowest"
+                + ",GetLastestPrice"
+                + ",GetLastestSell"
+                + ",Volume"
+                + ",TradesSum"
+                + ",Time";
+    }
     
     @Override
     public String toString() {
-        return "StockName=" + this.getStockName() +
-                ", GetLastestBuy="+this.getLatestBuy() +
-                ", GetLastestHighest="+this.getLatestHighest() +
-                ", GetLastestLowest="+this.getLatestLowest() +
-                ", GetLastestPrice="+this.getLatestPrice() +
-                ", GetLastestSell="+this.getLatestSell() +
-                ", Volume="+this.getVolume() +
-                ", TradesSum="+this.getTradesSum() +
-                ", Time="+this.getTime();
+        return  this.getStockName() +
+                ","+this.getLatestBuy() +
+                ","+this.getLatestHighest() +
+                ","+this.getLatestLowest() +
+                ","+this.getLatestPrice() +
+                ","+this.getLatestSell() +
+                ","+this.getVolume() +
+                ","+this.getTradesSum() +
+                ","+this.getTime();
     }
 }

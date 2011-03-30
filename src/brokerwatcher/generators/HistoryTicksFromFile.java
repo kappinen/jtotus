@@ -34,7 +34,19 @@ public class HistoryTicksFromFile implements EsperEventGenerator {
     private static final String pathToTicks = "ticks";
     private ArrayList<String> filesWithTicks = new ArrayList<String>();
     private boolean debug = false;
-
+    private String delimiter=",";
+    
+    
+    private int indxStockName = 0;
+    private int indxGetLastestBuy = 1;
+    private int indxGetLastestHighest = 2;
+    private int indxGetLastestLowest = 3;
+    private int indxGetLastestPrice = 4;
+    private int indxGetLastestSell = 5;
+    private int indxVolume = 6;
+    private int indxTradesSum = 7;
+    private int indxTime = 8;
+    
     public HistoryTicksFromFile(EPRuntime cepRT) {
         esperRuntime = cepRT;
         readFileNames();
@@ -57,6 +69,20 @@ public class HistoryTicksFromFile implements EsperEventGenerator {
      */
     public void setDebug(boolean debug) {
         this.debug = debug;
+    }
+
+    /**
+     * @return the delimiter
+     */
+    public String getDelimiter() {
+        return delimiter;
+    }
+
+    /**
+     * @param delimiter the delimiter to set
+     */
+    public void setDelimiter(String delimiter) {
+        this.delimiter = delimiter;
     }
 
     private static class NameComparator implements Comparator {
@@ -123,6 +149,7 @@ public class HistoryTicksFromFile implements EsperEventGenerator {
         StockTick tick = null;
         String line = null;
         String fileWithTicks = "TicksToFile.txt";
+        boolean readHeader = true;
 
         ConfigLoader<ConfTickGenerator> loader = new ConfigLoader<ConfTickGenerator>("ConfTickGenerator");
         config = loader.getConfig();
@@ -131,7 +158,6 @@ public class HistoryTicksFromFile implements EsperEventGenerator {
             loader.storeConfig(config);
         }
 
-        
         if (filesWithTicks.isEmpty()) {
             filesWithTicks.add(fileWithTicks);
         }
@@ -151,34 +177,58 @@ public class HistoryTicksFromFile implements EsperEventGenerator {
             while ((line = in.readLine()) != null) {
                 tick = new StockTick();
 
-                String[] tickAsString = line.split(",");
-                for (int i = 0; i < tickAsString.length; i++) {
-                    String[] varAndValue = tickAsString[i].trim().split("=");
-                    if (varAndValue.length != 2) {
-                        System.err.printf("%s : File corrupted !\n", fileWithTicks);
-                        continue;
-                    }
-                    //System.out.printf("Tick data: tick[%d] = %s line = %s\n",i, tickAsString[i], line);
-                    if (varAndValue[0].compareToIgnoreCase("StockName") == 0) {
-                        tick.setStockName(varAndValue[1]);
-                    } else if (varAndValue[0].compareToIgnoreCase("GetLastestBuy") == 0) {
-                        tick.setLatestBuy(Double.parseDouble(varAndValue[1]));
-                    } else if (varAndValue[0].compareToIgnoreCase("GetLastestHighest") == 0) {
-                        tick.setLatestHighest(Double.parseDouble(varAndValue[1]));
-                    } else if (varAndValue[0].compareToIgnoreCase("GetLastestLowest") == 0) {
-                        tick.setLatestLowest(Double.parseDouble(varAndValue[1]));
-                    } else if (varAndValue[0].compareToIgnoreCase("GetLastestPrice") == 0) {
-                        tick.setLatestPrice(Double.parseDouble(varAndValue[1]));
-                    } else if (varAndValue[0].compareToIgnoreCase("GetLastestSell") == 0) {
-                        tick.setLatestSell(Double.parseDouble(varAndValue[1]));
-                    } else if (varAndValue[0].compareToIgnoreCase("Volume") == 0) {
-                        tick.setVolume(Double.parseDouble(varAndValue[1]));
-                    } else if (varAndValue[0].compareToIgnoreCase("TradesSum") == 0) {
-                        tick.setTradesSum(Double.parseDouble(varAndValue[1]));
-                    } else if (varAndValue[0].compareToIgnoreCase("Time") == 0) {
-                        tick.setTime(varAndValue[1]);
-                    }
+                if (readHeader) {
+                    //TODO: dynamic assigment of indx variables.
+                    readHeader = false;
+                    continue;
                 }
+
+                String[] tickAsString = line.split(",");
+                if (tickAsString.length<8) {
+                    System.out.printf("File : % is corrupted?\n", fileWithTicks);
+                    return null;
+                }
+
+                tick.setLatestBuy(Double.parseDouble(tickAsString[indxGetLastestBuy]));
+                tick.setLatestHighest(Double.parseDouble(tickAsString[indxGetLastestHighest]));
+                tick.setLatestLowest(Double.parseDouble(tickAsString[indxGetLastestLowest]));
+                tick.setLatestPrice(Double.parseDouble(tickAsString[indxGetLastestPrice]));
+                tick.setLatestSell(Double.parseDouble(tickAsString[indxGetLastestSell]));
+                tick.setVolume(Double.parseDouble(tickAsString[indxVolume]));
+                tick.setTradesSum(Double.parseDouble(tickAsString[indxTradesSum]));
+                tick.setStockName(tickAsString[indxStockName]);
+                tick.setTime(tickAsString[indxTime]);
+                
+
+                
+
+//                for (int i = 0; i < tickAsString.length; i++) {
+//                    String[] varAndValue = tickAsString[i].trim().split("=");
+//                    if (varAndValue.length != 2) {
+//                        System.err.printf("%s : File corrupted !\n", fileWithTicks);
+//                        continue;
+//                    }
+//                    //System.out.printf("Tick data: tick[%d] = %s line = %s\n",i, tickAsString[i], line);
+//                    if (varAndValue[0].compareToIgnoreCase("StockName") == 0) {
+//                        tick.setStockName(varAndValue[1]);
+//                    } else if (varAndValue[0].compareToIgnoreCase("GetLastestBuy") == 0) {
+//                        tick.setLatestBuy(Double.parseDouble(varAndValue[1]));
+//                    } else if (varAndValue[0].compareToIgnoreCase("GetLastestHighest") == 0) {
+//                        tick.setLatestHighest(Double.parseDouble(varAndValue[1]));
+//                    } else if (varAndValue[0].compareToIgnoreCase("GetLastestLowest") == 0) {
+//                        tick.setLatestLowest(Double.parseDouble(varAndValue[1]));
+//                    } else if (varAndValue[0].compareToIgnoreCase("GetLastestPrice") == 0) {
+//                        tick.setLatestPrice(Double.parseDouble(varAndValue[1]));
+//                    } else if (varAndValue[0].compareToIgnoreCase("GetLastestSell") == 0) {
+//                        tick.setLatestSell(Double.parseDouble(varAndValue[1]));
+//                    } else if (varAndValue[0].compareToIgnoreCase("Volume") == 0) {
+//                        tick.setVolume(Double.parseDouble(varAndValue[1]));
+//                    } else if (varAndValue[0].compareToIgnoreCase("TradesSum") == 0) {
+//                        tick.setTradesSum(Double.parseDouble(varAndValue[1]));
+//                    } else if (varAndValue[0].compareToIgnoreCase("Time") == 0) {
+//                        tick.setTime(varAndValue[1]);
+//                    }
+//                }
 
                 if (tick.getVolume() == 0 && tick.getTradesSum() == 0) {
                         continue;
@@ -188,9 +238,7 @@ public class HistoryTicksFromFile implements EsperEventGenerator {
                 //Thread.sleep(config.sleepBetweenTicks / 10);
                 Thread.sleep(40);
             }
-
             System.out.printf("Done with %s\n", fileWithTicks);
-
             in.close();
         }
 

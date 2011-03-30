@@ -35,6 +35,7 @@ import java.util.Calendar;
 public class TicksToFile implements UpdateListener{
     private final String fileWithTicks = "TicksToFile.txt";
     private PrintWriter writer = null;
+    private boolean headerWritten = false;
 
 
     private File fileName() {
@@ -75,10 +76,13 @@ public class TicksToFile implements UpdateListener{
     }
 
 
-
     public void update(EventBean[] ebs, EventBean[] ebs1) {
          StockTick tick = (StockTick) ebs[0].getUnderlying();
-         getWriter().write(tick+"\n");
+         if (!headerWritten) {
+             getWriter().write(tick.getHeader()+"\n");
+             headerWritten = true;
+         }
+         getWriter().write(tick.toString()+"\n");
          getWriter().flush();
     }
 
