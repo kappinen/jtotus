@@ -77,9 +77,9 @@ public class TickGenerator implements EsperEventGenerator {
         System.out.printf("Stargin TickGenerator..\n");
         while (true) {
 
-//            if (timeout()) {
-//                continue;
-//            }
+            if (timeout()) {
+                continue;
+            }
 
             for (String stockName : stockList) {
                 tick = networkTicks.getTick(stockName);

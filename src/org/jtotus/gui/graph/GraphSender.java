@@ -19,6 +19,9 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.gui.graph;
 
+import brokerwatcher.BrokerWatcher;
+import brokerwatcher.generators.EsperEventGenerator;
+import com.espertech.esper.client.EPRuntime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -47,6 +50,7 @@ public final class GraphSender {
     private LinkedBlockingDeque<GraphPacket> getPort(){
         return mainEngine.fetchGraph(mainReviewTarget);
     }
+
     public GraphSender(String reviewTarget) {
         mainReviewTarget = reviewTarget;
         mainEngine = Engine.getInstance();
@@ -81,12 +85,14 @@ public final class GraphSender {
         packet.type = this.getType();
         packet.results  = listOfValues;
 
-        this.sentPacket(getMainReviewTarget(),packet);
+        EPRuntime esperRuntime = BrokerWatcher.getMainEngine().getEPRuntime();
+        esperRuntime.sendEvent(packet);
+//        this.sentPacket(getMainReviewTarget(),packet);
         this.reset();
     }
     
 
-    public boolean sentPacket(String reviewTarget, GraphPacket packetObj) {
+    private boolean sentPacket(String reviewTarget, GraphPacket packetObj) {
         LinkedBlockingDeque<GraphPacket> queue = null;
         
         if (getMainReviewTarget().compareTo(reviewTarget) != 0){
@@ -164,5 +170,6 @@ public final class GraphSender {
     public void setMainReviewTarget(String mainReviewTarget) {
         this.mainReviewTarget = mainReviewTarget;
     }
+
 
 }

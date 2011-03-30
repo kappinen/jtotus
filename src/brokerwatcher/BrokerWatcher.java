@@ -32,6 +32,7 @@ import brokerwatcher.eventtypes.StockTick;
 import brokerwatcher.generators.EsperEventGenerator;
 import brokerwatcher.generators.HistoryTicksFromFile;
 import brokerwatcher.generators.TickGenerator;
+import org.jtotus.gui.graph.GraphPacket;
 import org.jtotus.threads.MethodFuture;
 
 /**
@@ -61,6 +62,7 @@ public class BrokerWatcher implements Callable, Runnable{
         cepConfig.addEventType("StockTick", StockTick.class.getName());
         cepConfig.addEventType("IndicatorData", IndicatorData.class.getName());
         cepConfig.addEventType("EsperEventRsi", EsperEventRsi.class.getName());
+        cepConfig.addEventType("GraphPacket", GraphPacket.class.getName());
 
         provider = EPServiceProviderManager.getProvider(mainEngine, cepConfig);
 

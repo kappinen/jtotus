@@ -11,7 +11,7 @@ import com.espertech.esper.client.UpdateListener;
  *
  * @author house
  */
-public interface TickInterface extends UpdateListener{
+public interface TickInterface extends UpdateListener {
 
     public boolean subscribeForTicks();
     public boolean unsubscribeForTicks();

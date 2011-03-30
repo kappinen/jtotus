@@ -23,7 +23,6 @@ import brokerwatcher.generators.RsiGenerator;
 import brokerwatcher.generators.TickInterface;
 import brokerwatcher.generators.VPTGenerator;
 import brokerwatcher.generators.VrocGenerator;
-import brokerwatcher.listeners.ListenerRsiIndicator;
 import brokerwatcher.listeners.TicksToFile;
 import org.jtotus.methods.MethodEntry;
 import org.jtotus.methods.DecisionScript;

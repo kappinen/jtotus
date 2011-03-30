@@ -41,6 +41,8 @@ import javax.swing.table.TableColumn;
 import org.jtotus.config.ConfigLoader;
 import org.jtotus.config.GUIConfig;
 import org.jtotus.gui.graph.DynamicCharting;
+import org.jtotus.gui.graph.GraphPacket;
+import org.jtotus.gui.graph.GraphPrinter;
 
 /**
  *
@@ -354,9 +356,38 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
         EPServiceProvider provider = BrokerWatcher.getMainEngine();
         EPStatement eps = provider.getEPAdministrator().createEPL("select * from StockTick");
         EPStatement eps2 = provider.getEPAdministrator().createEPL("select * from IndicatorData");
+        EPStatement eps3 = provider.getEPAdministrator().createEPL("select * from GraphPacket");
+
         eps.addListener(this);
         eps2.addListener(this);
+        eps3.addListener(this);
+        
         //insertColumn("testing");
+    }
+
+    private void drawJFreeChart(GraphPacket packet) {
+                JInternalFrame interFrame = new JInternalFrame();
+
+                System.out.printf("---------> DRWAING !\n");
+                interFrame.setClosable(true);
+                interFrame.setIconifiable(true);
+                interFrame.setMaximizable(true);
+                interFrame.setDoubleBuffered(true);
+                interFrame.setInheritsPopupMenu(true);
+                interFrame.setLayer(5);
+                interFrame.setName(packet.plotName); // NOI18N
+                interFrame.setOpaque(false);
+                interFrame.setBounds(10, 10, 590, 460);
+                interFrame.setResizable(true);
+
+                interFrame.setVisible(true);
+
+                interFrame.setTitle(packet.plotName + " (" + packet.seriesTitle + ")");
+
+                GraphPrinter graphPrinter = new GraphPrinter(packet.seriesTitle);
+                interFrame.setContentPane(graphPrinter.getContainer());
+                desktopPane.add(interFrame, javax.swing.JLayeredPane.DEFAULT_LAYER);
+                graphPrinter.drawSeries(packet);
     }
 
     public void update(EventBean[] ebs, EventBean[] ebs1) {
@@ -383,6 +414,10 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
                 
                 upsertValue(tableToUpdate, data.getStockName(),
                             data.getIndicatorName(), data.getIndicatorValue());
+            } else if (ebs[i].getEventType().getName().equals("GraphPacket")){
+                GraphPacket data = (GraphPacket) ebs[i].getUnderlying();
+              
+                drawJFreeChart(data);
             }
         }
 

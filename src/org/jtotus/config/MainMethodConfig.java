@@ -29,7 +29,7 @@ public class MainMethodConfig {
    public Calendar inputStartingDate = null;
    public Calendar inputEndingDate = null;
 
-   public boolean inputPrintResults = true;
+   public boolean inputPrintResults = false;
    public boolean inputPerfomDecision = true;
 
    public String inputNormilizerType=null;
