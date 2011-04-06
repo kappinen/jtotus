@@ -18,12 +18,10 @@
 
 package org.jtotus.gui;
 
-
-
-
 import org.jtotus.engine.Engine;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
+import org.jtotus.engine.StartUpLoader;
 
 
 /**
@@ -35,6 +33,10 @@ public class JtotusApp extends SingleFrameApplication {
      * At startup create and show the main frame of the application.
      */
     @Override protected void startup() {
+        //Load ScriptEngine for JavaScript
+        StartUpLoader loader = StartUpLoader.getInstance();
+        loader.load("js");
+        
         JtotusView mainWindow=new JtotusView(this);
         
         Engine mainEngine=Engine.getInstance();

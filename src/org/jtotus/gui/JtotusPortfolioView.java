@@ -184,7 +184,6 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
         
         int[] selectedRows = table.getSelectedRows();
 
-
         for (int row = 0; row < selectedRows.length; row++) {
             int[] selectedColumns = table.getSelectedColumns();
             for (int col = 0; col < selectedColumns.length; col++) {
@@ -233,7 +232,7 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
     }
 
     //http://download.oracle.com/javase/tutorial/uiswing/components/menu.html
-    class PopupListener extends MouseAdapter {
+    private class PopupListener extends MouseAdapter {
         JTable table = null;
         JPopupMenu popup = null;
 

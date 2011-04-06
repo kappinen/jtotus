@@ -21,6 +21,9 @@ import java.util.List;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -39,8 +42,12 @@ public class StartUpLoader {
     public synchronized static StartUpLoader getInstance() {
         if (loader==null) {
             loader = new StartUpLoader();
+
+            BasicConfigurator.configure();
+            Logger.getRootLogger().setLevel(Level.INFO);
+            //DOMConfigurator.configure("log4j.xml");
         }
-        
+
         return loader;
     }
 
@@ -83,6 +90,7 @@ public class StartUpLoader {
             System.out.printf("\tLanguage: %s (%s)\n",
                     langName, langVersion);
         }
+
     }
     
 }

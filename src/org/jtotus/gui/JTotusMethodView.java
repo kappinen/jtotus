@@ -16,6 +16,11 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.gui;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -24,10 +29,13 @@ import java.util.Set;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JDialog;
 import javax.swing.JInternalFrame;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
@@ -39,6 +47,7 @@ import org.jtotus.common.Helper;
 import org.jtotus.common.MethodResults;
 import org.jtotus.config.ConfigLoader;
 import org.jtotus.config.GUIConfig;
+import org.jtotus.config.MainMethodConfig;
 import org.jtotus.engine.Engine;
 import org.jtotus.gui.mail.JtotusGmailClient;
 import org.jtotus.methods.MethodEntry;
@@ -101,9 +110,87 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
         }
     }
 
+    private class PopupListener extends MouseAdapter {
+        JTable table = null;
+        JPopupMenu popup = null;
+        JCheckBoxMenuItem item = null;
+        ConfigLoader<MainMethodConfig> configFile = null;
+        MainMethodConfig config = null;
+        
+        public PopupListener(JTable table) {
+            this.table =  table;
+        }
+
+        public JPopupMenu getPopupMenu() {
+            if (popup != null) {
+                return popup;
+            }
+
+            popup = new JPopupMenu();
+            item = new JCheckBoxMenuItem("Draw");
+
+            popup.add(item);
+
+            item.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent evt) {
+                    config.inputPrintResults = !config.inputPrintResults;
+                    configFile.storeConfig(config);
+                }
+            });
+
+            return popup;
+        }
+
+        public void mousePressed(MouseEvent e) {
+            maybeShowPopup(e);
+        }
+
+        public void mouseReleased(MouseEvent e) {
+            maybeShowPopup(e);
+        }
+
+        private void maybeShowPopup(MouseEvent e) {
+            if (e.isPopupTrigger()) {
+                final JPopupMenu popupMenu = getPopupMenu();
+
+                int[] selectedRows = table.getSelectedRows();
+
+                for (int row = 0; row < selectedRows.length; row++) {
+                    int[] selectedColumns = table.getSelectedColumns();
+                    for (int col = 0; col < selectedColumns.length; col++) {
+                        if (!table.isCellSelected(selectedRows[row], selectedColumns[col])
+                                || selectedColumns[col] == 0) {
+                            continue;
+                        }
+                        //
+                        String name = table.getValueAt(selectedRows[row], 0).toString();
+                        
+                        configFile = new ConfigLoader<MainMethodConfig>("OMXHelsinki"
+                                                                    + File.separator
+                                                                    + table.getColumnModel().getColumn(selectedColumns[col]).getHeaderValue()
+                                                                    + File.separator
+                                                                    + name);
+                        config = configFile.getConfig();
+                        if (config != null && config.inputPrintResults) {
+                            item.setSelected(true);
+                        } else {
+                            item.setSelected(false);
+                        }
+                    }
+                }
+
+                popupMenu.show(e.getComponent(),
+                        e.getX(), e.getY());
+            }
+        }
+    }
+
     public JDesktopPane getMainPane() {
         return drawDesktopPane;
     }
+
     public JInternalFrame addComponentToInternalWindow(JComponent component, String title) {
 
         JInternalFrame tempGraph = new JInternalFrame();
@@ -181,8 +268,8 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
 
         retValue.setModel(methodModel);
         retValue.setUpdateSelectionOnSort(true);
-
-        retValue.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        retValue.addMouseListener(new PopupListener(retValue));
+//        retValue.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
 
         return retValue;

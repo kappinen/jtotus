@@ -24,6 +24,7 @@ import brokerwatcher.generators.TickInterface;
 import brokerwatcher.generators.VPTGenerator;
 import brokerwatcher.generators.VrocGenerator;
 import brokerwatcher.listeners.TicksToFile;
+import brokerwatcher.ranalyzer.Rexecutor;
 import org.jtotus.methods.MethodEntry;
 import org.jtotus.methods.DecisionScript;
 import org.jtotus.methods.DummyMethod;
@@ -36,8 +37,9 @@ import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jtotus.gui.JtotusView;
-import org.jtotus.common.Helper;
 import org.jtotus.config.MethodConfig;
 import org.jtotus.database.AutoUpdateStocks;
 import org.jtotus.gui.MethodResultsPrinter;
@@ -48,6 +50,7 @@ import org.jtotus.methods.TaLibMOM;
 import org.jtotus.methods.TaLibRSI;
 import org.jtotus.methods.TaLibSMA;
 import org.jtotus.threads.*;
+import org.rosuda.REngine.REXPMismatchException;
 
 /**
  *
@@ -58,12 +61,12 @@ public class Engine {
     private static Engine singleton = null;
     private PortfolioDecision portfolioDecision = null;
     private LinkedList<MethodEntry> methodList;
-    private Helper help = null;
     private JtotusView mainWindow = null;
     private HashMap<String, LinkedBlockingDeque> graphAccessPoints = null;
 
     //GenearatorName, StatementString, Object
     private HashMap<String, HashMap<String, TickInterface>> listOfGenerators = null;
+    private final static Log log = LogFactory.getLog( Engine.class );
 
     public HashMap<String, HashMap<String, TickInterface>> getListOfGenerators() {
         return listOfGenerators;
@@ -103,9 +106,9 @@ public class Engine {
     }
 
 
-    //Constructor, singleton
     protected Engine() {
-        help = Helper.getInstance();
+
+        log.info("Engine is started");
         
         portfolioDecision = new PortfolioDecision();
 
@@ -114,9 +117,7 @@ public class Engine {
 
         this.prepareMethodsList();
 
-        //Load ScriptEngine for JavaScript
-        StartUpLoader loader = StartUpLoader.getInstance();
-        loader.load("js");
+        
     }
 
     public synchronized static Engine getInstance() {
@@ -139,7 +140,7 @@ public class Engine {
 
     public void run() {
         if (portfolioDecision.setList(methodList)) {
-            help.debug(1, "Dispatcher is already full");
+            log.debug("Dispatcher is already full");
             return;
         }
 
@@ -166,6 +167,13 @@ public class Engine {
 
     private void testRun() {
 
+        
+        Rexecutor rexec = new Rexecutor();
+        try {
+            System.out.printf("GOT FROM R:%s\n", rexec.eval("R.version.string").asString());
+        } catch (REXPMismatchException ex) {
+            Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         BrokerWatcher watcher = new BrokerWatcher();
         //TickListenerPrinter printer = new TickListenerPrinter();
@@ -216,8 +224,7 @@ public class Engine {
 
             while (nameIter.hasNext()) {
                 String nameList = nameIter.next();
-                help.debug("Engine",
-                        "Search name:%s in list:%s\n", tempName, nameList);
+                log.debug("Search name:"+tempName+" in list:"+nameList);
 
                 if (nameList.compareTo(tempName) == 0) {
                     found = true;
@@ -225,14 +232,14 @@ public class Engine {
                 }
             }
             if (!found) {
-                help.debug("Engine", "Removeing:%s\n", tempName);
+                log.debug("Removeing:" + tempName);
                 methodIter.remove();
             }
             found = false;
         }
 
         if (portfolioDecision.setList(methodL)) {
-            help.debug(1, "Dispatcher is already full");
+            log.debug("Dispatcher is already full");
             return;
         }
 

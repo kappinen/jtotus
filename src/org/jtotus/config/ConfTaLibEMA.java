@@ -21,7 +21,7 @@ package org.jtotus.config;
  *
  * @author Evgeni Kappinen
  */
-public class ConfTaLibEMA extends MainMethodConfig{
+public class ConfTaLibEMA extends MainMethodConfig {
 
     //Basic configuration
     public int inputEMAPeriod = 10;
