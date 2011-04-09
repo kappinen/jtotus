@@ -17,8 +17,10 @@
 
 package brokerwatcher.ranalyzer;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
@@ -42,7 +44,8 @@ public class Rexecutor {
      * @return false on failure
      */
     private synchronized static boolean startRServe() {
-
+        BufferedReader stderr = null;
+        
         if (serverStarted) {
             return serverStarted;
         }
@@ -54,20 +57,34 @@ public class Rexecutor {
                 // lower cased
                 rserverStartUp = System.getenv("R_HOME") + File.separator + "library" + File.separator + "Rserve" + File.separator + "Rserve.exe";
             } else {
-                rserverStartUp = "/usr/bin/R CMD Rserve";
+                rserverStartUp = "/usr/bin/R CMD Rserve --no-save";
             }
             ProcessBuilder builder = new ProcessBuilder(rserverStartUp.split(" "));
             Process process = builder.start();
-
+            stderr = new BufferedReader(new InputStreamReader(process.getErrorStream()));
             int ret = process.waitFor();
             if (ret == 0) {
                 log.info("RServe is started");
                 serverStarted = true;
+            } else {
+                String line;
+                while ((line = stderr.readLine()) != null) {
+                    System.err.println(line);
+                    System.err.flush();
+                }
             }
         } catch (InterruptedException ex) {
             Logger.getLogger(Rexecutor.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(Rexecutor.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stderr != null) {
+                try {
+                    stderr.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(Rexecutor.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
 
         return serverStarted;
