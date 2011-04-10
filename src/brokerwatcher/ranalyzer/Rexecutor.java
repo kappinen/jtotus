@@ -95,7 +95,7 @@ public class Rexecutor {
      * @return the connection
      */
     public RConnection getConnection() throws RserveException {
-        if (connection == null || connection.isConnected()) {
+        if (connection == null || !connection.isConnected()) {
             startRServe();
             connection = new RConnection();
         }

@@ -17,9 +17,17 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 package brokerwatcher.indicators;
 
 import brokerwatcher.eventtypes.StockTick;
+import brokerwatcher.ranalyzer.Rexecutor;
 import com.tictactec.ta.lib.Core;
 import com.tictactec.ta.lib.MInteger;
 import com.tictactec.ta.lib.RetCode;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.rosuda.REngine.REXP;
+import org.rosuda.REngine.REXPMismatchException;
+import org.rosuda.REngine.REngineException;
+import org.rosuda.REngine.RList;
+import org.rosuda.REngine.Rserve.RserveException;
 
 /**
  *
@@ -153,6 +161,39 @@ public class SimpleTechnicalIndicators extends StockIndicator<StockTick> {
 
         return outputDec;
     }
+
+
+
+    private static Rexecutor rexec = null;
+    public static double correlation(double a[], double b[]) {
+
+        if (rexec==null) {
+            rexec = new Rexecutor();
+        }
+        
+        double cor = 0.0;
+        try {
+
+            rexec.getConnection().assign("a", a);
+            rexec.getConnection().assign("b", b);
+
+            RList list = rexec.getConnection()
+                            .eval("cor.test(log(a), log(b), method=\"spearman\")")
+                            .asList();
+
+
+            cor = list.at("estimate").asDouble();
+//            cor = Math.pow(cor, 2);
+        } catch (REXPMismatchException ex) {
+            Logger.getLogger(SimpleTechnicalIndicators.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (REngineException ex) {
+            Logger.getLogger(SimpleTechnicalIndicators.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        
+        return cor;
+    }
+
 
 
     //TODO:

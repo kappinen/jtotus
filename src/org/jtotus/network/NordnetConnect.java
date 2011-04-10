@@ -16,7 +16,6 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.network;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,13 +28,13 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import brokerwatcher.eventtypes.StockTick;
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.InputStreamReader;
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jtotus.config.ConfigLoader;
 import org.jtotus.config.GUIConfig;
 import org.jtotus.engine.StartUpLoader;
@@ -58,7 +57,7 @@ public class NordnetConnect implements NetworkTickConnector {
 
     private HashMap<String, Integer> stockNameToIndex = null;
     private BrokerConnector connector = null;
-
+    private final static Log log = LogFactory.getLog( NordnetConnect.class );
     
 
     // Connects to login page, get seeds for user and password
@@ -145,12 +144,12 @@ public class NordnetConnect implements NetworkTickConnector {
              engine.eval(strBuild.toString(), bindings);
 
              password = (String)bindings.get("encryptedPass");
-             System.out.printf("!!!---> Password:{%s}\n", password);
+             
         } catch (ScriptException ex) {
             Logger.getLogger(NordnetConnector.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-         System.out.printf("JavaScript engine loaded: %s\n", engine.NAME);
+         log.info("JavaScript engine loaded:" + engine.NAME);
 
          return password;
     }
@@ -236,13 +235,7 @@ public class NordnetConnect implements NetworkTickConnector {
             System.err.printf("Incorrect size of splitted elements for pass and login tokens\n");
             return false;
         }
-        System.out.printf("Got element: data:%s html:%s\n", data[7], data[5]);
-        try {
-            Thread.sleep(7000);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(NordnetConnect.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        //System.err.printf("Failure: \n %s \n", loginPage);
+        log.info("Got element: data:"+data[7]+" html:" + data[5]);
 
         String encryptedPassword = fetchEncryptedPassword(encryptJS,
                                                  password,
@@ -302,7 +295,7 @@ public class NordnetConnect implements NetworkTickConnector {
         for (int count = 0; iter.hasNext(); count++) {
             Element elem = iter.next();
 
-            System.out.printf("Element value (%d):%s\n", count, elem.text());
+            log.info("Element value ("+count+"):"+elem.text());
             switch (count) {
                 case 3:
                     if (!elem.text().equalsIgnoreCase("OMX Helsinki")) {
@@ -337,11 +330,11 @@ public class NordnetConnect implements NetworkTickConnector {
 
                 //TODO:currency and time
                 default:
-                    System.out.printf("Not matched(%d) = %s \n", count, elem.text());
+                    log.info("Not matched(" +count+ ") = " + elem.text());
                     break;
             }
         }
-        System.out.printf("StockTick:%s\n", tick.toString());
+        log.info("StockTick:" + tick.toString());
 
         return tick;
     }

@@ -150,8 +150,8 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
                 outNbElement,
                 decSMAPeriod);
 
-        DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                config.inputEndingDate.getTime());
+        DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
+                                                     portfolioConfig.inputEndingDate.getTime());
 
         TimeSeriesCondition signals = new TimeSeriesCondition();
         signals.declareFunc("A", input);
@@ -183,8 +183,8 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
 
         sender = new GraphSender(stockType.getStockName());
         for (int elem = 0; elem <= outNbElement.value; elem++) {
-            DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                    config.inputEndingDate.getTime());
+            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
+                                                         portfolioConfig.inputEndingDate.getTime());
             dateIterator.move(elem + outBegIdx.value);
             sender.setSeriesName("Original");
             sender.addForSending(dateIterator.getCurrent(), input[elem + outBegIdx.value]);
@@ -197,8 +197,8 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
             sender = new GraphSender(stockType.getStockName());
             sender.setSeriesName(this.getMethName());
 
-            DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                    config.inputEndingDate.getTime());
+            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
+                                                         portfolioConfig.inputEndingDate.getTime());
             dateIterator.move(outBegIdx.value);
             for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
                 Date stockDate = dateIterator.next();
@@ -220,8 +220,8 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
         this.loadInputs(stockName);
         //Create period
         closingPrices = super.createClosingPriceList(stockName,
-                config.inputStartingDate,
-                config.inputEndingDate);
+                                                     portfolioConfig.inputStartingDate,
+                                                     portfolioConfig.inputEndingDate);
         double[] input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
 
 
@@ -234,13 +234,13 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
                     iter.nextState()) {
 
                 budjetCounter.initialize(stockType.getStockName(),
-                        "DecisionSMA",
-                        super.inputAssumedBudjet);
+                                        "DecisionSMA",
+                                        portfolioConfig.inputAssumedBudjet);
 
                 this.performDecisionTest(budjetCounter,
-                        stockName,
-                        input,
-                        iter.nextInt("SMAperiod"));
+                                        stockName,
+                                        input,
+                                        iter.nextInt("SMAperiod"));
 
                 if(budjetCounter.newBest()) {
                     config.inputSMAPeriod = iter.nextInt("SMAperiod");

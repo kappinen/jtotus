@@ -100,8 +100,8 @@ public class TaLibMOM extends TaLibAbstract implements MethodEntry {
         this.loadInputs(stockName);
         stockType.setStockName(stockName);
         
-        DateIterator dateIter = new DateIterator(config.inputStartingDate.getTime(),
-                                                 config.inputEndingDate.getTime());
+        DateIterator dateIter = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
+                                                 portfolioConfig.inputEndingDate.getTime());
 
         //Filling input data with Closing price for days
         while (dateIter.hasNext()) {
@@ -148,8 +148,8 @@ public class TaLibMOM extends TaLibAbstract implements MethodEntry {
         if (this.inputPrintResults) {
             sender = new GraphSender(stockType.getStockName());
             sender.setSeriesName(this.getMethName());
-            DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                                                         config.inputEndingDate.getTime());
+            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
+                                                         portfolioConfig.inputEndingDate.getTime());
             dateIterator.move(outBegIdx.value);
             for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
                 Date stockDate = dateIterator.next();
@@ -173,7 +173,7 @@ public class TaLibMOM extends TaLibAbstract implements MethodEntry {
             numberIter.setRange(config.inputMOMDecisionPeriod);
             while (numberIter.hasNext()) {
                 amoutOfStocks = 0;
-                assumedBudjet = this.inputAssumedBudjet.doubleValue();
+                assumedBudjet = portfolioConfig.inputAssumedBudjet;
                 decMOMPeriod = numberIter.next().intValue();
 
                 final int allocationSizeDecision = period - core.momLookback(decMOMPeriod);
@@ -232,8 +232,8 @@ public class TaLibMOM extends TaLibAbstract implements MethodEntry {
 
                     if (changed) {
                         if (this.inputPrintResults && decMOMPeriod == config.inputMOMPeriod) {
-                            DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                                                                         config.inputEndingDate.getTime());
+                            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
+                                                                         portfolioConfig.inputEndingDate.getTime());
                             dateIterator.move(elem + outBegIdxDec.value);
 
                             sender.setSeriesName("Sell/Buy signals");
@@ -245,10 +245,10 @@ public class TaLibMOM extends TaLibAbstract implements MethodEntry {
 
             }
 
-            Double successRate = ((bestAssumedBudjet / this.inputAssumedBudjet) - 1) * 100;
+            double successRate = ((bestAssumedBudjet / portfolioConfig.inputAssumedBudjet) - 1) * 100;
             System.out.printf("%s:The best period:%f best budjet:%f pros:%f\n",
                     stockType.getStockName(), bestPeriod, bestAssumedBudjet,
-                    successRate.doubleValue());
+                    successRate);
 
             totalStocksAnalyzed++;
             this.avgSuccessRate += successRate;

@@ -52,16 +52,15 @@ public abstract class TaLibAbstract {
     //Portofolio
     public String inputPortofolio = null;
     public String inpuPortfolio = null;
-    public Double inputAssumedBudjet = null;
     //General inputs
     public Calendar inputEndingDate = null;
-    public String[] inputListOfStocks = null;
     //Modes
     public boolean inputPrintResults = true;
     public boolean inputPerfomDecision = true;
     protected MethodResults methodResults = null;
     protected StockType stockType = null;
     protected MainMethodConfig child_config = null;
+    protected ConfPortfolio portfolioConfig = null;
 
 
     
@@ -76,28 +75,27 @@ public abstract class TaLibAbstract {
 
     public void loadPortofolioInputs() {
         //FIXME: set it in PortfolioDecision
-        String portfolio = "OMXHelsinki";
 
         ConfigLoader<ConfPortfolio> configPortfolio =
-                new ConfigLoader<ConfPortfolio>(portfolio);
+                new ConfigLoader<ConfPortfolio>("OMXHelsinki");
 
-        if (configPortfolio.getConfig() == null) {
+        portfolioConfig = configPortfolio.getConfig();
+        if (portfolioConfig == null) {
             //Load default values
-            ConfPortfolio newPortfolioConfig = new ConfPortfolio();
-            configPortfolio.storeConfig(newPortfolioConfig);
+            portfolioConfig = new ConfPortfolio();
+            configPortfolio.storeConfig(portfolioConfig);
         }
 
         //Get stock names
         configPortfolio.applyInputsToObject(this);
-        this.inputPortofolio = portfolio;
     }
 
     public List<Double> createClosingPriceList(String stockName, Calendar start, Calendar end) {
 
-         List<Double> closingPrices = new ArrayList<Double>();
+         List<Double> closingPrices = new ArrayList<Double>(2000);
 
          DateIterator dateIter = new DateIterator(start.getTime(),
-                                                 end.getTime());
+                                                  end.getTime());
 
          if (stockType==null) {
              stockType = new StockType();
@@ -107,7 +105,6 @@ public abstract class TaLibAbstract {
 
         //Filling input data with Closing price for days
         while (dateIter.hasNext()) {
-
             Calendar cal = Calendar.getInstance();
             cal.setTime(dateIter.next());
             BigDecimal closDay = stockType.fetchClosingPrice(cal);
@@ -120,7 +117,7 @@ public abstract class TaLibAbstract {
 
     //To override
     public MethodResults performMethod(String stockName) {
-        return null;
+        throw new RuntimeException("This methods should be overritten");
     }
 
     public void run() {
@@ -139,10 +136,10 @@ public abstract class TaLibAbstract {
         stockType = new StockType();
         methodResults = new MethodResults(this.getMethName());
 
-        System.out.printf("inputListOfStocks len:%d\n", inputListOfStocks.length);
+        System.out.printf("inputListOfStocks len:%d\n", portfolioConfig.inputListOfStocks.length);
 
-        for (int stockCount = 0; stockCount < this.inputListOfStocks.length; stockCount++) {
-            this.performMethod(this.inputListOfStocks[stockCount]);
+        for (int stockCount = 0; stockCount < portfolioConfig.inputListOfStocks.length; stockCount++) {
+            this.performMethod(portfolioConfig.inputListOfStocks[stockCount]);
         }
 
         if (child_config != null && child_config.inputNormilizerType != null) {

@@ -175,8 +175,8 @@ public class TaLibMACD extends TaLibAbstract implements MethodEntry {
 
         sender = new GraphSender(stockType.getStockName());
         for (int elem = 0; elem <= outNbElement.value; elem++) {
-            DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                    config.inputEndingDate.getTime());
+            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
+                                                         portfolioConfig.inputEndingDate.getTime());
             dateIterator.move(elem + outBegIdx.value);
             sender.setSeriesName("Original");
             sender.addForSending(dateIterator.getCurrent(), input[elem + outBegIdx.value]);
@@ -190,8 +190,8 @@ public class TaLibMACD extends TaLibAbstract implements MethodEntry {
             sender.setPlotName("MACD");
             sender.setSeriesName(this.getMethName());
 
-            DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                    config.inputEndingDate.getTime());
+            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
+                                                         portfolioConfig.inputEndingDate.getTime());
             dateIterator.move(outBegIdx.value);
             for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
                 Date stockDate = dateIterator.next();
@@ -216,8 +216,8 @@ public class TaLibMACD extends TaLibAbstract implements MethodEntry {
         this.loadInputs(stockName);
         //Create period
         closingPrices = super.createClosingPriceList(stockName,
-                config.inputStartingDate,
-                config.inputEndingDate);
+                                                    portfolioConfig.inputStartingDate,
+                                                    portfolioConfig.inputEndingDate);
         double[] input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
 
         //Perform testing if it is asked
@@ -233,7 +233,7 @@ public class TaLibMACD extends TaLibAbstract implements MethodEntry {
 
                 budjetCounter.initialize(stockType.getStockName(),
                                         "DecisionMACD",
-                                        super.inputAssumedBudjet);
+                                        portfolioConfig.inputAssumedBudjet);
 
                 this.performDecisionTest(budjetCounter,
                                         stockName,

@@ -114,8 +114,8 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
                                         outNbElement,
                                         decRSIPeriod);
 
-        DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                                                     config.inputEndingDate.getTime());
+        DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
+                                                     portfolioConfig.inputEndingDate.getTime());
 
         dateIterator.move(outBegIdx.value);
         for (int elem = 0; elem < outNbElement.value && dateIterator.hasNext(); elem++) {
@@ -200,8 +200,8 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
             sender.setPlotName("RSI");
             sender.setSeriesName(this.getMethName());
 
-            DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-                    config.inputEndingDate.getTime());
+            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
+                                                         portfolioConfig.inputEndingDate.getTime());
             dateIterator.move(outBegIdx.value);
             for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
                 Date stockDate = dateIterator.next();
@@ -226,8 +226,9 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
         this.loadInputs(stockName);
         //Create period
         closingPrices = super.createClosingPriceList(stockName,
-                config.inputStartingDate,
-                config.inputEndingDate);
+                                                     portfolioConfig.inputStartingDate,
+                                                     portfolioConfig.inputEndingDate);
+
         double[] input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
 
 
@@ -243,7 +244,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
 
                 budjetCounter.initialize(stockType.getStockName(),
                                         "DecisionRSI",
-                                        super.inputAssumedBudjet);
+                                        portfolioConfig.inputAssumedBudjet);
 
                 this.performDecisionTest(budjetCounter,
                                         stockName,
@@ -260,7 +261,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
             this.config.outputSuccessRate = budjetCounter.getProfitInProcents();
             methodResults.putSuccessRate(stockName, budjetCounter.getProfitInProcents());
             this.configFile.storeConfig(config);
-            budjetCounter.printBestResults();
+            //budjetCounter.printBestResults();
             budjetCounter.dumpResults();
         }
 
