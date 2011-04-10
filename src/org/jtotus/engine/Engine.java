@@ -23,6 +23,7 @@ import brokerwatcher.generators.RsiGenerator;
 import brokerwatcher.generators.TickInterface;
 import brokerwatcher.generators.VPTGenerator;
 import brokerwatcher.generators.VrocGenerator;
+import brokerwatcher.indicators.SimpleTechnicalIndicators;
 import brokerwatcher.listeners.TicksToFile;
 import brokerwatcher.ranalyzer.Rexecutor;
 import org.jtotus.methods.MethodEntry;
@@ -44,6 +45,7 @@ import org.jtotus.config.MethodConfig;
 import org.jtotus.database.AutoUpdateStocks;
 import org.jtotus.gui.MethodResultsPrinter;
 import org.jtotus.methods.PotentialWithIn;
+import org.jtotus.methods.SpearmanCorrelation;
 import org.jtotus.methods.TaLibEMA;
 import org.jtotus.methods.TaLibMACD;
 import org.jtotus.methods.TaLibMOM;
@@ -86,6 +88,7 @@ public class Engine {
         methodList.add(new TaLibEMA());
         methodList.add(new TaLibMOM());
         methodList.add(new TaLibMACD());
+        methodList.add(new SpearmanCorrelation());
 
         File scriptDir = new File("./src/org/jtotus/methods/scripts/");
         if (!scriptDir.isDirectory()) {
@@ -153,8 +156,9 @@ public class Engine {
             updateThread.start();
         }
 
-
-        testRun();
+        
+        
+//        testRun();
     }
 
 
@@ -167,13 +171,6 @@ public class Engine {
 
     private void testRun() {
 
-        
-        Rexecutor rexec = new Rexecutor();
-        try {
-            System.out.printf("GOT FROM R:%s\n", rexec.eval("R.version.string").asString());
-        } catch (REXPMismatchException ex) {
-            Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
-        }
 
         BrokerWatcher watcher = new BrokerWatcher();
         //TickListenerPrinter printer = new TickListenerPrinter();

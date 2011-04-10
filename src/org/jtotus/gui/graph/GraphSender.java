@@ -74,9 +74,10 @@ public final class GraphSender {
     public void sendAllStored() {
         GraphPacket packet = new GraphPacket();
         packet.seriesTitle  = this.getSeriesName();
-        packet.plotName = this.getPlotName();
+        packet.plotName = mainReviewTarget;
         packet.type = this.getType();
         packet.results  = listOfValues;
+        
 
         EPRuntime esperRuntime = BrokerWatcher.getMainEngine().getEPRuntime();
         esperRuntime.sendEvent(packet);

@@ -25,10 +25,6 @@ import java.util.Calendar;
  */
 public class MainMethodConfig {
    public String inputPortfolio=null;
-
-   public Calendar inputStartingDate = null;
-   public Calendar inputEndingDate = null;
-
    public boolean inputPrintResults = false;
    public boolean inputPerfomDecision = true;
 
@@ -42,8 +38,6 @@ public class MainMethodConfig {
 
         inputPortfolio = "OMXHelsinki";
 
-        inputEndingDate = Calendar.getInstance();
-        inputStartingDate = Calendar.getInstance();
-        inputStartingDate.add(Calendar.DATE, -300);
+        
    }
 }

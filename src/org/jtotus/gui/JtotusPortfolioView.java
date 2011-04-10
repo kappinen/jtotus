@@ -57,7 +57,7 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
     private JDesktopPane desktopPane = null;
     private HashMap <String, String>titleMap = null;
     private GUIConfig uiConfig = null;
-    private boolean debug = true;
+    private boolean debug = false;
     JInternalFrame standAloneFrame = new JInternalFrame();
 
 

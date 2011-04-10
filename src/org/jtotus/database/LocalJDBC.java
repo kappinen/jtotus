@@ -47,15 +47,15 @@ public class LocalJDBC implements InterfaceDataBase {
         try {
 
             String statement = "CREATE TABLE IF NOT EXISTS " + stockTable + " ("
-                    + "ID IDENTITY AUTO_INCREMENT,"
-                    + "DATE          DATE,"
-                    + "TIME          TIME,"
-                    + "OPEN          DECIMAL(18,4),"
-                    + "CLOSE         DECIMAL(18,4),"
-                    + "HIGH          DECIMAL(18,4),"
-                    + "LOW           DECIMAL(18,4),"
-                    + "VOLUME        INT,"
-                    + "PRIMARY KEY(ID));";
+                                + "ID IDENTITY AUTO_INCREMENT,"
+                                + "DATE          DATE,"
+                                + "TIME          TIME,"
+                                + "OPEN          DECIMAL(18,4),"
+                                + "CLOSE         DECIMAL(18,4),"
+                                + "HIGH          DECIMAL(18,4),"
+                                + "LOW           DECIMAL(18,4),"
+                                + "VOLUME        INT,"
+                                + "PRIMARY KEY(ID));";
 
             createTableStatement = con.prepareStatement(statement);
 

@@ -17,20 +17,45 @@
 
 package org.jtotus.config;
 
+import java.util.Calendar;
+
 /**
  *
  * @author Evgeni Kappinen
  */
 public class ConfPortfolio {
+    private String portofoliName=null;
     public String[] inputListOfStocks;
-    public Double inputAssumedBudjet=null;
+    public double inputAssumedBudjet;
+
+    public Calendar inputStartingDate = null;
+    public Calendar inputEndingDate = null;
+
 
     public ConfPortfolio() {
 
         MethodConfig mainConfig = new MethodConfig();
         inputListOfStocks = mainConfig.fetchStockNames();
-        inputAssumedBudjet=new Double(4000);
+        inputAssumedBudjet=6000;
+
+        inputEndingDate = Calendar.getInstance();
+        inputStartingDate = Calendar.getInstance();
+        inputStartingDate.add(Calendar.DATE, -300);
+        portofoliName = "OMXHelsinki";
     }
 
+    /**
+     * @return the portofoliName
+     */
+    public String getPortofoliName() {
+        return portofoliName;
+    }
+
+    /**
+     * @param portofoliName the portofoliName to set
+     */
+    public void setPortofoliName(String portofoliName) {
+        this.portofoliName = portofoliName;
+    }
     
 }
