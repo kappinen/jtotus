@@ -19,39 +19,25 @@
 
 package org.jtotus.methods;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
 import java.math.BigDecimal;
-import java.util.Calendar;
-import org.jtotus.common.DateIterator;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.lang.ArrayUtils;
+import org.jtotus.common.Helper;
 import org.jtotus.common.MethodResults;
-import org.jtotus.config.MethodConfig;
-import org.jtotus.common.StockType;
 
 /**
  *
  * @author Evgeni Kappinen
  */
-public class StatisticsFreqPeriod implements MethodEntry{
-    private String stockName = null;
+public class StatisticsFreqPeriod extends TaLibAbstract implements MethodEntry{
     private int maxPeriod = 20;
-    private int total_days = 0;
-    private int []posCurrent = new int[maxPeriod]; // Possitive current
-    private int []negCurrent = new int[maxPeriod]; // Negative current
-    private int []neuCurrent = new int[maxPeriod]; // Neutral current
+    private boolean debug = false;
+    private static final int POSITIVE = 0;
+    private static final int NEGATIVE = 1;
+    private static final int STILL = 2;
 
-
-
-
-    public StatisticsFreqPeriod() {
-    }
-
-    
-    public StatisticsFreqPeriod(String tmpName) {
-        stockName = tmpName;
-        
-    }
 
     public String getMethName() {
         return "StatisticsFreqPeriod";
@@ -59,189 +45,223 @@ public class StatisticsFreqPeriod implements MethodEntry{
 
     private int normilize(double tmp) {
 
-        if (tmp > 0)
-            return(1);
-        else if(tmp < 0)
-            return(-1);
-        
-       return 0;
+        if (tmp > 0) {
+            return 1;
+        } else if (tmp < 0) {
+            return -1;
+        }
+
+        return 0;
     }
 
-
-
-public void run() {
-
-
-    MethodConfig config = new MethodConfig();
-
-    ArrayList<String> stockList = new ArrayList<String>();
-
-
-    if (stockName == null) {//Stock Name is not provided, lets use config file
-        String []tempList = config.fetchStockNames();
-
-        for (int i = 0; i < tempList.length;i++)
-            stockList.add(tempList[i]);
-        String []stockNames = config.fetchStockNames();
-    }
-    else {
-        stockList.add(stockName);
-    }
-    
-    StatisticsForFreqPeriod(stockList,config);
-    
-    
-}
-
-
-private void StatisticsForFreqPeriod(ArrayList<String> stockList,
-                                     MethodConfig config) {
-
-
-    Iterator<String> list = stockList.iterator();
-
-    while (list.hasNext()) {
-        StockType stock = new StockType(list.next());
-
-               
-        BigDecimal previousDay = null;
-        BigDecimal searchDady = null;
-
-        int mainCurrent = 0;
-        double localCurrent = 0;
+    public int lastTrend(String stockName) {
+        BigDecimal data = null;
+        double table[] = null;
+        int mainDirection = 0;
         int strikes = 0;
+        
+        stockType.setStockName(stockName);
+        for (int i = 0; i < this.getMaxPeriod(); i++) {
 
-        Date startDate = config.getStartTime();
-        Date endDate = config.getEndTime();
-
-        Iterator<Date> dateIter = new DateIterator(startDate, endDate);
-
-        System.err.print(startDate + ":"+ endDate + "\n");
-        Calendar calendar = Calendar.getInstance();
-        while(dateIter.hasNext()) {
-
-            if (previousDay == null) {
-                Date nextDay = dateIter.next();
-                calendar.setTime(nextDay);
-                previousDay = stock.fetchClosingPrice(calendar);
-                    if (previousDay == null) {
-                    continue;
-                    }
-                total_days++;
+            data = stockType.fetchPastDayClosingPrice(i);
+            if (data==null) {
+                continue;
             }
 
-  
+            table = Helper.putAsLastToArray(table, data.doubleValue());
 
-            while(dateIter.hasNext()){
+            if (table.length < 2){
+                continue;
+            }
+            strikes = 0;
+            mainDirection = normilize(table[1] - table[0]);
+            for (int y = 1; y < table.length; y++) {
+                double delta = table[y] - table[y - 1];
 
-                Date nextDay = dateIter.next();
-                calendar.setTime(nextDay);
-                
-                searchDady = stock.fetchClosingPrice(calendar);
-                if (searchDady != null) {
-                    total_days++;
-                    break;
+                if (mainDirection != normilize(delta)) {
+                    return -1*mainDirection*strikes;
                 }
+                strikes++;
+            }
+        }
+        
+        return 0;
+    }
+
+    @Override
+    public MethodResults call() throws Exception {
+        this.loadPortofolioInputs();
+        int trendInDays = 0;
+        double output[] = null;
+        List<Double> closingPrices = null;
+        int marketStat[][] = null;
+        MethodResults results = new MethodResults(this.getMethName());
+
+
+        for (int stockCount = 0; stockCount < portfolioConfig.inputListOfStocks.length; stockCount++) {
+            closingPrices = super.createClosingPriceList(portfolioConfig.inputListOfStocks[stockCount],
+                                                         portfolioConfig.inputStartingDate,
+                                                         portfolioConfig.inputEndingDate);
+
+            output = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
+            marketStat = statisticsForFreq(output);
+            printResultsToStdout(portfolioConfig.inputListOfStocks[stockCount], marketStat, output.length - 1);
+
+            trendInDays = lastTrend(portfolioConfig.inputListOfStocks[stockCount]);
+
+            if (debug) {
+                System.out.printf("Last trend for :%s is : %d\n",
+                    portfolioConfig.inputListOfStocks[stockCount],
+                    trendInDays);
             }
             
-            if (searchDady == null) {
-                break;
+
+            double value = 0.0;
+            if (trendInDays > 0) {
+                value = marketStat[POSITIVE][Math.abs(trendInDays) + 1];
+            } else if (trendInDays < 0) {
+                value = marketStat[NEGATIVE][Math.abs(trendInDays) + 1];
+            } else {
+                value = marketStat[STILL][Math.abs(trendInDays) + 1];
             }
 
-
-              
-             localCurrent = searchDady.doubleValue() - previousDay.doubleValue();
-//             System.err.printf("The previous;%f and search;%f\n",
-//                      previousDay, searchDady);
-
-             if (mainCurrent != normilize(localCurrent)) {
-                 if (mainCurrent > 0) {
-                     posCurrent[strikes]++;
-                 }
-                 else if (mainCurrent<0) {
-                     negCurrent[strikes]++;
-                 }
-                 else {
-                     neuCurrent[strikes]++;
-                     }
-
-                    mainCurrent = normilize(localCurrent);
-                    strikes = 1;
-                }
-                else {
-                    if (strikes<maxPeriod)
-                        strikes++;
-                }
-             
-             previousDay = searchDady;
-
+            if (debug) {
+                System.out.printf("%s last trend:%d:%d marketstat:%f prop:%f\n",
+                    portfolioConfig.inputListOfStocks[stockCount],
+                    trendInDays, Math.abs(trendInDays), value,
+                    value / (double)output.length );
+            }
+            
+            results.putResult(portfolioConfig.inputListOfStocks[stockCount], (value / (double)(output.length - 1))*100);
         }
 
 
+        return results;
+    }
+
+    public void run() {
+        try {
+            this.call();
+        } catch (Exception ex) {
+            Logger.getLogger(StatisticsFreqPeriod.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    /**
+     * 
+     * @param output market data
+     */
+
+    public int[][] statisticsForFreq(double output[]) {
+        int mainDirection = 0;
+        int strikes = 0;
+        int[][] marketStat = new int[3][getMaxPeriod()];
+
+        //Set fist flow
+        if (output.length < 2) {
+            return null;
+        }
         
+        mainDirection = normilize(output[1]  - output[0]); //First direction
 
-            if (mainCurrent > 0) {
-               posCurrent[strikes]++;
+        for (int i = 1; i < output.length; i++) {
+            double delta = output[i] - output[i-1];
+
+            if (debug) {
+                System.out.printf("[%f:%f] delta:%f direct:%d deltaDirection:%d strikes:%d \n",
+                        output[i - 1], output[i], output[i] - output[i - 1], mainDirection, normilize(delta), strikes);
             }
-            else if (mainCurrent<0) {
-                negCurrent[strikes]++;
+            
+            if (mainDirection != normilize(delta)) {
+                if (mainDirection > 0) {
+                    marketStat[this.POSITIVE][strikes]++;
+                } else if (mainDirection < 0) {
+                    marketStat[this.NEGATIVE][strikes]++;
+                } else {
+                    marketStat[this.STILL][strikes]++;
+                }
+
+                mainDirection = normilize(delta);
+                strikes = 1;
+            } else {
+                if (strikes < getMaxPeriod()) {
+                    strikes++;
+                }
             }
-            else {
-                neuCurrent[strikes]++;
-            }
+        }
+        
+        if (mainDirection > 0) {
+            marketStat[this.POSITIVE][strikes]++;
+        } else if (mainDirection < 0) {
+            marketStat[this.NEGATIVE][strikes]++;
+        } else {
+            marketStat[this.STILL][strikes]++;
+        }
+        
+        if (debug) {
+            printResultsToStdout("Testing..", marketStat, output.length - 1);
+        }
+        
+        return marketStat;
     }
-        //results
-        printResultsToOur();
-}
-    
-    
-    
-    
-private float pros(int share, float total) {
-    return ((float)share / total)*100;
-}
 
-
-
-private void printResultsToOur()
-{
-    float total_pos = 0.0f;
-    float total_neg = 0.0f;
-    float total_neu = 0.0f;
-    int rowSum = 0;
-
-    for (int i = 1; i<maxPeriod; i++) {
-        total_pos += posCurrent[i];
-        total_neg += negCurrent[i];
-        total_neu += neuCurrent[i];
+    private float pros(int share, float total) {
+        return ((float) share / total) * 100;
     }
 
+    private void printResultsToStdout(String stockName, int[][] marketData, int total_days) {
+        float total_pos = 0.0f;
+        float total_neg = 0.0f;
+        float total_neu = 0.0f;
+        int rowSum = 0;
 
-    
-    for (int i = 1; i<maxPeriod; i++) {
-       if (posCurrent[i] != 0 || negCurrent[i] != 0 || neuCurrent[i] != 0)
-        {
-         rowSum = posCurrent[i] + negCurrent[i] + neuCurrent[i];
-         System.out.printf("Raises: %d (%.2f) [%.2f] |"
-                 + " Drops: %d (%.2f) [%.2f] |"
-                 + " Still: %d (%.2f) [%.2f] -> %d days in a row\n",
-                 posCurrent[i], pros(posCurrent[i],total_pos), pros(posCurrent[i],(float)rowSum),
-                 negCurrent[i], pros(negCurrent[i],total_neg), pros(negCurrent[i],(float)rowSum),
-                 neuCurrent[i], pros(neuCurrent[i],total_neu), pros(neuCurrent[i],(float)rowSum),
-                 i);
+        for (int i = 1; i < getMaxPeriod(); i++) {
+            total_pos += marketData[this.POSITIVE][i];
+            total_neg += marketData[this.NEGATIVE][i];
+            total_neu += marketData[this.STILL][i];
         }
 
+        System.out.printf("Data for %s\n", stockName);
+        for (int i = 1; i < getMaxPeriod(); i++) {
+            if (marketData[this.POSITIVE][i] != 0 || marketData[this.NEGATIVE][i] != 0 || marketData[this.STILL][i] != 0) {
+                rowSum = marketData[this.POSITIVE][i] + marketData[this.NEGATIVE][i] + marketData[this.STILL][i];
+                System.out.printf("Up: %d (%.2f of total) (%.2f of Ups) [%.2f of Row] |"
+                        + " Down: %d (%.2f) [%.2f] |"
+                        + " Still: %d (%.2f) [%.2f] -> %d days in a row\n",
+                        marketData[this.POSITIVE][i],
+                        pros(marketData[this.POSITIVE][i], total_days),
+                        pros(marketData[this.POSITIVE][i], total_pos),
+                        pros(marketData[this.POSITIVE][i], (float) rowSum),
+                        marketData[this.NEGATIVE][i],
+                        pros(marketData[this.NEGATIVE][i], total_neg),
+                        pros(marketData[this.NEGATIVE][i], (float) rowSum),
+                        marketData[this.STILL][i], 
+                        pros(marketData[this.STILL][i], total_neu),
+                        pros(marketData[this.STILL][i], (float) rowSum),
+                        i);
+            }
+
+        }
+        System.out.printf("total days:%d \n", total_days);
     }
-    System.out.printf("total days:%d \n", total_days);
-}
 
     public boolean isCallable() {
-        return false;
+        return true;
     }
 
 
-    public MethodResults call() throws Exception {
-        throw new UnsupportedOperationException("Not supported yet.");
+
+    /**
+     * @return the maxPeriod
+     */
+    public int getMaxPeriod() {
+        return maxPeriod;
     }
-    
+
+    /**
+     * @param maxPeriod the maxPeriod to set
+     */
+    public void setMaxPeriod(int maxPeriod) {
+        this.maxPeriod = maxPeriod;
+    }
 }

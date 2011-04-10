@@ -160,5 +160,35 @@ public class Helper {
         System.out.printf("\n");
     }
 
+    public static double[] putAsFirstToArray(double[]oldArray, double newValue) {
+        double newArray [] = null;
+
+        if (oldArray==null) {
+            newArray = new double[1];
+            newArray[0] = newValue;
+            return newArray;
+        }
+        
+        newArray = new double[oldArray.length+1];
+        System.arraycopy(oldArray, 0, newArray, 1, oldArray.length);
+        newArray[0] = newValue;
+        return newArray;
+    }
+
+    public static double[] putAsLastToArray(double[]oldArray, double newValue) {
+        double newArray [] = null;
+
+        if (oldArray==null) {
+            newArray = new double[1];
+            newArray[0] = newValue;
+            return newArray;
+        }
+
+        newArray = new double[oldArray.length+1];
+        System.arraycopy(oldArray, 0, newArray, 0, oldArray.length);
+        newArray[newArray.length-1] = newValue;
+        return newArray;
+    }
+
     
 }

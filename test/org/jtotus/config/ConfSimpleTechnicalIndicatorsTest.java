@@ -5,11 +5,11 @@
 
 package org.jtotus.config;
 
+import org.junit.Assert;
 import brokerwatcher.indicators.SimpleTechnicalIndicators;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -31,7 +31,7 @@ public class ConfSimpleTechnicalIndicatorsTest {
     @Test
     public void testSomeMethod() {
         double cor = SimpleTechnicalIndicators.correlation(new double[] {0,1,2,3}, new double[] {0,1,2,3});
-        assert cor == 1.0;
+        Assert.assertFalse(cor != 1.0);
 
     }
 

@@ -46,13 +46,13 @@ import org.jtotus.database.AutoUpdateStocks;
 import org.jtotus.gui.MethodResultsPrinter;
 import org.jtotus.methods.PotentialWithIn;
 import org.jtotus.methods.SpearmanCorrelation;
+import org.jtotus.methods.StatisticsFreqPeriod;
 import org.jtotus.methods.TaLibEMA;
 import org.jtotus.methods.TaLibMACD;
 import org.jtotus.methods.TaLibMOM;
 import org.jtotus.methods.TaLibRSI;
 import org.jtotus.methods.TaLibSMA;
 import org.jtotus.threads.*;
-import org.rosuda.REngine.REXPMismatchException;
 
 /**
  *
@@ -89,6 +89,7 @@ public class Engine {
         methodList.add(new TaLibMOM());
         methodList.add(new TaLibMACD());
         methodList.add(new SpearmanCorrelation());
+        methodList.add(new StatisticsFreqPeriod());
 
         File scriptDir = new File("./src/org/jtotus/methods/scripts/");
         if (!scriptDir.isDirectory()) {

@@ -32,7 +32,7 @@ public class StockNames {
 
     public StockNames() {
 
-                //Aliases
+        //Aliases
         //http://en.wikipedia.org/wiki/OMX_Helsinki_25
 
         stockMap.put("Cargotec Oyj","CGCBV.HSE");
