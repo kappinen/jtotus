@@ -30,7 +30,7 @@ public class ConfPortfolio {
 
     public Calendar inputStartingDate = null;
     public Calendar inputEndingDate = null;
-
+    public boolean useCurentDayAsEndingDate = true;
 
     public ConfPortfolio() {
 

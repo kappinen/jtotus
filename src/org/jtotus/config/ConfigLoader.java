@@ -118,6 +118,13 @@ public class ConfigLoader<T> {
             return null;
         }
 
+        if (retObj instanceof ConfPortfolio) {
+            ConfPortfolio config = (ConfPortfolio)retObj;
+            if (config.useCurentDayAsEndingDate){
+                config.inputEndingDate = Calendar.getInstance();
+            }
+        }
+
         return retObj;
     }
 

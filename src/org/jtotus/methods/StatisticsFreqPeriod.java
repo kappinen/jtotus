@@ -132,7 +132,7 @@ public class StatisticsFreqPeriod extends TaLibAbstract implements MethodEntry{
                     value / (double)output.length );
             }
             
-            results.putResult(portfolioConfig.inputListOfStocks[stockCount], (value / (double)(output.length - 1))*100);
+            results.putResult(portfolioConfig.inputListOfStocks[stockCount], trendInDays*(value / (double)(output.length - 1)));
         }
 
 
