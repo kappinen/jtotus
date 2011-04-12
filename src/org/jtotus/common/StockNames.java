@@ -20,58 +20,74 @@ package org.jtotus.common;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 /**
  *
  * @author Evgeni Kappinen
  */
 public class StockNames {
-    private Map<String,String> stockMap = new HashMap<String,String>();
+    private Map<String, IndexMarketData> stockMap = new HashMap<String, IndexMarketData>();
+
     private Iterator mapIter = null;
 
     public StockNames() {
 
         //Aliases
         //http://en.wikipedia.org/wiki/OMX_Helsinki_25
-
-        stockMap.put("Cargotec Oyj","CGCBV.HSE");
-        stockMap.put("Elisa Oyj","ELI1V.HSE");
-        stockMap.put("Fortum Oyj", "FUM1V.HE");
-        stockMap.put("Fortum Oyj", "FUM1V.HSE");
-        stockMap.put("Kemira Oyj","KRA1V.HSE");
-        stockMap.put("KONE Oyj","KNEBV.HSE");
-        stockMap.put("Konecranes Oyj","KCR1V.HSE");
-        stockMap.put("Metso Oyj","MEO1V.HSE");
-        stockMap.put("Neste Oil","NES1V.HSE");
-        stockMap.put("Nokia Oyj", "NOK1V.HSE");
-        stockMap.put("Nokian Renkaat Oyj","NRE1V.HSE");
-        stockMap.put("Nordea Bank AB","NDA1V.HSE");
-        stockMap.put("Outokumpu Oyj","OUT1V.HSE");
-        stockMap.put("Outotec Oyj","OTE1V.HSE");
-        stockMap.put("Pohjola Bank A","POH1S.HSE");
-        stockMap.put("Rautaruukki Oyj","RTRKS.HSE");
-        stockMap.put("Pohjola Bank A","POH1S.HSE");
-        stockMap.put("Sampo Oyj A","SAMAS.HSE");
-        stockMap.put("Sanoma Oyj","SAA1V.HSE");
-        stockMap.put("Stora Enso Oyj A","STEAV.HSE");
-        stockMap.put("TeliaSonera AB","TLS1V.HSE");
-        stockMap.put("Tieto Oyj","TIE1V.HSE");
-        stockMap.put("UPM-Kymmene Oyj","UPM1V.HSE");
-        stockMap.put("Wärtsilä Corporation","WRT1V.HSE");
-        stockMap.put("YIT Oyj","YTY1V.HSE");
+                                                          // Weights are %
+        stockMap.put("Cargotec Oyj", new IndexMarketData("CGCBV.HSE", 1.0));
+        stockMap.put("Elisa Oyj", new IndexMarketData("ELI1V.HSE", 3.2));
+        stockMap.put("Fortum Oyj", new IndexMarketData("FUM1V.HE", 9.8));
+        stockMap.put("Fortum Oyj", new IndexMarketData("FUM1V.HSE", 9.8));
+        stockMap.put("Kemira Oyj", new IndexMarketData("KRA1V.HSE", 1.7));
+        stockMap.put("KONE Oyj", new IndexMarketData("KNEBV.HSE", 7.9));
+        stockMap.put("Konecranes Oyj", new IndexMarketData("KCR1V.HSE", 2.0));
+        stockMap.put("Metso Oyj", new IndexMarketData("MEO1V.HSE", 4.4));
+        stockMap.put("Neste Oil", new IndexMarketData("NES1V.HSE", 2.1));
+        stockMap.put("Nokia Oyj", new IndexMarketData("NOK1V.HSE", 9.8));
+        stockMap.put("Nokian Renkaat Oyj", new IndexMarketData("NRE1V.HSE", 3.3));
+        stockMap.put("Nordea Bank AB", new IndexMarketData("NDA1V.HSE", 4.4));
+        stockMap.put("Outokumpu Oyj", new IndexMarketData("OUT1V.HSE", 2.4));
+        stockMap.put("Outotec Oyj", new IndexMarketData("OTE1V.HSE", 1.6));
+        stockMap.put("Pohjola Bank A", new IndexMarketData("POH1S.HSE", 2.2));
+        stockMap.put("Rautaruukki Oyj", new IndexMarketData("RTRKS.HSE", 1.8));
+        stockMap.put("Pohjola Bank A", new IndexMarketData("POH1S.HSE", 2.2));
+        stockMap.put("Sampo Oyj A", new IndexMarketData("SAMAS.HSE", 10.0));
+        stockMap.put("Sanoma Oyj", new IndexMarketData("SAA1V.HSE", 2.2));
+        //FIXME:!! Stora Enso Oyj A -> Stora Enso Oyj R stock!
+        stockMap.put("Stora Enso Oyj A", new IndexMarketData("STEAV.HSE", 3.9));
+        stockMap.put("TeliaSonera AB", new IndexMarketData("TLS1V.HSE",6.4));
+        stockMap.put("Tieto Oyj", new IndexMarketData("TIE1V.HSE", 1.5));
+        stockMap.put("UPM-Kymmene Oyj", new IndexMarketData("UPM1V.HSE", 6.4));
+        stockMap.put("Wärtsilä Corporation", new IndexMarketData("WRT1V.HSE", 4.0));
+        stockMap.put("YIT Oyj", new IndexMarketData("YTY1V.HSE", 2.6));
 
     }
 
+    private class IndexMarketData {
+
+        public IndexMarketData(String shortName, double indxWeight) {
+            this.shortName = shortName;
+            this.indxWeight = indxWeight;
+        }
+
+        String shortName;
+        double indxWeight;
+    }
+
     public Iterator iterator() {
-       Set entries = stockMap.entrySet();
-       mapIter = entries.iterator();
-       return mapIter;
+       return stockMap.entrySet().iterator();
     }
 
 
     public String getHexName(String name) {
-        return stockMap.get(name);
+        IndexMarketData index = stockMap.get(name);
+        return index.shortName;
+    }
+
+    public double getStockWeight(String name) {
+        IndexMarketData index = stockMap.get(name);
+        return index.indxWeight;
     }
 
     public String[]getNames() {

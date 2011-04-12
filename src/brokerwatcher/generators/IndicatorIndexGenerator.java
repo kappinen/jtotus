@@ -18,23 +18,26 @@
 package brokerwatcher.generators;
 
 import brokerwatcher.eventtypes.IndicatorData;
+import brokerwatcher.eventtypes.StockTick;
 import com.espertech.esper.client.EventBean;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Map.Entry;
+import org.jtotus.common.StockNames;
 
 /**
  *
  * @author Evgeni Kappinen
  */
 public class IndicatorIndexGenerator extends TickAnalyzer {
-    private String indicator =  "Vroc";
+    private String indicator =  "OMXH25";
     private HashMap <String, Double>indicatorMap = new HashMap <String, Double>();
-
+    private StockNames stockWeight;
+    private boolean debug = false;
 
     public IndicatorIndexGenerator() {
         super();
+        stockWeight = new StockNames();
     }
-
 
     private void init(){
         super.patternForEvents("every IndicatorData(indicatorName='"+indicator+"')")
@@ -43,24 +46,39 @@ public class IndicatorIndexGenerator extends TickAnalyzer {
 
     private double calculateIndex() {
         double sum = 0.0d;
-        Iterator<String> indKeys = indicatorMap.keySet().iterator();
-        while(indKeys.hasNext()) {
-            double value = indicatorMap.get(indKeys.next());
-            sum += value;
+        double weight;
+
+        for (Entry<String, Double> entry: indicatorMap.entrySet()) {
+            weight = stockWeight.getStockWeight(entry.getKey());
+            sum += entry.getValue() * weight;
         }
 
-        System.out.printf("IndicatorIndex: size:%d value:%f\n", indicatorMap.size(), sum);
+        if (debug) {
+            System.out.printf("IndicatorIndex: size:%d value:%f\n", indicatorMap.size(), sum);
+        }
+        
         return sum;
     }
     
     public void update(EventBean[] ebs, EventBean[] ebs1) {
 
         for (int i=0; i < ebs.length;i++) {
-            IndicatorData data = (IndicatorData)ebs[i].getUnderlying();
-            if (data==null) {
-                continue;
+
+            if (ebs[i].getUnderlying() instanceof IndicatorData) {
+                IndicatorData data = (IndicatorData)ebs[i].getUnderlying();
+                if (data==null) {
+                    continue;
+                }
+                indicatorMap.put(data.getStockName(), data.getIndicatorValue());
+            } else if (ebs[i].getUnderlying() instanceof StockTick) {
+                StockTick data = (StockTick)ebs[i].getUnderlying();
+                if (data==null) {
+                    continue;
+                }
+                indicatorMap.put(data.getStockName(), data.getLatestPrice());
             }
-            indicatorMap.put(data.getStockName(), data.getIndicatorValue());
+            
+            
         }
 
         IndicatorData data = new IndicatorData();

@@ -159,7 +159,7 @@ public class Engine {
 
         
         
-//        testRun();
+        testRun();
     }
 
 
@@ -187,7 +187,7 @@ public class Engine {
         addGeneratorToList("select * from StockTick", new AccdistGenerator());
         addGeneratorToList("select * from StockTick", new VPTGenerator());
         addGeneratorToList("select * from StockTick", new RsiGenerator());
-        addGeneratorToList("select * from indicatorData=IndicatorData(indicatorName='Vroc')", new IndicatorIndexGenerator());
+        addGeneratorToList("select * from StockTick", new IndicatorIndexGenerator());
         watcher.addStatement("select * from StockTick", new TicksToFile());
 
         mainWindow.fetchGeneratorList();
