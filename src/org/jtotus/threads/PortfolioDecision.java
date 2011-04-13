@@ -37,7 +37,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.jtotus.common.Helper;
 import org.jtotus.common.MethodResults;
-import org.jtotus.config.MethodConfig;
+import org.jtotus.config.ConfPortfolio;
 
 /**
  *
@@ -48,6 +48,7 @@ public class PortfolioDecision implements Runnable {
     private Helper help = null;
     private LinkedList<MethodEntry> threadList = null;
     private ExecutorService threadExecutor = null;
+    
 
     private void init() {
         if (help == null) {
@@ -59,11 +60,21 @@ public class PortfolioDecision implements Runnable {
         if (threadExecutor == null) {
             threadExecutor = Executors.newCachedThreadPool();
         }
+        
     }
 
     public PortfolioDecision() {
-
+        super();
         init();
+    }
+
+    public void addLongTermMethod(MethodEntry entry) {
+        ConfPortfolio portfolioConfig = ConfPortfolio.getPortfolioConfig();
+        threadList.add(entry);
+        
+        if (portfolioConfig.isAutoStared(entry.getMethName())) {
+            startTask(entry);
+        }
     }
 
     public PortfolioDecision(LinkedList<MethodEntry> threads) {
@@ -77,31 +88,17 @@ public class PortfolioDecision implements Runnable {
 
     }
 
-    public boolean setList(LinkedList<MethodEntry> threads) {
+    public void startLongTermMethods(LinkedList<String> methodNames) {
 
-        help.debug("PortfolioDecision", "setting list with size:%d\n",
-                threads.size());
-
-        if (!threadList.isEmpty()) {
-            threadList.clear();
+        Iterator<MethodEntry> methodIter = threadList.iterator();
+        while (methodIter.hasNext()) {
+            MethodEntry entry = methodIter.next();
+            if (methodNames.contains(entry.getMethName())){
+                startTask(entry);
+            }
         }
-
-        Iterator<MethodEntry> iterator = threads.iterator();
-        while (iterator.hasNext()) {
-            threadList.add(iterator.next());
-        }
-
-        return false;
     }
-
-    public MethodConfig fetchConfig(String method) {
-        //TODO: add which configuration to run by user
-
-        MethodConfig config = new MethodConfig();
-
-        return config;
-    }
-
+  
     public void run() {
 
         help.debug("PortfolioDecision", "Dispatcher started..\n");
@@ -109,7 +106,6 @@ public class PortfolioDecision implements Runnable {
         if (threadList.isEmpty()) {
             System.err.printf("Not tasks for Portfolio Decision\n");
         }
-
 
         //Start threads       
         Iterator<MethodEntry> iterator = threadList.iterator();
@@ -130,6 +126,29 @@ public class PortfolioDecision implements Runnable {
                 threadExecutor.execute(task);
             }
         }
-
     }
+
+    private void startTask(MethodEntry task) {
+
+        //Start threads
+        MethodFuture<MethodResults> futureTask = null;
+        InterfaceMethodListner methodListener = null;
+
+        if (task.isCallable()) {
+            //Callable<MethodResults> callableTmp = task;
+            futureTask = new MethodFuture<MethodResults>(task);
+            methodListener = new MethodListener();
+            futureTask.addListener(methodListener);
+
+            threadExecutor.execute(futureTask);
+        } else {
+            //Lets support Runnable for now.
+            threadExecutor.execute(task);
+        }
+    }
+
+    public LinkedList<MethodEntry> getMethodList() {
+        return threadList;
+    }
+
 }

@@ -21,9 +21,7 @@
 package org.jtotus.gui;
 
 
-import brokerwatcher.BrokerWatcher;
 import brokerwatcher.generators.TickInterface;
-import com.espertech.esper.client.EPServiceProvider;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -39,7 +37,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.concurrent.LinkedBlockingDeque;
 import javax.swing.Timer;
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
@@ -461,7 +458,7 @@ public class JtotusView extends FrameView {
                    break;
                }
            }
-           
+
            if (itemFound) {
                continue;
            }
@@ -478,7 +475,7 @@ public class JtotusView extends FrameView {
            menu.setSelected(false);
            menu.setText(itemName);
            menu.setToolTipText(tickGen.getListnerInfo());
-           
+
            menu.addActionListener(aListener);
            indicatorsMenu.add(menu);
        }
@@ -533,5 +530,4 @@ public class JtotusView extends FrameView {
             // the result computed by doInBackground().
         }
     }
-
 }

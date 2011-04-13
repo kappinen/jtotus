@@ -49,7 +49,9 @@ public class MethodFuture <T> extends FutureTask<T>{
             if (super.isDone() && !super.isCancelled()) {
                 T methodResults = super.get();
                 //FIXME:dangerous
-                method.putResults((MethodResults) methodResults);
+                if (methodResults != null) {
+                    method.putResults((MethodResults) methodResults);
+                }
             }
         } catch (InterruptedException ex) {
             Logger.getLogger(MethodFuture.class.getName()).log(Level.SEVERE, null, ex);

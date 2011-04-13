@@ -23,11 +23,15 @@ package org.jtotus.methods;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.jtotus.common.MethodResults;
+import org.jtotus.config.ConfigLoader;
+import org.jtotus.threads.PortfolioDecision;
 
 /**
  *
@@ -98,4 +102,42 @@ public class DecisionScript extends TaLibAbstract implements MethodEntry {
 
         return this.runGroovyScripts(file);
     }
+
+    private static FileFilter fileIsGroovyScript() {
+        FileFilter fileFilter = new FileFilter() {
+
+            public boolean accept(File file) {
+                if (!file.isFile() || !file.canRead()) {
+                    return false;
+                }
+
+                String name = file.getName();
+                if (!name.endsWith(".groovy")) {
+                    return false;
+                }
+                return true;
+            }
+        };
+        return fileFilter;
+    }
+
+    public static void loadScripts(PortfolioDecision portfolio) {
+
+        File scriptDir = new File(ConfigLoader.getPathToGroovyScripts());
+        if (!scriptDir.isDirectory()) {
+            return;
+        }
+
+        FileFilter filter = fileIsGroovyScript();
+        File[] listOfFiles = scriptDir.listFiles(filter);
+
+        for (File tmp : listOfFiles) {
+            try {
+                portfolio.addLongTermMethod(new DecisionScript(tmp.getCanonicalPath()));
+            } catch (IOException ex) {
+                Logger.getLogger(DecisionScript.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
 }

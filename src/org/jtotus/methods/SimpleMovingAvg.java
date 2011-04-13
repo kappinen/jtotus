@@ -19,21 +19,22 @@ package org.jtotus.methods;
 
 import org.jtotus.common.Helper;
 import org.jtotus.common.MethodResults;
-import org.jtotus.config.MethodConfig;
 import org.jtotus.common.StockType;
 import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
 import org.jtotus.common.DateIterator;
-import org.jtotus.gui.graph.GraphPacket;
+import org.jtotus.config.ConfPortfolio;
 import org.jtotus.gui.graph.GraphSender;
 /**
  *
  * @author Evgeni Kappinen
  */
+
+@Deprecated
 public class SimpleMovingAvg implements MethodEntry {
 
-    private MethodConfig config = null;
+    private ConfPortfolio config = null;
     private Helper help = Helper.getInstance();;
 
 
@@ -46,7 +47,7 @@ public class SimpleMovingAvg implements MethodEntry {
 
     public void run() {
 
-        config = new MethodConfig();
+        config = ConfPortfolio.getPortfolioConfig();
 
         Calendar startingDate = Calendar.getInstance();
         startingDate.add(Calendar.DATE, -100);
@@ -65,7 +66,7 @@ public class SimpleMovingAvg implements MethodEntry {
         Calendar calendar = null;
 
         //FIXME:ensure that asked period will be fetched
-        String[] stocks = config.stockNames;
+        String[] stocks = config.inputListOfStocks;
         for (int i = stocks.length - 1; i >= 0; i--) {
             calendar = Calendar.getInstance();
             calendar.setTime(date);
@@ -73,17 +74,18 @@ public class SimpleMovingAvg implements MethodEntry {
             count = 0;
             StockType stockType = new StockType(stocks[i]);
 
-            for (int y = 0; count < config.day_period && failures < 100 ; y++) {
-
-                tmp = stockType.fetchClosingPrice(calendar);
-                if (tmp != null) {
-                    avr = avr.add(tmp);
-                    count++;
-
-                } else { failures++; }
-                
-              calendar.add(Calendar.DATE, -1);
-            }
+            //FIXME:remove whole class ?
+//            for (int y = 0; count < config.day_period && failures < 100 ; y++) {
+//
+//                tmp = stockType.fetchClosingPrice(calendar);
+//                if (tmp != null) {
+//                    avr = avr.add(tmp);
+//                    count++;
+//
+//                } else { failures++; }
+//
+//              calendar.add(Calendar.DATE, -1);
+//            }
 
             
 
@@ -109,4 +111,5 @@ public class SimpleMovingAvg implements MethodEntry {
     public MethodResults call() throws Exception {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
 }

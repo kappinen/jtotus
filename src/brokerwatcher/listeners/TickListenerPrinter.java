@@ -20,7 +20,6 @@ import brokerwatcher.eventtypes.StockTick;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.UpdateListener;
 import java.util.Calendar;
-import java.util.Date;
 import org.jtotus.gui.graph.GraphSender;
 
 /**

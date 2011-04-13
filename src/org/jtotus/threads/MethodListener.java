@@ -25,10 +25,10 @@ import org.jtotus.gui.MethodResultsPrinter;
  * @author Evgeni Kappinen
  */
 public class MethodListener implements InterfaceMethodListner {
-     private Engine engine = Engine.getInstance();
      
     public void putResults(MethodResults results) {
-
+        
+        Engine engine = Engine.getInstance();
         results.printToConsole();
         MethodResultsPrinter printer = engine.getResultsPrinter();
         printer.drawResults(results);

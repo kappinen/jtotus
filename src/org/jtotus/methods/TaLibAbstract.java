@@ -50,7 +50,7 @@ public abstract class TaLibAbstract {
     //TODO: staring date, ending date aka period
     //INPUTS TO METHOD:
     //Portofolio
-    public String inputPortofolio = null;
+    public String inputPortofolio = "OMXHelsinki";
     public String inpuPortfolio = null;
     //General inputs
     public Calendar inputEndingDate = null;

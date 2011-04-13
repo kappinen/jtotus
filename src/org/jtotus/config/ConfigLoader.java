@@ -36,6 +36,8 @@ public class ConfigLoader<T> {
     private XStream xstream = null;
     private String configName = null;
     private String configDir = "config" + File.separator;
+    private boolean debug = false;
+    private static final String pathToGroovyScripts = "./src/org/jtotus/methods/scripts/";
 
     public ConfigLoader(String config) {
         configName = configDir + config;
@@ -49,9 +51,8 @@ public class ConfigLoader<T> {
                 dir.mkdirs();
             }
         }
-
+        
         xstream = new XStream(new DomDriver());
-
     }
 
     public boolean configDirExists() {
@@ -108,7 +109,9 @@ public class ConfigLoader<T> {
 
         try {
             fis = new FileInputStream(path);
-           //xstream.alias("methodConfig", MainMethodConfig.class);
+            if (debug) {
+                System.out.printf("ConfigLoader reading:%s\n", path);
+            }
             retObj = (T) xstream.fromXML(fis);
             
             fis.close();
@@ -220,5 +223,11 @@ public class ConfigLoader<T> {
         }
 
 
+    }
+
+
+
+    public static String getPathToGroovyScripts() {
+        return pathToGroovyScripts;
     }
 }

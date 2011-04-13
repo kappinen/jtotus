@@ -36,12 +36,13 @@ public class JtotusApp extends SingleFrameApplication {
         //Load ScriptEngine for JavaScript
         StartUpLoader loader = StartUpLoader.getInstance();
         loader.load("js");
-        
-        JtotusView mainWindow=new JtotusView(this);
-        
-        Engine mainEngine=Engine.getInstance();
 
+        Engine mainEngine = Engine.getInstance();
+
+        JtotusView mainWindow = new JtotusView(this);
         mainWindow.setListener(mainEngine);
+        mainWindow.initialize();
+        
         mainEngine.setGUI(mainWindow);
 
         mainEngine.run();

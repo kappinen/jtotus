@@ -41,6 +41,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import org.jtotus.common.Helper;
 import org.jtotus.common.MethodResults;
+import org.jtotus.config.ConfPortfolio;
 import org.jtotus.config.ConfigLoader;
 import org.jtotus.config.GUIConfig;
 import org.jtotus.config.MainMethodConfig;
@@ -110,6 +111,7 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
         JTable table = null;
         JPopupMenu popup = null;
         JCheckBoxMenuItem item = null;
+        JCheckBoxMenuItem auto = null;
         ConfigLoader<MainMethodConfig> configFile = null;
         MainMethodConfig config = null;
         
@@ -124,8 +126,9 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
 
             popup = new JPopupMenu();
             item = new JCheckBoxMenuItem("Draw");
-
+            auto = new JCheckBoxMenuItem("Auto-start");
             popup.add(item);
+            popup.add(auto);
 
             item.addActionListener(new ActionListener() {
 
@@ -133,6 +136,30 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
                 public void actionPerformed(ActionEvent evt) {
                     config.inputPrintResults = !config.inputPrintResults;
                     configFile.storeConfig(config);
+                }
+            });
+
+            auto.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent evt) {
+                    int[] selectedRows = table.getSelectedRows();
+                    ConfPortfolio portfolioConfig;
+
+                    ConfigLoader<ConfPortfolio> configPortfolio =
+                            new ConfigLoader<ConfPortfolio>("OMXHelsinki");
+
+                    portfolioConfig = configPortfolio.getConfig();
+                    if (portfolioConfig == null) {
+                        //Load default values
+                        portfolioConfig = new ConfPortfolio();
+                    }
+
+                    for (int row = 0; row < selectedRows.length; row++) {
+                       String method = table.getModel().getValueAt(selectedRows[row], 0).toString();
+                       portfolioConfig.setAutoStared(method);
+                    }
+                    configPortfolio.storeConfig(portfolioConfig);
                 }
             });
 
@@ -151,9 +178,27 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
             if (e.isPopupTrigger()) {
                 final JPopupMenu popupMenu = getPopupMenu();
 
+                ConfPortfolio portfolioConfig;
+
+                ConfigLoader<ConfPortfolio> configPortfolio =
+                        new ConfigLoader<ConfPortfolio>("OMXHelsinki");
+
+                portfolioConfig = configPortfolio.getConfig();
+                if (portfolioConfig == null) {
+                    //Load default values
+                    portfolioConfig = new ConfPortfolio();
+                }
+
                 int[] selectedRows = table.getSelectedRows();
 
                 for (int row = 0; row < selectedRows.length; row++) {
+                    String method = table.getModel().getValueAt(selectedRows[row], 0).toString();
+                    if (portfolioConfig.isAutoStared(method)) {
+                        auto.setSelected(true);
+                    } else {
+                        auto.setSelected(false);
+                    }
+                    
                     int[] selectedColumns = table.getSelectedColumns();
                     for (int col = 0; col < selectedColumns.length; col++) {
                         if (!table.isCellSelected(selectedRows[row], selectedColumns[col])
@@ -176,6 +221,9 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
                         }
                     }
                 }
+
+                
+                
 
                 popupMenu.show(e.getComponent(),
                         e.getX(), e.getY());

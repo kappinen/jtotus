@@ -81,7 +81,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
             config = new ConfTaLibRSI();
             configFile.storeConfig(config);
         } else {
-            config = (ConfTaLibRSI) configFile.getConfig();
+            config = configFile.getConfig();
         }
         super.child_config = config;
         configFile.applyInputsToObject(this);

@@ -17,8 +17,6 @@
 
 package org.jtotus.config;
 
-import java.util.Calendar;
-
 /**
  *
  * @author Evgeni Kappinen
@@ -27,7 +25,7 @@ public class MainMethodConfig {
    public String inputPortfolio=null;
    public boolean inputPrintResults = false;
    public boolean inputPerfomDecision = true;
-
+   private boolean autoStart = false;
    public String inputNormilizerType=null;
 
     //Methods sets, if available.
@@ -38,6 +36,19 @@ public class MainMethodConfig {
 
         inputPortfolio = "OMXHelsinki";
 
-        
    }
+
+    /**
+     * @return the autoStart
+     */
+    public boolean isAutoStart() {
+        return autoStart;
+    }
+
+    /**
+     * @param autoStart the autoStart to set
+     */
+    public void setAutoStart(boolean autoStart) {
+        this.autoStart = autoStart;
+    }
 }

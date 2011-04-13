@@ -23,25 +23,16 @@ import brokerwatcher.generators.RsiGenerator;
 import brokerwatcher.generators.TickInterface;
 import brokerwatcher.generators.VPTGenerator;
 import brokerwatcher.generators.VrocGenerator;
-import brokerwatcher.indicators.SimpleTechnicalIndicators;
 import brokerwatcher.listeners.TicksToFile;
-import brokerwatcher.ranalyzer.Rexecutor;
 import org.jtotus.methods.MethodEntry;
 import org.jtotus.methods.DecisionScript;
 import org.jtotus.methods.DummyMethod;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jtotus.config.ConfPortfolio;
 import org.jtotus.gui.JtotusView;
-import org.jtotus.config.MethodConfig;
 import org.jtotus.database.AutoUpdateStocks;
 import org.jtotus.gui.MethodResultsPrinter;
 import org.jtotus.methods.PotentialWithIn;
@@ -62,70 +53,45 @@ public class Engine {
 
     private static Engine singleton = null;
     private PortfolioDecision portfolioDecision = null;
-    private LinkedList<MethodEntry> methodList;
     private JtotusView mainWindow = null;
-    private HashMap<String, LinkedBlockingDeque> graphAccessPoints = null;
-
+    private ConfPortfolio portfolioConfig = null;
     //GenearatorName, StatementString, Object
     private HashMap<String, HashMap<String, TickInterface>> listOfGenerators = null;
-    private final static Log log = LogFactory.getLog( Engine.class );
-
+    private final static Log log = LogFactory.getLog(Engine.class);
+    private MethodResultsPrinter  resultsPrinter = null;
+    
     public HashMap<String, HashMap<String, TickInterface>> getListOfGenerators() {
         return listOfGenerators;
     }
-
-    private MethodResultsPrinter  resultsPrinter = null;
-
+    
     private void prepareMethodsList() {
         // Available methods
-
+        if (portfolioDecision == null) {
+            portfolioDecision = new PortfolioDecision();
+        }
+        
         listOfGenerators = new HashMap<String, HashMap<String, TickInterface>>();
 
-        methodList.add(new DummyMethod(portfolioDecision));
-        methodList.add(new PotentialWithIn());
-        methodList.add(new TaLibRSI());
-        methodList.add(new TaLibSMA());
-        methodList.add(new TaLibEMA());
-        methodList.add(new TaLibMOM());
-        methodList.add(new TaLibMACD());
-        methodList.add(new SpearmanCorrelation());
-        methodList.add(new StatisticsFreqPeriod());
+        portfolioDecision.addLongTermMethod(new DummyMethod(portfolioDecision));
+        portfolioDecision.addLongTermMethod(new PotentialWithIn());
+        portfolioDecision.addLongTermMethod(new TaLibRSI());
+        portfolioDecision.addLongTermMethod(new TaLibSMA());
+        portfolioDecision.addLongTermMethod(new TaLibEMA());
+        portfolioDecision.addLongTermMethod(new TaLibMOM());
+        portfolioDecision.addLongTermMethod(new TaLibMACD());
+        portfolioDecision.addLongTermMethod(new SpearmanCorrelation());
+        portfolioDecision.addLongTermMethod(new StatisticsFreqPeriod());
 
-        File scriptDir = new File("./src/org/jtotus/methods/scripts/");
-        if (!scriptDir.isDirectory()) {
-            return;
-        }
-
-        FileFilter filter = fileIsGroovyScript();
-        File[] listOfFiles = scriptDir.listFiles(filter);
-
-        for (File tmp : listOfFiles) {
-            try {
-                methodList.add(new DecisionScript(tmp.getCanonicalPath()));
-            } catch (IOException ex) {
-                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
+        DecisionScript.loadScripts(portfolioDecision);
     }
 
-
-    protected Engine() {
-
-        log.info("Engine is started");
-        
-        portfolioDecision = new PortfolioDecision();
-
-        graphAccessPoints = new HashMap<String, LinkedBlockingDeque>();
-        methodList = new LinkedList<MethodEntry>();
-
+    private Engine() {
         this.prepareMethodsList();
-
-        
     }
+
 
     public synchronized static Engine getInstance() {
-
+        
         if (singleton == null) {
             singleton = new Engine();
         }
@@ -135,29 +101,24 @@ public class Engine {
 
     public void setGUI(JtotusView tempView) {
         mainWindow = tempView;
-        mainWindow.initialize();
     }
 
     public synchronized LinkedList<MethodEntry> getMethods() {
-        return methodList;
+        return portfolioDecision.getMethodList();
     }
 
     public void run() {
-        if (portfolioDecision.setList(methodList)) {
-            log.debug("Dispatcher is already full");
-            return;
-        }
 
-        MethodConfig config = new MethodConfig();
+        log.info("Engine is started");
 
+        this.prepareMethodsList();
         //Auto-update stock values
-        String[] stocks = config.stockNames;
+        portfolioConfig = ConfPortfolio.getPortfolioConfig();
+        String[] stocks = portfolioConfig.inputListOfStocks;
         for (int i = stocks.length - 1; i >= 0; i--) {
             Thread updateThread = new Thread(new AutoUpdateStocks(stocks[i]));
             updateThread.start();
         }
-
-        
         
         testRun();
     }
@@ -193,89 +154,14 @@ public class Engine {
         mainWindow.fetchGeneratorList();
         watcher.call();
 
-        
-//        DateTime date = new DateTime();
-//
-//        System.out.printf("\nTime:%s\n", date.toString());
-//
-//        for (StateIterator iter = new StateIterator().addParam("Param2", "int[6-8]{1}"); iter.hasNext() != StateIterator.END_STATE; iter.nextState()) {
-//            System.out.printf("Param2: %d\n", iter.nextInt("Param2"));
-//        }
-
-
     }
 
     public void train() {
 
         LinkedList<String> methodNames = mainWindow.getMethodList();
-
-
-        LinkedList<MethodEntry> methodL = (LinkedList<MethodEntry>) methodList.clone();
-        Iterator<MethodEntry> methodIter = methodL.iterator();
-        boolean found = false;
-
-
-        while (methodIter.hasNext()) {
-            Iterator<String> nameIter = methodNames.iterator();
-            MethodEntry methName = methodIter.next();
-            String tempName = methName.getMethName();
-
-            while (nameIter.hasNext()) {
-                String nameList = nameIter.next();
-                log.debug("Search name:"+tempName+" in list:"+nameList);
-
-                if (nameList.compareTo(tempName) == 0) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                log.debug("Removeing:" + tempName);
-                methodIter.remove();
-            }
-            found = false;
-        }
-
-        if (portfolioDecision.setList(methodL)) {
-            log.debug("Dispatcher is already full");
-            return;
-        }
-
-        Thread portThread = new Thread(portfolioDecision);
-        portThread.start();
-
+        portfolioDecision.startLongTermMethods(methodNames);
     }
 
-    private FileFilter fileIsGroovyScript() {
-        FileFilter fileFilter = new FileFilter() {
-
-            public boolean accept(File file) {
-                if (!file.isFile() || !file.canRead()) {
-                    return false;
-                }
-
-                String name = file.getName();
-                if (!name.endsWith(".groovy")) {
-                    return false;
-                }
-                return true;
-            }
-        };
-        return fileFilter;
-    }
-
-    public void registerGraph(String reviewTarget, LinkedBlockingDeque acceccPoint) {
-
-        if (graphAccessPoints.containsKey(reviewTarget)) {
-            System.err.printf("Warning BUG SHOULD NO HAPPEND!!\n");
-            //FIXME:what to do when..
-            return;
-        }
-
-        //Register access port for messages
-        graphAccessPoints.put(reviewTarget, acceccPoint);
-
-    }
 
     public synchronized void registerResultsPrinter(MethodResultsPrinter printer) {
         System.out.printf("Registering result printer\n");

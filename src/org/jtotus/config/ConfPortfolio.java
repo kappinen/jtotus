@@ -17,6 +17,7 @@
 
 package org.jtotus.config;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
 /**
@@ -27,21 +28,20 @@ public class ConfPortfolio {
     private String portofoliName=null;
     public String[] inputListOfStocks;
     public double inputAssumedBudjet;
-
     public Calendar inputStartingDate = null;
     public Calendar inputEndingDate = null;
     public boolean useCurentDayAsEndingDate = true;
+    public ArrayList<String> autoStartedMethods;
 
     public ConfPortfolio() {
-
-        MethodConfig mainConfig = new MethodConfig();
-        inputListOfStocks = mainConfig.fetchStockNames();
+        inputListOfStocks = fetchGUIStockNames();
         inputAssumedBudjet=6000;
 
         inputEndingDate = Calendar.getInstance();
         inputStartingDate = Calendar.getInstance();
         inputStartingDate.add(Calendar.DATE, -300);
         portofoliName = "OMXHelsinki";
+        autoStartedMethods = new ArrayList<String>();
     }
 
     /**
@@ -57,5 +57,43 @@ public class ConfPortfolio {
     public void setPortofoliName(String portofoliName) {
         this.portofoliName = portofoliName;
     }
-    
+
+    public String[] fetchGUIStockNames() {
+        GUIConfig config = null;
+        ConfigLoader<GUIConfig> loader = new ConfigLoader<GUIConfig>("GUIConfig");
+
+        //config = new GUIConfig();
+        config = loader.getConfig();
+        //if config does not exists create new one
+        if (config == null) {
+            config = new GUIConfig();
+            loader.storeConfig(config);
+        }
+
+        return config.fetchStockNames();
+        
+    }
+
+    public static synchronized ConfPortfolio getPortfolioConfig() {
+        ConfPortfolio portfolioConfig;
+        
+        ConfigLoader<ConfPortfolio> configPortfolio =
+                new ConfigLoader<ConfPortfolio>("OMXHelsinki");
+
+        portfolioConfig = configPortfolio.getConfig();
+        if (portfolioConfig == null) {
+            //Load default values
+            portfolioConfig = new ConfPortfolio();
+            configPortfolio.storeConfig(portfolioConfig);
+        }
+        return portfolioConfig;
+    }
+
+    public boolean isAutoStared(String methodName) {
+        return autoStartedMethods.contains(methodName);
+    }
+
+    public void setAutoStared(String methodName) {
+        autoStartedMethods.add(methodName);
+    }
 }

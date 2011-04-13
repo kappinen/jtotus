@@ -1,4 +1,4 @@
-/*
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      /*
     This file is part of jTotus.
 
     jTotus is free software: you can redistribute it and/or modify
@@ -26,8 +26,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.jtotus.common.Helper;
 import org.jtotus.common.MethodResults;
+import org.jtotus.common.StockNames;
 import org.jtotus.common.StockType;
-import org.jtotus.config.MethodConfig;
+import org.jtotus.config.ConfPortfolio;
 
 /**
  *
@@ -60,16 +61,15 @@ public class PotentialWithIn implements MethodEntry {
 
 
     public void run() {
-       MethodConfig listOfTasks = new MethodConfig();
-
+       ConfPortfolio portfolioConfig = ConfPortfolio.getPortfolioConfig();
        voteCounter = new HashMap<String, Integer>();
        periodList = new ArrayList<PeriodClosingPrice>();
        
-       Iterator<String> iter = listOfTasks.iterator();
-
+       
+       String []stockNames = portfolioConfig.inputListOfStocks;
        //Build period history for stock
-       while(iter.hasNext()) {
-           StockType stock = new StockType(iter.next());
+       for(int i = 0; i < stockNames.length; i++) {
+           StockType stock = new StockType(stockNames[i]);
             periodList.add(new PeriodClosingPrice(stock));
             help.debug(this.getClass().getName(),
                     "StockName for period:%s\n", stock.getStockName());
@@ -266,8 +266,6 @@ public class PotentialWithIn implements MethodEntry {
            }
         }
 
-
-      
            //Find out potentials and sort them
 
 //
@@ -306,6 +304,5 @@ public class PotentialWithIn implements MethodEntry {
     public boolean isCallable() {
         return true;
     }
-
 
 }
