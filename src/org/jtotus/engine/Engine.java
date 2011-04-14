@@ -24,8 +24,6 @@ import brokerwatcher.generators.TickInterface;
 import brokerwatcher.generators.VPTGenerator;
 import brokerwatcher.generators.VrocGenerator;
 import brokerwatcher.listeners.TicksToFile;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jtotus.methods.MethodEntry;
 import org.jtotus.methods.DummyMethod;
 import java.util.HashMap;
@@ -60,18 +58,20 @@ public class Engine {
     //GenearatorName, StatementString, Object
     private HashMap<String, HashMap<String, TickInterface>> listOfGenerators = null;
     private final static Log log = LogFactory.getLog(Engine.class);
-    private MethodResultsPrinter  resultsPrinter = null;
+    private MethodResultsPrinter resultsPrinter = null;
+    private BrokerWatcher watcher = new BrokerWatcher();
+
     
     public HashMap<String, HashMap<String, TickInterface>> getListOfGenerators() {
         return listOfGenerators;
     }
-    
+
     private void prepareMethodsList() {
         // Available methods
         if (portfolioDecision == null) {
             portfolioDecision = new PortfolioDecision();
         }
-        
+
         listOfGenerators = new HashMap<String, HashMap<String, TickInterface>>();
 
         portfolioDecision.addLongTermMethod(new DummyMethod(portfolioDecision));
@@ -103,9 +103,8 @@ public class Engine {
         this.prepareMethodsList();
     }
 
-
     public synchronized static Engine getInstance() {
-        
+
         if (singleton == null) {
             singleton = new Engine();
         }
@@ -133,22 +132,18 @@ public class Engine {
             Thread updateThread = new Thread(new AutoUpdateStocks(stocks[i]));
             updateThread.start();
         }
-        
+
         testRun();
     }
-
 
     private void addGeneratorToList(String stmt, TickInterface ticker) {
         HashMap<String, TickInterface> tickerMap = new HashMap<String, TickInterface>();
         tickerMap.put(stmt, ticker);
         listOfGenerators.put(ticker.getName(), tickerMap);
     }
-    
 
     private void testRun() {
 
-
-        BrokerWatcher watcher = new BrokerWatcher();
         //TickListenerPrinter printer = new TickListenerPrinter();
 
         //printer.sendEventsToGui();
@@ -176,7 +171,6 @@ public class Engine {
         portfolioDecision.startLongTermMethods(methodNames);
     }
 
-
     public synchronized void registerResultsPrinter(MethodResultsPrinter printer) {
         System.out.printf("Registering result printer\n");
         resultsPrinter = printer;
@@ -186,5 +180,13 @@ public class Engine {
 
     public synchronized MethodResultsPrinter getResultsPrinter() {
         return resultsPrinter;
+    }
+
+    public void startHistorySimulator() {
+        watcher.startHistoryGenerator();
+    }
+
+    public void startMarketTicker() {
+        watcher.startTicker();
     }
 }

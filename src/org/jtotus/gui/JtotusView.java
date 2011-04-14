@@ -217,6 +217,7 @@ public class JtotusView extends FrameView {
         methodTabbedPane = new org.jtotus.gui.JTotusMethodView();
         menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
+        jCheckBoxMenuItem1 = new javax.swing.JCheckBoxMenuItem();
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenu configMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem configMenuItem = new javax.swing.JMenuItem();
@@ -272,11 +273,11 @@ public class JtotusView extends FrameView {
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
-                .addContainerGap(769, Short.MAX_VALUE)
+                .addContainerGap(767, Short.MAX_VALUE)
                 .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(mainPanelLayout.createSequentialGroup()
-                    .addComponent(methodTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 764, Short.MAX_VALUE)
+                    .addComponent(methodTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 762, Short.MAX_VALUE)
                     .addGap(32, 32, 32)))
         );
 
@@ -284,6 +285,16 @@ public class JtotusView extends FrameView {
 
         fileMenu.setText(resourceMap.getString("fileMenu.text")); // NOI18N
         fileMenu.setName("fileMenu"); // NOI18N
+
+        jCheckBoxMenuItem1.setSelected(true);
+        jCheckBoxMenuItem1.setText(resourceMap.getString("jCheckBoxMenuItem1.text")); // NOI18N
+        jCheckBoxMenuItem1.setName("jCheckBoxMenuItem1"); // NOI18N
+        jCheckBoxMenuItem1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                jCheckBoxMenuItem1MouseReleased(evt);
+            }
+        });
+        fileMenu.add(jCheckBoxMenuItem1);
 
         javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(org.jtotus.gui.JtotusApp.class).getContext().getActionMap(JtotusView.class, this);
         exitMenuItem.setAction(actionMap.get("quit")); // NOI18N
@@ -362,7 +373,7 @@ public class JtotusView extends FrameView {
             .addGroup(statusPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(statusMessageLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 505, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 507, Short.MAX_VALUE)
                 .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(statusAnimationLabel)
@@ -481,6 +492,15 @@ public class JtotusView extends FrameView {
        }
     }//GEN-LAST:event_indicatorsMenuMousePressed
 
+    private void jCheckBoxMenuItem1MouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBoxMenuItem1MouseReleased
+        Engine engine = Engine.getInstance();
+        if (jCheckBoxMenuItem1.isSelected()) {
+            engine.startHistorySimulator();
+        }else {
+            engine.startMarketTicker();
+        }
+    }//GEN-LAST:event_jCheckBoxMenuItem1MouseReleased
+
    
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -488,6 +508,7 @@ public class JtotusView extends FrameView {
     private javax.swing.JLabel infoLable;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButtonRunScripts;
+    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JSplitPane jSplitPane1;

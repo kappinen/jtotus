@@ -32,6 +32,8 @@ import brokerwatcher.eventtypes.StockTick;
 import brokerwatcher.generators.EsperEventGenerator;
 import brokerwatcher.generators.HistoryTicksFromFile;
 import brokerwatcher.generators.TickGenerator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jtotus.gui.graph.GraphPacket;
 import org.jtotus.threads.MethodFuture;
 
@@ -91,12 +93,47 @@ public class BrokerWatcher implements Callable, Runnable{
         eps.addListener(listener);
     }
 
+
+    public void startHistoryGenerator() {
+        startService(new HistoryTicksFromFile(cep.getEPRuntime()));
+    }
+
+    public void startTicker() {
+        startService(new TickGenerator(cep.getEPRuntime()));
+    }
+
+    private void startService(EsperEventGenerator tickGenerator) {
+
+        if (futureTask != null) {
+            if (futureTask.cancel(true)) {
+             futureTask =  null;
+            }
+        }
+
+        if (futureTask == null) {
+            futureTask = new MethodFuture<String>(tickGenerator);
+            threadExecutor.submit(futureTask);
+        }
+        
+    }
+    
+
     public Object call() {
 
-        EsperEventGenerator tickGenerator = new HistoryTicksFromFile(cep.getEPRuntime());
-        //EsperEventGenerator tickGenerator = new TickGenerator(cep.getEPRuntime());
-        futureTask = new MethodFuture<String>(tickGenerator);
-        threadExecutor.submit(futureTask);
+//        EsperEventGenerator tickGenerator = new HistoryTicksFromFile(cep.getEPRuntime());
+//        EsperEventGenerator tickGenerator = new TickGenerator(cep.getEPRuntime());
+//        futureTask = new MethodFuture<String>(tickGenerator);
+//        threadExecutor.submit(futureTask);
+
+        startHistoryGenerator();
+
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(BrokerWatcher.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        startTicker();
+        
 
         return null;
     }
