@@ -29,7 +29,6 @@ import org.jtotus.methods.SimpleMovingAvg
 import org.jtotus.common.Helper;
 import org.jtotus.engine.Engine;
 import org.jtotus.gui.graph.GraphPacket;
-import org.jtotus.config.MethodConfig;
 import org.jtotus.common.MethodResults;
 //
 //
@@ -66,5 +65,6 @@ import org.jtotus.common.MethodResults;
 
 println "DONE for StockClosingPrice"
 
-results.printToConsole()
-return results
+//results.printToConsole()
+//return results
+return null

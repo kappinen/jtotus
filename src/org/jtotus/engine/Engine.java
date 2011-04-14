@@ -24,8 +24,9 @@ import brokerwatcher.generators.TickInterface;
 import brokerwatcher.generators.VPTGenerator;
 import brokerwatcher.generators.VrocGenerator;
 import brokerwatcher.listeners.TicksToFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jtotus.methods.MethodEntry;
-import org.jtotus.methods.DecisionScript;
 import org.jtotus.methods.DummyMethod;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -35,6 +36,7 @@ import org.jtotus.config.ConfPortfolio;
 import org.jtotus.gui.JtotusView;
 import org.jtotus.database.AutoUpdateStocks;
 import org.jtotus.gui.MethodResultsPrinter;
+import org.jtotus.methods.GroovyScipts;
 import org.jtotus.methods.PotentialWithIn;
 import org.jtotus.methods.SpearmanCorrelation;
 import org.jtotus.methods.StatisticsFreqPeriod;
@@ -82,7 +84,19 @@ public class Engine {
         portfolioDecision.addLongTermMethod(new SpearmanCorrelation());
         portfolioDecision.addLongTermMethod(new StatisticsFreqPeriod());
 
-        DecisionScript.loadScripts(portfolioDecision);
+        try {
+            Class groovyClass = Class.forName("org.jtotus.methods.DecisionScript");
+            GroovyScipts scripts = (GroovyScipts) groovyClass.newInstance();
+            scripts.loadScripts(portfolioDecision);
+
+        } catch (InstantiationException ex) {
+            log.info("GroovyScipt is disabled : InstantiationException");
+        } catch (IllegalAccessException ex) {
+            log.info("GroovyScipt is disabled : IllegalAccessException");
+        } catch (ClassNotFoundException ex) {
+            log.info("GroovyScipt is disabled");
+        }
+
     }
 
     private Engine() {

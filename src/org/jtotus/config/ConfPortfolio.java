@@ -36,7 +36,7 @@ public class ConfPortfolio {
     public ArrayList<String> autoStartedMethods;
 
     public static final String portfolioName = "OMXHelsinki";
-    private static final String pathToGroovyScripts = "./src/org/jtotus/methods/scripts/";
+    private static final String pathToGroovyScripts = "modules" + File.separator + "groovy" + File.separator + "scripts";
     private static final String pathToResults = portfolioName + File.separator + "results";
     
     public ConfPortfolio() {

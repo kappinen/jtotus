@@ -25,24 +25,25 @@ import groovy.lang.GroovyObject;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.jtotus.common.MethodResults;
 import org.jtotus.config.ConfPortfolio;
-import org.jtotus.config.ConfigLoader;
 import org.jtotus.threads.PortfolioDecision;
 
 /**
  *
  * @author Evgeni Kappinen
  */
-public class DecisionScript extends TaLibAbstract implements MethodEntry {
+public class DecisionScript extends TaLibAbstract implements MethodEntry, GroovyScipts {
 
     private String path_to_script = null;
 
-    public DecisionScript(String tmp) {
+    public DecisionScript() {
+    }
+
+    protected DecisionScript(String tmp) {
         super();
         path_to_script = tmp;
     }
@@ -55,6 +56,7 @@ public class DecisionScript extends TaLibAbstract implements MethodEntry {
         MethodResults results = null;
 
         try {
+            System.out.printf("PATHTOSCIPTs:%s\n", path_to_script);
             groovyClass = loader.parseClass(path_to_script);
             // let's call some method on an instance
             groovyObject = (GroovyObject) groovyClass.newInstance();
@@ -122,7 +124,7 @@ public class DecisionScript extends TaLibAbstract implements MethodEntry {
         return fileFilter;
     }
 
-    public static void loadScripts(PortfolioDecision portfolio) {
+    public void loadScripts(PortfolioDecision portfolio) {
 
         File scriptDir = new File(ConfPortfolio.getPathToGroovyScripts());
         if (!scriptDir.isDirectory()) {
@@ -140,5 +142,4 @@ public class DecisionScript extends TaLibAbstract implements MethodEntry {
             }
         }
     }
-
 }
