@@ -95,6 +95,7 @@ public class StatisticsFreqPeriod extends TaLibAbstract implements MethodEntry{
         double output[] = null;
         List<Double> closingPrices = null;
         int marketStat[][] = null;
+        int direct = 0;
         MethodResults results = new MethodResults(this.getMethName());
 
 
@@ -119,10 +120,13 @@ public class StatisticsFreqPeriod extends TaLibAbstract implements MethodEntry{
             double value = 0.0;
             if (trendInDays > 0) {
                 value = marketStat[POSITIVE][Math.abs(trendInDays) + 1];
+                direct =  1;
             } else if (trendInDays < 0) {
                 value = marketStat[NEGATIVE][Math.abs(trendInDays) + 1];
+                direct =  -1;
             } else {
                 value = marketStat[STILL][Math.abs(trendInDays) + 1];
+                direct = 0;
             }
 
             if (debug) {
@@ -132,7 +136,7 @@ public class StatisticsFreqPeriod extends TaLibAbstract implements MethodEntry{
                     value / (double)output.length );
             }
             
-            results.putResult(portfolioConfig.inputListOfStocks[stockCount], trendInDays*(value / (double)(output.length - 1)));
+            results.putResult(portfolioConfig.inputListOfStocks[stockCount], direct*(value / (double)(output.length - 1)));
         }
 
 

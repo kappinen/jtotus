@@ -17,6 +17,8 @@
 
 package org.jtotus.config;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -33,6 +35,10 @@ public class ConfPortfolio {
     public boolean useCurentDayAsEndingDate = true;
     public ArrayList<String> autoStartedMethods;
 
+    public static final String portfolioName = "OMXHelsinki";
+    private static final String pathToGroovyScripts = "./src/org/jtotus/methods/scripts/";
+    private static final String pathToResults = portfolioName + File.separator + "results";
+    
     public ConfPortfolio() {
         inputListOfStocks = fetchGUIStockNames();
         inputAssumedBudjet=6000;
@@ -95,5 +101,24 @@ public class ConfPortfolio {
 
     public void setAutoStared(String methodName) {
         autoStartedMethods.add(methodName);
+    }
+
+
+    public static String getPathToGroovyScripts() {
+        return pathToGroovyScripts;
+    }
+
+    public static String getPathToResults() {
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        
+        String path = pathToResults + File.separator
+                + format.format(cal.getTime()) + File.separator;
+
+        File dirs =  new File(path);
+        if (dirs.exists()) {
+            dirs.mkdirs();
+        }
+        return path + "LongTermResults";
     }
 }

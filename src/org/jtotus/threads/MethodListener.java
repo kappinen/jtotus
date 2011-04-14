@@ -17,6 +17,9 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 package org.jtotus.threads;
 
 import org.jtotus.common.MethodResults;
+import org.jtotus.config.ConfPortfolio;
+import org.jtotus.config.ConfigLoader;
+import org.jtotus.config.ResultsOfLongTermMethods;
 import org.jtotus.engine.Engine;
 import org.jtotus.gui.MethodResultsPrinter;
 
@@ -27,6 +30,16 @@ import org.jtotus.gui.MethodResultsPrinter;
 public class MethodListener implements InterfaceMethodListner {
      
     public void putResults(MethodResults results) {
+
+        ConfigLoader<ResultsOfLongTermMethods> loader =
+                new ConfigLoader<ResultsOfLongTermMethods>(ConfPortfolio.getPathToResults());
+
+        ResultsOfLongTermMethods resultsFile = loader.getConfig();
+        if (resultsFile == null) {
+            resultsFile = new ResultsOfLongTermMethods();
+        }
+        resultsFile.add(results.getMethodName(), results);
+        loader.storeConfig(resultsFile);
         
         Engine engine = Engine.getInstance();
         results.printToConsole();

@@ -37,7 +37,7 @@ public class ConfigLoader<T> {
     private String configName = null;
     private String configDir = "config" + File.separator;
     private boolean debug = false;
-    private static final String pathToGroovyScripts = "./src/org/jtotus/methods/scripts/";
+    
 
     public ConfigLoader(String config) {
         configName = configDir + config;
@@ -225,9 +225,4 @@ public class ConfigLoader<T> {
 
     }
 
-
-
-    public static String getPathToGroovyScripts() {
-        return pathToGroovyScripts;
-    }
 }

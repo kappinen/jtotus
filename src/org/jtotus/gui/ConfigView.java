@@ -180,7 +180,6 @@ public class ConfigView extends javax.swing.JDialog {
 
            if (fileName.endsWith(".xml")){
 
-               SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
                 DefaultTableModel model = (DefaultTableModel) confTable.getModel();
                 config = configLoader.readObj(fileName);
                 

@@ -30,6 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.jtotus.common.MethodResults;
+import org.jtotus.config.ConfPortfolio;
 import org.jtotus.config.ConfigLoader;
 import org.jtotus.threads.PortfolioDecision;
 
@@ -123,7 +124,7 @@ public class DecisionScript extends TaLibAbstract implements MethodEntry {
 
     public static void loadScripts(PortfolioDecision portfolio) {
 
-        File scriptDir = new File(ConfigLoader.getPathToGroovyScripts());
+        File scriptDir = new File(ConfPortfolio.getPathToGroovyScripts());
         if (!scriptDir.isDirectory()) {
             return;
         }
