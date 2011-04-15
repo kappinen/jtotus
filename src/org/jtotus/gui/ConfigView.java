@@ -24,20 +24,11 @@
 
 package org.jtotus.gui;
 
-import java.awt.Component;
-import java.awt.event.WindowEvent;
-import java.io.File;
-import java.lang.reflect.Field;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.AbstractCellEditor;
-import javax.swing.JDialog;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerDateModel;
-import javax.swing.SpinnerModel;
+import net.sf.nachocalendar.table.JTableCustomizer;
+import org.dom4j.Document;
+import org.jtotus.config.ConfigLoader;
+
+import javax.swing.*;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -46,10 +37,14 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-import net.sf.nachocalendar.table.DateFieldTableEditor;
-import net.sf.nachocalendar.table.JTableCustomizer;
-import org.dom4j.Document;
-import org.jtotus.config.ConfigLoader;
+import java.awt.*;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.lang.reflect.Field;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -106,9 +101,6 @@ public class ConfigView extends javax.swing.JDialog {
      }
 
 }
-
-
-
 
 
    // http://docstore.mik.ua/orelly/java-ent/jfc/ch03_19.htm
@@ -234,8 +226,6 @@ public class ConfigView extends javax.swing.JDialog {
         }
 
    }
-
-
 
     /** Creates new form ConfigView */
     public ConfigView(java.awt.Frame parent, boolean modal) {
