@@ -17,39 +17,40 @@
 
 package brokerwatcher.ranalyzer;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.Rserve.RConnection;
 import org.rosuda.REngine.Rserve.RserveException;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
- *
  * @author Evgeni Kappinen
  */
 public class Rexecutor {
     private static boolean serverStarted = false;
-    private final static Log log = LogFactory.getLog( Rexecutor.class );
-    private final static String os = System.getProperty( "os.name" ).toLowerCase();
+    private final static Log log = LogFactory.getLog(Rexecutor.class);
+    private final static String os = System.getProperty("os.name").toLowerCase();
     private RConnection connection = null;
 
     /**
      * Starts RServe daemon
+     *
      * @return false on failure
      */
     private synchronized static boolean startRServe() {
         BufferedReader stderr = null;
-        
+
         if (serverStarted) {
             return serverStarted;
         }
-        
+
         try {
             String rserverStartUp = null;
             log.info("Starting RServe");
@@ -90,7 +91,7 @@ public class Rexecutor {
         return serverStarted;
     }
 
-    
+
     /**
      * @return the connection
      */
@@ -99,7 +100,7 @@ public class Rexecutor {
             startRServe();
             connection = new RConnection();
         }
-        
+
         return connection;
     }
 
@@ -120,17 +121,9 @@ public class Rexecutor {
         } finally {
             //TODO: close/shutdown connection ?
         }
-        
+
         return new REXP();
     }
-    
 
-
-
-
-
-
-
-    
 
 }

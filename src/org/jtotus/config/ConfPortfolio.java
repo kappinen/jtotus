@@ -23,11 +23,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 /**
- *
  * @author Evgeni Kappinen
  */
 public class ConfPortfolio {
-    private String portofoliName=null;
+    private String portofoliName = null;
     public String[] inputListOfStocks;
     public double inputAssumedBudjet;
     public Calendar inputStartingDate = null;
@@ -38,15 +37,16 @@ public class ConfPortfolio {
     public static final String portfolioName = "OMXHelsinki";
     private static final String pathToGroovyScripts = "modules" + File.separator + "groovy" + File.separator + "scripts";
     private static final String pathToResults = portfolioName + File.separator + "results";
-    
+
     public ConfPortfolio() {
         inputListOfStocks = fetchGUIStockNames();
-        inputAssumedBudjet=6000;
+        inputAssumedBudjet = 6000;
 
         inputEndingDate = Calendar.getInstance();
         inputStartingDate = Calendar.getInstance();
         inputStartingDate.add(Calendar.DATE, -300);
         portofoliName = "OMXHelsinki";
+
         autoStartedMethods = new ArrayList<String>();
     }
 
@@ -77,12 +77,12 @@ public class ConfPortfolio {
         }
 
         return config.fetchStockNames();
-        
+
     }
 
     public static synchronized ConfPortfolio getPortfolioConfig() {
         ConfPortfolio portfolioConfig;
-        
+
         ConfigLoader<ConfPortfolio> configPortfolio =
                 new ConfigLoader<ConfPortfolio>("OMXHelsinki");
 
@@ -111,11 +111,11 @@ public class ConfPortfolio {
     public static String getPathToResults() {
         Calendar cal = Calendar.getInstance();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        
+
         String path = pathToResults + File.separator
                 + format.format(cal.getTime()) + File.separator;
 
-        File dirs =  new File(path);
+        File dirs = new File(path);
         if (dirs.exists()) {
             dirs.mkdirs();
         }

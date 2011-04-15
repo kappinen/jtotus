@@ -22,78 +22,67 @@ package org.jtotus.gui;
 
 
 import brokerwatcher.generators.TickInterface;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.UnsupportedLookAndFeelException;
 import org.jdesktop.application.Action;
-import org.jdesktop.application.ResourceMap;
-import org.jdesktop.application.SingleFrameApplication;
-import org.jdesktop.application.FrameView;
-import org.jdesktop.application.Task;
-import org.jdesktop.application.TaskMonitor;
+import org.jdesktop.application.*;
+import org.jtotus.crypt.JtotusKeyRingPassword;
+import org.jtotus.engine.Engine;
+import org.jtotus.gui.passwords.JtotusPasswordGUI;
+import org.jtotus.gui.passwords.JtotusSetPasswordsGUI;
+
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import javax.swing.Timer;
-import javax.swing.Icon;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFrame;
-import javax.swing.JMenuItem;
-import javax.swing.UIManager;
-import org.jtotus.crypt.JtotusKeyRingPassword;
-import org.jtotus.engine.Engine;
-import org.jtotus.gui.passwords.JtotusPasswordGUI;
-import org.jtotus.gui.passwords.JtotusSetPasswordsGUI;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
- 
-    
+
 /**
  * The application's main frame.
  */
 public class JtotusView extends FrameView {
 
-   private Engine mainEngine = null;
-   private JFrame mainFrame = null;
+    private Engine mainEngine = null;
+    private JFrame mainFrame = null;
 
-   
-   public void initialize()
-    {
-       ((JTotusMethodView)methodTabbedPane).initialize();
 
-       JtotusPortfolioView portTabTable = new JtotusPortfolioView();
-       portTabTable.initialize();
+    public void initialize() {
+        ((JTotusMethodView) methodTabbedPane).initialize();
 
-       portTabTable.setMainPane(((JTotusMethodView)methodTabbedPane).getMainPane());
-       ((JTotusMethodView)methodTabbedPane).addComponentToInternalWindow(portTabTable, "PortfolioView");
-       
+        JtotusPortfolioView portTabTable = new JtotusPortfolioView();
+        portTabTable.initialize();
+
+        portTabTable.setMainPane(((JTotusMethodView) methodTabbedPane).getMainPane());
+        ((JTotusMethodView) methodTabbedPane).addComponentToInternalWindow(portTabTable, "PortfolioView");
+
 
     }
 
-   public LinkedList<String> getMethodList() {
+    public LinkedList<String> getMethodList() {
 
-       //Returns selected methods from methoTabPane
-       return ((JTotusMethodView)methodTabbedPane).getSelectedMethods();
-   }
+        //Returns selected methods from methoTabPane
+        return ((JTotusMethodView) methodTabbedPane).getSelectedMethods();
+    }
 
 
-   public void checkKeyRingPassword() {
+    public void checkKeyRingPassword() {
         //Ask for Keyring password first
         JtotusPasswordGUI keyRingGUI = new JtotusPasswordGUI(mainFrame, true);
         keyRingGUI.askForKeyRing();
 
         JtotusKeyRingPassword password = JtotusKeyRingPassword.getInstance();
-        if(password.getKeyRingPassword() == null) {
+        if (password.getKeyRingPassword() == null) {
             keyRingGUI.dispose();
             System.exit(-1);
         }
-   }
+    }
 
     public JtotusView(SingleFrameApplication app) {
         super(app);
-        mainFrame=app.getMainFrame();
+        mainFrame = app.getMainFrame();
 
         this.checkKeyRingPassword();
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -142,11 +131,11 @@ public class JtotusView extends FrameView {
                     progressBar.setVisible(false);
                     progressBar.setValue(0);
                 } else if ("message".equals(propertyName)) {
-                    String text = (String)(evt.getNewValue());
+                    String text = (String) (evt.getNewValue());
                     statusMessageLabel.setText((text == null) ? "" : text);
                     messageTimer.restart();
                 } else if ("progress".equals(propertyName)) {
-                    int value = (Integer)(evt.getNewValue());
+                    int value = (Integer) (evt.getNewValue());
                     progressBar.setVisible(true);
                     progressBar.setIndeterminate(false);
                     progressBar.setValue(value);
@@ -154,11 +143,10 @@ public class JtotusView extends FrameView {
             }
         });
 
-        
+
     }
 
-    public void setListener(Engine engine)
-    {
+    public void setListener(Engine engine) {
         try {
             UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
         } catch (ClassNotFoundException ex) {
@@ -173,7 +161,7 @@ public class JtotusView extends FrameView {
         mainEngine = engine;
     }
 
-    
+
     @Action
     public Task showConfigView() {
         return new ShowConfigViewTask(getApplication());
@@ -189,19 +177,24 @@ public class JtotusView extends FrameView {
             ConfigView configView = new ConfigView(mainFrame, true);
             configView.setVisible(true);
         }
-        @Override protected Object doInBackground() {
+
+        @Override
+        protected Object doInBackground() {
             // Your Task's code here.  This method runs
             // on a background thread, so don't reference
             // the Swing GUI from here.
             return null;  // return your result
         }
-        @Override protected void succeeded(Object result) {
+
+        @Override
+        protected void succeeded(Object result) {
             // Runs on the EDT.  Update the GUI based on
             // the result computed by doInBackground().
         }
     }
 
-   /** This method is called from within the constructor to
+    /**
+     * This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
      * always regenerated by the Form Editor.
@@ -263,22 +256,22 @@ public class JtotusView extends FrameView {
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
-            mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(mainPanelLayout.createSequentialGroup()
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(481, Short.MAX_VALUE))
-            .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(methodTabbedPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 685, Short.MAX_VALUE))
+                mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(mainPanelLayout.createSequentialGroup()
+                                .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(481, Short.MAX_VALUE))
+                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(methodTabbedPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 685, Short.MAX_VALUE))
         );
         mainPanelLayout.setVerticalGroup(
-            mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
-                .addContainerGap(767, Short.MAX_VALUE)
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(mainPanelLayout.createSequentialGroup()
-                    .addComponent(methodTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 762, Short.MAX_VALUE)
-                    .addGap(32, 32, 32)))
+                mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
+                                .addContainerGap(767, Short.MAX_VALUE)
+                                .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(mainPanelLayout.createSequentialGroup()
+                                        .addComponent(methodTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 762, Short.MAX_VALUE)
+                                        .addGap(32, 32, 32)))
         );
 
         menuBar.setName("menuBar"); // NOI18N
@@ -286,7 +279,7 @@ public class JtotusView extends FrameView {
         fileMenu.setText(resourceMap.getString("fileMenu.text")); // NOI18N
         fileMenu.setName("fileMenu"); // NOI18N
 
-        jCheckBoxMenuItem1.setSelected(true);
+        jCheckBoxMenuItem1.setSelected(false);
         jCheckBoxMenuItem1.setText(resourceMap.getString("jCheckBoxMenuItem1.text")); // NOI18N
         jCheckBoxMenuItem1.setName("jCheckBoxMenuItem1"); // NOI18N
         jCheckBoxMenuItem1.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -313,6 +306,7 @@ public class JtotusView extends FrameView {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 configMenuItemMouseClicked(evt);
             }
+
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 configMenuItemMousePressed(evt);
             }
@@ -334,6 +328,7 @@ public class JtotusView extends FrameView {
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 jMenuItem2MousePressed(evt);
             }
+
             public void mouseReleased(java.awt.event.MouseEvent evt) {
                 jMenuItem2MouseReleased(evt);
             }
@@ -368,37 +363,37 @@ public class JtotusView extends FrameView {
         javax.swing.GroupLayout statusPanelLayout = new javax.swing.GroupLayout(statusPanel);
         statusPanel.setLayout(statusPanelLayout);
         statusPanelLayout.setHorizontalGroup(
-            statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 689, Short.MAX_VALUE)
-            .addGroup(statusPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(statusMessageLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 507, Short.MAX_VALUE)
-                .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(statusAnimationLabel)
-                .addContainerGap())
-            .addGroup(statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(statusPanelLayout.createSequentialGroup()
-                    .addContainerGap()
-                    .addComponent(infoLable, javax.swing.GroupLayout.PREFERRED_SIZE, 423, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(254, Short.MAX_VALUE)))
+                statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 689, Short.MAX_VALUE)
+                        .addGroup(statusPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(statusMessageLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 507, Short.MAX_VALUE)
+                                .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(statusAnimationLabel)
+                                .addContainerGap())
+                        .addGroup(statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(statusPanelLayout.createSequentialGroup()
+                                        .addContainerGap()
+                                        .addComponent(infoLable, javax.swing.GroupLayout.PREFERRED_SIZE, 423, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addContainerGap(254, Short.MAX_VALUE)))
         );
         statusPanelLayout.setVerticalGroup(
-            statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(statusPanelLayout.createSequentialGroup()
-                .addComponent(statusPanelSeparator, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
-                .addGroup(statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(statusMessageLabel)
-                    .addComponent(statusAnimationLabel)
-                    .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(12, 12, 12))
-            .addGroup(statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(statusPanelLayout.createSequentialGroup()
-                    .addGap(9, 9, 9)
-                    .addComponent(infoLable)
-                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(statusPanelLayout.createSequentialGroup()
+                                .addComponent(statusPanelSeparator, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                                .addGroup(statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(statusMessageLabel)
+                                        .addComponent(statusAnimationLabel)
+                                        .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(12, 12, 12))
+                        .addGroup(statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(statusPanelLayout.createSequentialGroup()
+                                        .addGap(9, 9, 9)
+                                        .addComponent(infoLable)
+                                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
 
         setComponent(mainPanel);
@@ -413,12 +408,12 @@ public class JtotusView extends FrameView {
 
         mainEngine.train();
 
-        
+
     }//GEN-LAST:event_jButton1MouseClicked
 
     private void jButtonRunScriptsMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonRunScriptsMousePressed
 
-}//GEN-LAST:event_jButtonRunScriptsMousePressed
+    }//GEN-LAST:event_jButtonRunScriptsMousePressed
 
     private void configMenuItemMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_configMenuItemMouseClicked
         System.out.printf("Staring config view\n");
@@ -437,7 +432,7 @@ public class JtotusView extends FrameView {
         // TODO add your handling code here:
         MethodResultsPrinter printer = (MethodResultsPrinter) methodTabbedPane;
         printer.sendReport();
-        
+
 
     }//GEN-LAST:event_jMenuItem1MousePressed
 
@@ -445,7 +440,7 @@ public class JtotusView extends FrameView {
     }//GEN-LAST:event_jMenuItem2MousePressed
 
     private void jMenuItem2MouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenuItem2MouseReleased
-       JtotusSetPasswordsGUI passwords = new JtotusSetPasswordsGUI(mainFrame, false);
+        JtotusSetPasswordsGUI passwords = new JtotusSetPasswordsGUI(mainFrame, false);
         passwords.doShow();
     }//GEN-LAST:event_jMenuItem2MouseReleased
 
@@ -455,54 +450,53 @@ public class JtotusView extends FrameView {
 
     private void indicatorsMenuMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_indicatorsMenuMousePressed
 
-       Engine engine = Engine.getInstance();
-       Map<String, HashMap<String, TickInterface>> listOfGen = engine.getListOfGenerators();
-       
-       for(Map.Entry <String, HashMap<String, TickInterface>>entry : listOfGen.entrySet()) {
-           String itemName = entry.getKey();
-           boolean itemFound = false;
-           int count=indicatorsMenu.getItemCount();
-           for (int i=0;i<count;i++) {
-               JMenuItem item = indicatorsMenu.getItem(i);
-               if (item.getText().equalsIgnoreCase(itemName)){
-                   itemFound=true;
-                   break;
-               }
-           }
+        Engine engine = Engine.getInstance();
+        Map<String, HashMap<String, TickInterface>> listOfGen = engine.getListOfGenerators();
 
-           if (itemFound) {
-               continue;
-           }
+        for (Map.Entry<String, HashMap<String, TickInterface>> entry : listOfGen.entrySet()) {
+            String itemName = entry.getKey();
+            boolean itemFound = false;
+            int count = indicatorsMenu.getItemCount();
+            for (int i = 0; i < count; i++) {
+                JMenuItem item = indicatorsMenu.getItem(i);
+                if (item.getText().equalsIgnoreCase(itemName)) {
+                    itemFound = true;
+                    break;
+                }
+            }
 
-           HashMap<String, TickInterface> generator = entry.getValue();
+            if (itemFound) {
+                continue;
+            }
 
-           //FIXME: add other statements
-           Iterator<String> stmts = generator.keySet().iterator();
-           TickInterface tickGen = generator.get(stmts.next());
+            HashMap<String, TickInterface> generator = entry.getValue();
 
-           JCheckBoxMenuItem menu = new JCheckBoxMenuItem();
-           ActionListener aListener = new GeneratorActionListener(generator);
+            //FIXME: add other statements
+            Iterator<String> stmts = generator.keySet().iterator();
+            TickInterface tickGen = generator.get(stmts.next());
 
-           menu.setSelected(false);
-           menu.setText(itemName);
-           menu.setToolTipText(tickGen.getListnerInfo());
+            JCheckBoxMenuItem menu = new JCheckBoxMenuItem();
+            ActionListener aListener = new GeneratorActionListener(generator);
 
-           menu.addActionListener(aListener);
-           indicatorsMenu.add(menu);
-       }
+            menu.setSelected(false);
+            menu.setText(itemName);
+            menu.setToolTipText(tickGen.getListnerInfo());
+
+            menu.addActionListener(aListener);
+            indicatorsMenu.add(menu);
+        }
     }//GEN-LAST:event_indicatorsMenuMousePressed
 
     private void jCheckBoxMenuItem1MouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBoxMenuItem1MouseReleased
         Engine engine = Engine.getInstance();
         if (jCheckBoxMenuItem1.isSelected()) {
             engine.startHistorySimulator();
-        }else {
+        } else {
             engine.startMarketTicker();
         }
     }//GEN-LAST:event_jCheckBoxMenuItem1MouseReleased
 
-   
-    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu indicatorsMenu;
     private javax.swing.JLabel infoLable;
@@ -540,13 +534,17 @@ public class JtotusView extends FrameView {
             // to ConfigMenuItemMouseClickedTask fields, here.
             super(app);
         }
-        @Override protected Object doInBackground() {
+
+        @Override
+        protected Object doInBackground() {
             // Your Task's code here.  This method runs
             // on a background thread, so don't reference
             // the Swing GUI from here.
             return null;  // return your result
         }
-        @Override protected void succeeded(Object result) {
+
+        @Override
+        protected void succeeded(Object result) {
             // Runs on the EDT.  Update the GUI based on
             // the result computed by doInBackground().
         }
