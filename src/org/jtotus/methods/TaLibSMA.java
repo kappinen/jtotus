@@ -76,7 +76,7 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
 
     public void loadInputs(String configStock) {
 
-        configFile = new ConfigLoader<ConfTaLibSMA>(this.inputPortofolio
+        configFile = new ConfigLoader<ConfTaLibSMA>(super.portfolioConfig.portfolioName
                 + File.separator
                 + configStock
                 + File.separator
@@ -132,9 +132,6 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
      * @param evaluator Evaluation object
      * @param stockName ReviewTarget of the method
      * @param input closing price for period
-     * @param stateConfig Contains all information
-     *                    about a state for particular test.
-     *
      * @return  void
      */
     public void performDecisionTest(EvaluateMethodSignals evaluator,
@@ -179,9 +176,9 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
                 config.inputSMAPeriod);
 
 
-        methodResults.putResult(stockType.getStockName(), output[output.length - 1]);
+        methodResults.putResult(stockName, output[output.length - 1]);
 
-        sender = new GraphSender(stockType.getStockName());
+        sender = new GraphSender(stockName);
         for (int elem = 0; elem <= outNbElement.value; elem++) {
             DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
                                                          portfolioConfig.inputEndingDate.getTime());
@@ -194,7 +191,7 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
 
 
         if (config.inputPrintResults) {
-            sender = new GraphSender(stockType.getStockName());
+            sender = new GraphSender(stockName);
             sender.setSeriesName(this.getMethName());
 
             DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
@@ -208,32 +205,24 @@ public class TaLibSMA extends TaLibAbstract implements MethodEntry {
         }
 
         System.out.printf("%s (%s) has %d successrate\n", this.getMethName(),
-                stockType.getStockName(), methodResults.getSuccessRate().intValue());
+                stockName, methodResults.getSuccessRate().intValue());
         return methodResults;
     }
 
     @Override
-    public MethodResults performMethod(String stockName) {
-        List<Double> closingPrices = null;
-
+    public MethodResults performMethod(String stockName, double [] input) {
         //Load config for a stock
         this.loadInputs(stockName);
-        //Create period
-        closingPrices = super.createClosingPriceList(stockName,
-                                                     portfolioConfig.inputStartingDate,
-                                                     portfolioConfig.inputEndingDate);
-        double[] input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
-
 
         //Perform testing if it is asked
-        if (this.inputPerfomDecision) {
+        if (config.inputPerfomDecision) {
             EvaluateMethodSignals budjetCounter = new EvaluateMethodSignals();
 
             for (StateIterator iter = new StateIterator().addParam("SMAperiod", config.inputSMADecisionPeriod);
                     iter.hasNext() != StateIterator.END_STATE;
                     iter.nextState()) {
 
-                budjetCounter.initialize(stockType.getStockName(),
+                budjetCounter.initialize(stockName,
                                         "DecisionSMA",
                                         portfolioConfig.inputAssumedBudjet);
 

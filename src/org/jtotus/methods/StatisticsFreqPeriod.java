@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import org.apache.commons.lang.ArrayUtils;
 import org.jtotus.common.Helper;
 import org.jtotus.common.MethodResults;
+import org.jtotus.common.StockType;
 
 /**
  *
@@ -37,7 +38,7 @@ public class StatisticsFreqPeriod extends TaLibAbstract implements MethodEntry{
     private static final int POSITIVE = 0;
     private static final int NEGATIVE = 1;
     private static final int STILL = 2;
-
+    private StockType stockType = null;
 
     public String getMethName() {
         return "StatisticsFreqPeriod";
@@ -59,8 +60,13 @@ public class StatisticsFreqPeriod extends TaLibAbstract implements MethodEntry{
         double table[] = null;
         int mainDirection = 0;
         int strikes = 0;
-        
+
+        if (stockType == null) {
+            stockType = new StockType();
+        }
+
         stockType.setStockName(stockName);
+
         for (int i = 0; i < this.getMaxPeriod(); i++) {
 
             data = stockType.fetchPastDayClosingPrice(i);
@@ -100,11 +106,10 @@ public class StatisticsFreqPeriod extends TaLibAbstract implements MethodEntry{
 
 
         for (int stockCount = 0; stockCount < portfolioConfig.inputListOfStocks.length; stockCount++) {
-            closingPrices = super.createClosingPriceList(portfolioConfig.inputListOfStocks[stockCount],
+            output = super.createClosingPriceList(portfolioConfig.inputListOfStocks[stockCount],
                                                          portfolioConfig.inputStartingDate,
                                                          portfolioConfig.inputEndingDate);
 
-            output = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
             marketStat = statisticsForFreq(output);
             printResultsToStdout(portfolioConfig.inputListOfStocks[stockCount], marketStat, output.length - 1);
 

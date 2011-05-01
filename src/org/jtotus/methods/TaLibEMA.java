@@ -76,7 +76,7 @@ public class TaLibEMA extends TaLibAbstract implements MethodEntry {
 
     public void loadInputs(String configStock) {
 
-        configFile = new ConfigLoader<ConfTaLibEMA>(this.inputPortofolio
+        configFile = new ConfigLoader<ConfTaLibEMA>(super.portfolioConfig.portfolioName
                 + File.separator
                 + configStock
                 + File.separator
@@ -96,37 +96,16 @@ public class TaLibEMA extends TaLibAbstract implements MethodEntry {
         configFile.applyInputsToObject(this);
     }
 
-    public MethodResults performEMA(String stockName) {
-
-        List<Double> closingPrices = new ArrayList<Double>();
+    public MethodResults performEMA(String stockName, double[] input) {
 
         double[] output = null;
         MInteger outBegIdx = null;
         MInteger outNbElement = null;
         int period = 0;
 
-        closingPrices.clear();
-
         this.loadInputs(stockName);
-        stockType.setStockName(stockName);
-        
-        DateIterator dateIter = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
-                                                 portfolioConfig.inputEndingDate.getTime());
-
-        //Filling input data with Closing price for days
-        while (dateIter.hasNext()) {
-
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(dateIter.next());
-            BigDecimal closDay = stockType.fetchClosingPrice(cal);
-            if (closDay != null) {
-                closingPrices.add(closDay.doubleValue());
-            }
-        }
-
 
         final Core core = new Core();
-        double[] input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
 
         period = input.length - 1;
         final int allocationSize = period - core.emaLookback(config.inputEMAPeriod);
@@ -153,14 +132,11 @@ public class TaLibEMA extends TaLibAbstract implements MethodEntry {
             return new MethodResults(this.getMethName());
         }
 
-
-
-
         //System.out.printf("The original size: (%d:%d) alloc:%d\n", outBegIdx.value,outNbElement.value,allocationSize);
 
-        methodResults.putResult(stockType.getStockName(), output[output.length - 1]);
+        methodResults.putResult(stockName, output[output.length - 1]);
 
-        if (this.inputPrintResults) {
+        if (config.inputPrintResults) {
             sender = new GraphSender(this.getMethName());
             sender.setSeriesName(this.getMethName());
             DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
@@ -174,8 +150,7 @@ public class TaLibEMA extends TaLibAbstract implements MethodEntry {
         }
 
         //************* DECISION TEST *************//
-        if (this.inputPerfomDecision) {
-
+        if (config.inputPerfomDecision) {
 
             double amoutOfStocks = 0;
             double bestAssumedBudjet = 0;
@@ -246,7 +221,7 @@ public class TaLibEMA extends TaLibAbstract implements MethodEntry {
                     }
 
                     if (changed) {
-                        if (this.inputPrintResults && decEMAPeriod == config.inputEMAPeriod) {
+                        if (config.inputPrintResults && decEMAPeriod == config.inputEMAPeriod) {
                             DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
                                                                          portfolioConfig.inputEndingDate.getTime());
                             dateIterator.move(elem + outBegIdxDec.value);
@@ -260,7 +235,7 @@ public class TaLibEMA extends TaLibAbstract implements MethodEntry {
 
             double successRate = ((bestAssumedBudjet / portfolioConfig.inputAssumedBudjet) - 1) * 100;
             System.out.printf("%s:The best period:%f best budjet:%f pros:%f\n",
-                    stockType.getStockName(), bestPeriod, bestAssumedBudjet, successRate);
+                              stockName, bestPeriod, bestAssumedBudjet, successRate);
 
             totalStocksAnalyzed++;
             this.avgSuccessRate += successRate;
@@ -275,7 +250,7 @@ public class TaLibEMA extends TaLibAbstract implements MethodEntry {
     }
 
     @Override
-    public MethodResults performMethod(String stockName) {
-        return this.performEMA(stockName);
+    public MethodResults performMethod(String stockName, double []input) {
+        return this.performEMA(stockName, input);
     }
 }

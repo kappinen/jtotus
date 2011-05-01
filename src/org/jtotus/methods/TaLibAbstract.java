@@ -16,17 +16,20 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.methods;
 
-
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import brokerwatcher.eventtypes.MarketData;
+import brokerwatcher.eventtypes.StockTick;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.UpdateListener;
+import org.apache.commons.lang.ArrayUtils;
 import org.jtotus.common.MethodResults;
 import java.util.Calendar;
 import java.util.List;
 import org.jtotus.common.DateIterator;
-import org.jtotus.common.Helper;
 import org.jtotus.common.StockType;
 import org.jtotus.config.ConfigLoader;
 import org.jtotus.gui.graph.GraphPacket;
@@ -36,34 +39,21 @@ import org.jtotus.config.MainMethodConfig;
 import org.jtotus.methods.utils.Normalizer;
 
 /**
- *
  * @author Evgeni Kappinen
  */
-public abstract class TaLibAbstract {
+public abstract class TaLibAbstract implements UpdateListener {
 
     /*Stock list */
-    private Helper help = Helper.getInstance();
-    private Double avgSuccessRate = null;
     private int totalStocksAnalyzed = 0;
-    GraphPacket packet = null;
     GraphSender sender = null;
-    //TODO: staring date, ending date aka period
     //INPUTS TO METHOD:
-    //Portofolio
-    public String inputPortofolio = "OMXHelsinki";
-    public String inpuPortfolio = null;
-    //General inputs
-    public Calendar inputEndingDate = null;
-    //Modes
-    public boolean inputPrintResults = true;
-    public boolean inputPerfomDecision = true;
+
     protected MethodResults methodResults = null;
-    protected StockType stockType = null;
+
     protected MainMethodConfig child_config = null;
     protected ConfPortfolio portfolioConfig = null;
 
 
-    
     public String getMethName() {
         String tmp = this.getClass().getName();
         return tmp.substring(tmp.lastIndexOf(".") + 1, tmp.length());
@@ -90,34 +80,32 @@ public abstract class TaLibAbstract {
         configPortfolio.applyInputsToObject(this);
     }
 
-    public List<Double> createClosingPriceList(String stockName, Calendar start, Calendar end) {
+    public double[] createClosingPriceList(String stockName, Calendar start, Calendar end) {
 
-         List<Double> closingPrices = new ArrayList<Double>(2000);
+        StockType stockType = new StockType(stockName);
+        return stockType.fetchClosingPricePeriod(stockName, start, end);
 
-         DateIterator dateIter = new DateIterator(start.getTime(),
-                                                  end.getTime());
-
-         if (stockType==null) {
-             stockType = new StockType();
-         }
-         //Guranteed to be created by call()
-         stockType.setStockName(stockName);
-
-        //Filling input data with Closing price for days
-        while (dateIter.hasNext()) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(dateIter.next());
-            BigDecimal closDay = stockType.fetchClosingPrice(cal);
-            if (closDay != null) {
-                closingPrices.add(closDay.doubleValue());
-            }
-        }
-         return closingPrices;
+//        List<Double> closingPrices = new ArrayList<Double>(2000);
+//
+//        DateIterator dateIter = new DateIterator(start.getTime(),
+//                end.getTime());
+//
+//        //Filling input data with Closing price for days
+//        while (dateIter.hasNext()) {
+//            Calendar cal = Calendar.getInstance();
+//            cal.setTime(dateIter.next());
+//            BigDecimal closDay = stockType.fetchClosingPrice(cal);
+//            if (closDay != null) {
+//                closingPrices.add(closDay.doubleValue());
+//            }
+//        }
+//
+//        return ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
     }
 
     //To override
-    public MethodResults performMethod(String stockName) {
-        throw new RuntimeException("This methods should be overritten");
+    public MethodResults performMethod(String stockName, double[] input) {
+        throw new RuntimeException("This methods should be overwritten");
     }
 
     public void run() {
@@ -131,15 +119,15 @@ public abstract class TaLibAbstract {
     public MethodResults call() throws Exception {
         this.loadPortofolioInputs();
 
-        avgSuccessRate = new Double(0.0f);
-        packet = new GraphPacket();
-        stockType = new StockType();
         methodResults = new MethodResults(this.getMethName());
 
-        System.out.printf("inputListOfStocks len:%d\n", portfolioConfig.inputListOfStocks.length);
-
         for (int stockCount = 0; stockCount < portfolioConfig.inputListOfStocks.length; stockCount++) {
-            this.performMethod(portfolioConfig.inputListOfStocks[stockCount]);
+            double[] input = this.createClosingPriceList(portfolioConfig.inputListOfStocks[stockCount],
+                    portfolioConfig.inputStartingDate,
+                    portfolioConfig.inputEndingDate);
+
+
+            this.performMethod(portfolioConfig.inputListOfStocks[stockCount], input);
         }
 
         if (child_config != null && child_config.inputNormilizerType != null) {
@@ -150,4 +138,26 @@ public abstract class TaLibAbstract {
         return methodResults;
 
     }
+
+    public void update(EventBean[] ebs, EventBean[] ebs1) {
+        this.loadPortofolioInputs();
+
+        //Update list of the price
+        for (int i = 0; i < ebs.length; i++) {
+            if (ebs[i].getUnderlying() instanceof MarketData) {
+                MarketData data = (MarketData)ebs[i].getUnderlying();
+                for (Map.Entry<String,double[]> stockData : data.data.entrySet()) {
+                    this.performMethod(stockData.getKey(), stockData.getValue());
+                }
+
+                if (child_config != null && child_config.inputNormilizerType != null) {
+                    Normalizer norm = new Normalizer();
+                    methodResults = norm.perform(child_config.inputNormilizerType, methodResults);
+                }
+             //TODO: send data as results!
+            }
+        }
+    }
+
+
 }

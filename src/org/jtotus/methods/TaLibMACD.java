@@ -54,7 +54,7 @@ public class TaLibMACD extends TaLibAbstract implements MethodEntry {
 
     public void loadInputs(String configStock) {
 
-        configFile = new ConfigLoader<ConfTaLibMACD>(super.inputPortofolio
+        configFile = new ConfigLoader<ConfTaLibMACD>(super.portfolioConfig.portfolioName
                 + File.separator
                 + configStock
                 + File.separator
@@ -77,8 +77,6 @@ public class TaLibMACD extends TaLibAbstract implements MethodEntry {
      * @param evaluator Evaluation object
      * @param stockName ReviewTarget of the method
      * @param input closing price for period
-     * @param stateConfig Contains all information
-     *                    about a state for particular test.
      *
      * @return  void
      */
@@ -146,7 +144,6 @@ public class TaLibMACD extends TaLibAbstract implements MethodEntry {
 
     public MethodResults performMACD(String stockName, double[] input) {
         
-        stockType.setStockName(stockName);
         this.loadInputs(stockName);
 
         System.out.printf("Periods fast:%d slow:%d signal:%d\n",
@@ -171,9 +168,9 @@ public class TaLibMACD extends TaLibAbstract implements MethodEntry {
                                         config.inputMACDSignalPeriod);
 
 
-        methodResults.putResult(stockType.getStockName(), macd[outNbElement.value - 1]);
+        methodResults.putResult(stockName, macd[outNbElement.value - 1]);
 
-        sender = new GraphSender(stockType.getStockName());
+        sender = new GraphSender(stockName);
         for (int elem = 0; elem <= outNbElement.value; elem++) {
             DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
                                                          portfolioConfig.inputEndingDate.getTime());
@@ -186,7 +183,7 @@ public class TaLibMACD extends TaLibAbstract implements MethodEntry {
 
 
         if (config.inputPrintResults) {
-            sender = new GraphSender(stockType.getStockName());
+            sender = new GraphSender(stockName);
             sender.setPlotName("MACD");
             sender.setSeriesName(this.getMethName());
 
@@ -201,7 +198,7 @@ public class TaLibMACD extends TaLibAbstract implements MethodEntry {
         }
 
         System.out.printf("%s (%s) has %d successrate\n", this.getMethName(),
-                stockType.getStockName(), methodResults.getSuccessRate().intValue());
+                stockName, methodResults.getSuccessRate().intValue());
 
         return methodResults;
 
@@ -209,16 +206,10 @@ public class TaLibMACD extends TaLibAbstract implements MethodEntry {
 
 
     @Override
-    public MethodResults performMethod(String stockName) {
-        List<Double> closingPrices = null;
+    public MethodResults performMethod(String stockName, double []input) {
 
         //Load config for a stock
         this.loadInputs(stockName);
-        //Create period
-        closingPrices = super.createClosingPriceList(stockName,
-                                                    portfolioConfig.inputStartingDate,
-                                                    portfolioConfig.inputEndingDate);
-        double[] input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
 
         //Perform testing if it is asked
         if (false) {
@@ -231,7 +222,7 @@ public class TaLibMACD extends TaLibAbstract implements MethodEntry {
                     iter.hasNext() != StateIterator.END_STATE;
                 iter.nextState()) {
 
-                budjetCounter.initialize(stockType.getStockName(),
+                budjetCounter.initialize(stockName,
                                         "DecisionMACD",
                                         portfolioConfig.inputAssumedBudjet);
 

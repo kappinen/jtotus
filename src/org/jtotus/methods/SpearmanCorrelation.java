@@ -65,11 +65,10 @@ public class SpearmanCorrelation extends TaLibAbstract implements MethodEntry {
         double output[] =  marketData.get(stockName);
 
         if (output == null) {
-            closingPrices = super.createClosingPriceList(stockName,
-                                                         portfolioConfig.inputStartingDate,
-                                                         portfolioConfig.inputEndingDate);
+            output = super.createClosingPriceList(stockName,
+                                                  portfolioConfig.inputStartingDate,
+                                                  portfolioConfig.inputEndingDate);
 
-            output = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
             marketData.put(stockName, output);
         }
 

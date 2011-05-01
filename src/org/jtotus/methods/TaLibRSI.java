@@ -70,7 +70,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
 
     public void loadInputs(String configStock) {
 
-        configFile = new ConfigLoader<ConfTaLibRSI>(super.inputPortofolio
+        configFile = new ConfigLoader<ConfTaLibRSI>(super.portfolioConfig.portfolioName
                 + File.separator
                 + configStock
                 + File.separator
@@ -93,10 +93,8 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
      * @param evaluator Evaluation object
      * @param stockName ReviewTarget of the method
      * @param input closing price for period
-     * @param stateConfig Contains all information
-     *                    about a state for particular test.
-     *
      * @return  void
+     *
      */
     public void performDecisionTest(EvaluateMethodSignals evaluator,
                                     String stockName,
@@ -166,7 +164,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
     
 
     public MethodResults performRSI(String stockName, double[] input) {
-        stockType.setStockName(stockName);
+
         this.loadInputs(stockName);
 
         System.out.printf("period:%d\n", config.inputRSIPeriod);
@@ -181,7 +179,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
                 config.inputRSIPeriod);
 
 
-        methodResults.putResult(stockType.getStockName(), output[output.length - 1]);
+        methodResults.putResult(stockName, output[output.length - 1]);
 
 //        sender = new GraphSender(stockType.getStockName());
 //        for (int elem = 0; elem <= outNbElement.value; elem++) {
@@ -196,7 +194,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
         
 
         if (config.inputPrintResults) {
-            sender = new GraphSender(stockType.getStockName());
+            sender = new GraphSender(stockName);
             sender.setPlotName("RSI");
             sender.setSeriesName(this.getMethName());
 
@@ -211,7 +209,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
         }
 
         System.out.printf("%s (%s) has %d successrate\n", this.getMethName(),
-                stockType.getStockName(), methodResults.getSuccessRate().intValue());
+                stockName, methodResults.getSuccessRate().intValue());
 
         return methodResults;
 
@@ -219,21 +217,14 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
     
 
     @Override
-    public MethodResults performMethod(String stockName) {
-        List<Double> closingPrices = null;
+    public MethodResults performMethod(String stockName, double [] input) {
 
         //Load config for a stock
         this.loadInputs(stockName);
-        //Create period
-        closingPrices = super.createClosingPriceList(stockName,
-                                                     portfolioConfig.inputStartingDate,
-                                                     portfolioConfig.inputEndingDate);
-
-        double[] input = ArrayUtils.toPrimitive(closingPrices.toArray(new Double[0]));
 
 
         //Perform testing if it is asked
-        if (this.inputPerfomDecision) {
+        if (config.inputPerfomDecision) {
             EvaluateMethodSignals budjetCounter = new EvaluateMethodSignals();
 
             for (StateIterator iter = new StateIterator()
@@ -242,7 +233,7 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
                     .addParam("HigestThreshold", config.inputRSIHigestThreshold);
                     iter.hasNext() != StateIterator.END_STATE; iter.nextState()) {
 
-                budjetCounter.initialize(stockType.getStockName(),
+                budjetCounter.initialize(stockName,
                                         "DecisionRSI",
                                         portfolioConfig.inputAssumedBudjet);
 
