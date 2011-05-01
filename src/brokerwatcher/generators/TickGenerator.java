@@ -21,6 +21,7 @@ import brokerwatcher.eventtypes.StockTick;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeZone;
 import org.jtotus.config.ConfTickGenerator;
 import org.jtotus.config.ConfigLoader;
@@ -101,13 +102,24 @@ public class TickGenerator implements EsperEventGenerator {
         boolean toContinue = false;
 
         timeZone = DateTimeZone.forID(config.timeZone);
-        
+
         startTickerTime = config.start_hour * 60 + config.start_minute;
         endTickerTime = config.end_hour * 60 + config.end_minute;
+
         try {
             time = new DateTime(timeZone);
-            if (time.getMinuteOfDay() < startTickerTime) {
+            if (DateTimeConstants.SATURDAY == time.getDayOfWeek()) {
+                long toSleep = 24 * 60 - time.getMinuteOfDay() + 24*60;
+                System.out.printf("TickGenerator sleeps until Monday, because it is Saturday\n");
+                Thread.sleep(toSleep);
+            } else if (DateTimeConstants.SUNDAY == time.getDayOfWeek()) {
+                long toSleep = 24 * 60 - time.getMinuteOfDay();
+                System.out.printf("TickGenerator sleeps until Monday, because it is Sunday\n");
+                Thread.sleep(toSleep);
+            }
 
+
+            if (time.getMinuteOfDay() < startTickerTime) {
                 long minutesToSleep = Math.abs(time.getMinuteOfDay() - startTickerTime);
                 System.out.printf("Sleeping (%d) minutes ... Starting 1 at:%d:%d\n", minutesToSleep, config.start_hour, config.start_minute);
                 Thread.sleep(minutesToSleep * 60 * 1000);
