@@ -16,14 +16,14 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.config;
 
-import java.io.FileOutputStream;
+import java.io.*;
+
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+
 import java.lang.reflect.Field;
 import java.util.Calendar;
+import java.util.RandomAccess;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -74,23 +74,22 @@ public class ConfigLoader<T> {
     }
 
     public boolean writeObj(Object obj, String path) {
+        RandomAccessFile file = null;
 
-        FileOutputStream fos = null;
         if (!this.configDirExists()) {
             return false;
         }
 
         try {
-            fos = new FileOutputStream(path, false);
-            //xstream.alias("methodConfig", MainMethodConfig.class);
-            xstream.toXML(obj, fos);
-            fos.flush();
+            file =  new RandomAccessFile(path, "rw");
+            String xml = xstream.toXML(obj);
+            file.writeUTF(xml);
         } catch (IOException ex) {
-            Logger.getLogger(ConfigLoader.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
             return false;
         } finally {
             try {
-                fos.close();
+                 file.close();
             } catch (IOException ex) {
                 Logger.getLogger(ConfigLoader.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -100,7 +99,7 @@ public class ConfigLoader<T> {
     }
 
     public T readObj(String path) {
-        FileInputStream fis = null;
+        RandomAccessFile file = null;
         T retObj = null;
 
         if (!configDirExists()) {
@@ -108,20 +107,27 @@ public class ConfigLoader<T> {
         }
 
         try {
-            fis = new FileInputStream(path);
+            file = new RandomAccessFile(path, "rw");
             if (debug) {
                 System.out.printf("ConfigLoader reading:%s\n", path);
             }
-            retObj = (T) xstream.fromXML(fis);
-            
-            fis.close();
+            retObj = (T) xstream.fromXML(file.readUTF());
+
         } catch (IOException ex) {
-            System.err.printf("Failure to read config:%s\n", configName);
+            System.err.printf("Warning: failed to read config:%s : %s\n", configName, path);
 //            Logger.getLogger(ConfigLoader.class.getName()).log(Level.SEVERE, null, ex);
             return null;
+        } finally {
+            try {
+                if (file != null){
+                    file.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
-        if (retObj instanceof ConfPortfolio) {
+        if (retObj != null && retObj instanceof ConfPortfolio) {
             ConfPortfolio config = (ConfPortfolio)retObj;
             if (config.useCurentDayAsEndingDate){
                 config.inputEndingDate = Calendar.getInstance();
@@ -187,10 +193,7 @@ public class ConfigLoader<T> {
 
         toObjectFields = obj.getClass().getDeclaredFields();
         fromObjectFields = config.getClass().getDeclaredFields();
-//        for (int to = 0; to < toObjectFields.length; to++) {
-//            System.out.printf("Found in class obj:%s type:%s\n",
-//                    toObjectFields[to].getName(), toObjectFields[to].getType().getName());
-//        }
+
         for (int to = 0; to < toObjectFields.length; to++) {
             String inputToName = toObjectFields[to].getName();
             //Only input starting fields are used in configuration file
