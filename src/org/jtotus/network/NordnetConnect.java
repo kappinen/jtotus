@@ -16,6 +16,7 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.network;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -163,9 +164,13 @@ public class NordnetConnect implements NetworkTickConnector {
         BufferedReader input = null;
         StringBuilder data = new StringBuilder();
 
+        File file =new File(filename);
+        if (!file.isFile() || !file.exists()) {
+            return null;
+        }
 
         try {
-            input = new BufferedReader(new FileReader(filename));
+            input = new BufferedReader(new FileReader(file));
 
             while ((line = input.readLine()) != null) {
                 data.append(line);
@@ -175,10 +180,12 @@ public class NordnetConnect implements NetworkTickConnector {
             script =  data.toString();
 
         } catch (IOException ex) {
-            Logger.getLogger(NordnetConnect.class.getName()).log(Level.SEVERE, null, ex);
+//            Logger.getLogger(NordnetConnect.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.printf(" Could not find js for authentication : %s", filename);
         } finally {
             try {
-                input.close();
+                if (input != null)
+                    input.close();
             } catch (IOException ex) {
                 Logger.getLogger(NordnetConnect.class.getName()).log(Level.SEVERE, null, ex);
             }
