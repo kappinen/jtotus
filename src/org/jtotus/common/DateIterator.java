@@ -54,6 +54,28 @@ public class DateIterator implements Iterator<Date>, Iterable<Date>
 
         current.setTime(start.getTime());
 
+    }
+
+
+        // Starts with past date(start) and going towards ending date
+    public DateIterator(Calendar tmpStart, Calendar tmpEnd)
+    {
+        end = (Calendar)tmpEnd.clone();
+
+        start = (Calendar)tmpStart.clone();
+        start.add(Calendar.DATE, -1);
+
+        if(!end.after(start)) {
+            System.err.printf("Warning startin date is afte ending date! Reversing dates("+start.getTime()+":"+end.getTime()+"\n");
+            Calendar tmp = Calendar.getInstance();
+
+            tmp.setTime(start.getTime());
+            start.setTime(end.getTime());
+            end.setTime(tmp.getTime());
+             System.err.printf("New time startin date is afte ending date! Reversing dates("+start.getTime()+":"+end.getTime()+"\n");
+        }
+
+        current.setTime(start.getTime());
 
     }
 
@@ -87,8 +109,7 @@ public class DateIterator implements Iterator<Date>, Iterable<Date>
         return !rangeCheck.after(end);
     }
 
-
-    public Date next()
+    public Calendar nextInCalendar()
     {
         current.add(Calendar.DATE, step);
 
@@ -99,7 +120,12 @@ public class DateIterator implements Iterator<Date>, Iterable<Date>
            current.add(Calendar.DATE, 1);
         }
 
-        return current.getTime();
+        return current;
+    }
+
+    public Date next()
+    {
+        return nextInCalendar().getTime();
     }
 
     public void remove()

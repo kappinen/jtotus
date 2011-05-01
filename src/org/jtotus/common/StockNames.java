@@ -82,6 +82,9 @@ public class StockNames {
 
     public String getHexName(String name) {
         IndexMarketData index = stockMap.get(name);
+        if (index== null) {
+            System.err.printf("Error: could not locate name for:%s\n", name);
+        }
         return index.shortName;
     }
 
