@@ -26,21 +26,15 @@ import java.util.logging.Logger;
 public class JtotusKeyRingPassword {
 
     private String keyRingPassword = null;
-    private static JtotusKeyRingPassword instance = null;
+    private static final JtotusKeyRingPassword instance = new JtotusKeyRingPassword();
     private boolean cancel = false;
     private Object passLock = new Object();
 
     private JtotusKeyRingPassword() {
     }
 
-
-
     //FIXME:re-check if it is safe to keep password in signleton ?
     public synchronized static JtotusKeyRingPassword getInstance() {
-
-        if (instance == null) {
-            instance = new JtotusKeyRingPassword();
-        }
         return instance;
     }
 
