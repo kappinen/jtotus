@@ -78,7 +78,6 @@ public class ListenerRsiIndicator implements UpdateListener {
     }
 
     private EPRuntime getEngine() {
-
         if (esperRuntime == null) {
             esperRuntime = BrokerWatcher.getMainEngine().getEPRuntime();
         }
@@ -144,8 +143,8 @@ public class ListenerRsiIndicator implements UpdateListener {
     public void update(EventBean[] ebs, EventBean[] ebs1) {
 
         //Update list of the price
-        for (int i = 0; i < ebs.length; i++) {
-            StockTick tick = (StockTick) ebs[i].getUnderlying();
+        for (EventBean eb : ebs) {
+            StockTick tick = (StockTick) eb.getUnderlying();
             ArrayList<Double> list = stockRsi.get(tick.getStockName());
             if (list == null) {
                 list = new ArrayList<Double>();
@@ -155,28 +154,28 @@ public class ListenerRsiIndicator implements UpdateListener {
 
         }
 
-        for (int i = 0; i < ebs.length; i++) {
-            StockTick tick = (StockTick) ebs[i].getUnderlying();
+        for (EventBean eb : ebs) {
+            StockTick tick = (StockTick) eb.getUnderlying();
             ArrayList<Double> stockTicks = stockRsi.get(tick.getStockName());
 
 
             if (stockTicks.size() > getConfig(tick.getStockName()).inputRSIPeriod + 1) {
                 double[] input = ArrayUtils.toPrimitive(stockTicks.toArray(new Double[0]));
 
-                 makeTest(tick.getStockName(), input);
+                makeTest(tick.getStockName(), input);
 
                 MInteger outBegIdx = new MInteger();
                 MInteger outNbElement = new MInteger();
 
                 double[] output = this.actionRSI(input,
-                                        outBegIdx, outNbElement,
-                                        getConfig(tick.getStockName()).inputRSIPeriod);
+                        outBegIdx, outNbElement,
+                        getConfig(tick.getStockName()).inputRSIPeriod);
 
 
                 if (output[output.length - 1] < getConfig(tick.getStockName()).outputRSILowestThreshold) {
-                //    System.err.printf("[%s] buy for: %f rsi:%d\n",tick.getStockName(), tick.getLatestSell(), getConfig(tick.getStockName()).outputRSILowestThreshold);
+                    //    System.err.printf("[%s] buy for: %f rsi:%d\n",tick.getStockName(), tick.getLatestSell(), getConfig(tick.getStockName()).outputRSILowestThreshold);
                     getBudjetCounter(tick.getStockName()).buy(tick.getLatestSell(), -1);
-                }else if(output[output.length - 1] > getConfig(tick.getStockName()).outputRSIHigestThreshold) {
+                } else if (output[output.length - 1] > getConfig(tick.getStockName()).outputRSIHigestThreshold) {
                     getBudjetCounter(tick.getStockName()).buy(tick.getLatestBuy(), -1);
                 }
                 //System.out.printf("Size of output:%d rsi:%d\n", output.length, getConfig(tick.getStockName()).inputRSIPeriod);
@@ -184,7 +183,7 @@ public class ListenerRsiIndicator implements UpdateListener {
                 EsperEventRsi rsiEvent = new EsperEventRsi();
                 rsiEvent.setStockName(tick.getStockName());
                 rsiEvent.setRsi(output[output.length - 1]);
-                
+
                 this.getEngine().sendEvent(rsiEvent);
 
                 //Sending Indicator Data
@@ -194,7 +193,7 @@ public class ListenerRsiIndicator implements UpdateListener {
                 data.setIndicatorName("RSI");
 
                 this.getEngine().sendEvent(data);
-                
+
 
                 getBudjetCounter(tick.getStockName()).dumpResults();
             }
@@ -233,10 +232,7 @@ public class ListenerRsiIndicator implements UpdateListener {
 
     /************* DECISION TEST *************
      * @param evaluator Evaluation object
-     * @param stockName ReviewTarget of the method
      * @param input closing price for period
-     * @param stateConfig Contains all information
-     *                    about a state for particular test.
      *
      * @return  void
      */
@@ -249,7 +245,7 @@ public class ListenerRsiIndicator implements UpdateListener {
         if (input.length < decRSIPeriod) {
             return;
         }
-        
+
         boolean change=false;
         MInteger outBegIdx = new MInteger();
         MInteger outNbElement = new MInteger();
@@ -258,7 +254,6 @@ public class ListenerRsiIndicator implements UpdateListener {
                                          outBegIdx,
                                          outNbElement,
                                          decRSIPeriod);
-
 
         for (int elem = 0; elem < outNbElement.value; elem++) {
             if (output[elem] < lowestThreshold && change == false) {

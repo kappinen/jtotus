@@ -21,8 +21,11 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import brokerwatcher.BrokerWatcher;
 import brokerwatcher.eventtypes.MarketData;
 import brokerwatcher.eventtypes.StockTick;
+import com.espertech.esper.client.EPRuntime;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.UpdateListener;
 import org.apache.commons.lang.ArrayUtils;
@@ -45,6 +48,7 @@ public abstract class TaLibAbstract implements UpdateListener {
 
     /*Stock list */
     private int totalStocksAnalyzed = 0;
+    private EPRuntime runtime = null;
     GraphSender sender = null;
     //INPUTS TO METHOD:
 
@@ -126,7 +130,6 @@ public abstract class TaLibAbstract implements UpdateListener {
                     portfolioConfig.inputStartingDate,
                     portfolioConfig.inputEndingDate);
 
-
             this.performMethod(portfolioConfig.inputListOfStocks[stockCount], input);
         }
 
@@ -143,10 +146,12 @@ public abstract class TaLibAbstract implements UpdateListener {
         this.loadPortofolioInputs();
 
         //Update list of the price
-        for (int i = 0; i < ebs.length; i++) {
-            if (ebs[i].getUnderlying() instanceof MarketData) {
-                MarketData data = (MarketData)ebs[i].getUnderlying();
-                for (Map.Entry<String,double[]> stockData : data.data.entrySet()) {
+        for (EventBean eb : ebs) {
+            if (eb.getUnderlying() instanceof MarketData) {
+                MarketData data = (MarketData) eb.getUnderlying();
+                methodResults = new MethodResults(this.getMethName());
+                for (Map.Entry<String, double[]> stockData : data.data.entrySet()) {
+                    System.out.printf("Handeling : %s\n", stockData.getKey());
                     this.performMethod(stockData.getKey(), stockData.getValue());
                 }
 
@@ -154,10 +159,15 @@ public abstract class TaLibAbstract implements UpdateListener {
                     Normalizer norm = new Normalizer();
                     methodResults = norm.perform(child_config.inputNormilizerType, methodResults);
                 }
-             //TODO: send data as results!
+
+                if (runtime == null) {
+                    runtime = BrokerWatcher.getMainEngine()
+                            .getEPRuntime();
+                }
+
+                runtime.sendEvent(methodResults);
             }
         }
     }
-
 
 }

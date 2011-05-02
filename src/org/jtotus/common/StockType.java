@@ -37,7 +37,7 @@ public class StockType implements Iterator{
     private StockNames stocks = new StockNames();
     private Iterator mapIter = null;
     private final DataFetcher fetcher = new DataFetcher();
-    private Helper help=Helper.getInstance();;
+    private Helper help=Helper.getInstance();
 
 
     public StockType() {
@@ -124,6 +124,10 @@ public class StockType implements Iterator{
         help.debug("StockType", "Fetching:%s: Time:" + time + "\n" , stockName);
 
         return fetcher.fetchClosingPrice(stockName, cal);
+    }
+
+    public double []fetchClosingPricePeriod(final String stockName, final Calendar startDate, final Calendar endDate) {
+        return fetcher.fetchClosingPricePeriod(stockName, startDate, endDate);
     }
 
     public BigDecimal fetchPastDayClosingPrice(int count){

@@ -109,8 +109,6 @@ public class PeriodClosingPrice {
         return ret;
     }
 
-
-
     public void setStartDate(Date endDate) {
         endingDate = endDate;
         return;
@@ -176,7 +174,7 @@ public class PeriodClosingPrice {
 
         return null;
     }
-    
+
     public BigDecimal getMinValue() {
         initList();
         if (sortedList != null) {
@@ -185,21 +183,4 @@ public class PeriodClosingPrice {
         return null;
     }
 
-
-    public double [] toDoubleArray(){
-       initList();
-        
-       
-       double[] retArray = new double[priceList.size()];
-       Set<Entry<Calendar, BigDecimal>> entrySet = priceList.entrySet();
-        Iterator<Entry<Calendar, BigDecimal>> iterator = entrySet.iterator();
-
-        for(int i = 0;iterator.hasNext();i++){
-            Entry<Calendar, BigDecimal> next = iterator.next();
-           retArray[i] = next.getValue().doubleValue();
-        }
-
-       return retArray;
-    }
-    
 }

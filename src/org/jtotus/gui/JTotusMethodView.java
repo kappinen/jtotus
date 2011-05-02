@@ -39,6 +39,9 @@ import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+
+import brokerwatcher.BrokerWatcher;
+import com.espertech.esper.client.*;
 import org.jtotus.common.Helper;
 import org.jtotus.common.MethodResults;
 import org.jtotus.config.ConfPortfolio;
@@ -53,12 +56,23 @@ import org.jtotus.methods.MethodEntry;
  *
  * @author Evgeni Kappinen
  */
-public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinter {
+public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinter, UpdateListener {
 
     private JScrollPane jScrollPane1 = null;
     private JDesktopPane drawDesktopPane = null;
     private JTable methodTable = null;
     private Helper help = Helper.getInstance();
+
+    @Override
+    public void update(EventBean[] eventBeans, EventBean[] eventBeans1) {
+
+        for (EventBean eventBean : eventBeans) {
+            if (eventBean.getUnderlying() instanceof MethodResults) {
+                MethodResults results = (MethodResults) eventBean.getUnderlying();
+                this.drawResults(results);
+            }
+        }
+    }
 
     class methodTableListener implements TableModelListener {
 
@@ -155,9 +169,9 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
                         portfolioConfig = new ConfPortfolio();
                     }
 
-                    for (int row = 0; row < selectedRows.length; row++) {
-                       String method = table.getModel().getValueAt(selectedRows[row], 0).toString();
-                       portfolioConfig.setAutoStared(method);
+                    for (int selectedRow : selectedRows) {
+                        String method = table.getModel().getValueAt(selectedRow, 0).toString();
+                        portfolioConfig.setAutoStared(method);
                     }
                     configPortfolio.storeConfig(portfolioConfig);
                 }
@@ -200,19 +214,20 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
                     }
                     
                     int[] selectedColumns = table.getSelectedColumns();
-                    for (int col = 0; col < selectedColumns.length; col++) {
-                        if (!table.isCellSelected(selectedRows[row], selectedColumns[col])
-                                || selectedColumns[col] == 0) {
+                    for (int selectedColumn : selectedColumns) {
+                        if (!table.isCellSelected(selectedRows[row], selectedColumn)
+                                || selectedColumn == 0) {
                             continue;
                         }
                         //
                         String name = table.getValueAt(selectedRows[row], 0).toString();
-                        
+
                         configFile = new ConfigLoader<MainMethodConfig>("OMXHelsinki"
-                                                                    + File.separator
-                                                                    + table.getColumnModel().getColumn(selectedColumns[col]).getHeaderValue()
-                                                                    + File.separator
-                                                                    + name);
+                                    + File.separator
+                                    + table.getColumnModel().getColumn(selectedColumn).getHeaderValue()
+                                    + File.separator
+                                    + name);
+
                         config = configFile.getConfig();
                         if (config != null && config.inputPrintResults) {
                             item.setSelected(true);
@@ -294,14 +309,13 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
         GUIConfig uiConfig = new GUIConfig();
         String listOfStocks[] = uiConfig.fetchStockNames();
 
-        for (int i = 0; i < listOfStocks.length; i++) {
-            methodModel.addColumn(listOfStocks[i]);
+        for (String listOfStock : listOfStocks) {
+            methodModel.addColumn(listOfStock);
         }
 
         LinkedList<MethodEntry> methods = uiConfig.getSupportedMethodsList();
-        Iterator<MethodEntry> methIter = methods.iterator();
-        while (methIter.hasNext()) {
-            MethodEntry next = methIter.next();
+        for (MethodEntry method : methods) {
+            MethodEntry next = method;
             String rowsValues[] = new String[listOfStocks.length + 1];
             rowsValues[0] = next.getMethName();
             methodModel.addRow(rowsValues);
@@ -353,14 +367,18 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
     public void initialize() {
         jScrollPane1 = new JScrollPane();
         drawDesktopPane = new JDesktopPane();
-        
         //Register Method Results printer
+        //TODO:remove from engine !!!
         Engine engine = Engine.getInstance();
         engine.registerResultsPrinter(this);
 
+        EPServiceProvider cepEngine = BrokerWatcher.getMainEngine();
+        EPAdministrator cepAdm = cepEngine.getEPAdministrator();
+
+        EPStatement eps = cepAdm.createEPL("select * from MethodResults");
+        eps.addListener(this);
         this.configureMethodTab();
         jScrollPane1.setHorizontalScrollBarPolicy(jScrollPane1.HORIZONTAL_SCROLLBAR_ALWAYS);
-
     }
 
     public void drawResults(MethodResults results) {
@@ -390,7 +408,8 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
     private int getRowIndex(String methodName) {
         DefaultTableModel methodModel = (DefaultTableModel) methodTable.getModel();
 
-        for (int i = 0; i < methodModel.getRowCount(); i++) {
+        int i = 0;
+        while (i < methodModel.getRowCount()) {
             help.debug(this.getClass().getName(),
                     "From columns Searching:%s:%s\n", methodName,
                     (String) methodModel.getValueAt(i, 0));
@@ -399,6 +418,7 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
             if (method.compareTo(methodName) == 0) {
                 return i;
             }
+            i++;
         }
         return -1;
     }
@@ -419,8 +439,6 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
         return -1;
     }
 
-
-    //FIXME:report should be sent by engine not gui
     public void sendReport() {
         JtotusGmailClient gmailClient = new JtotusGmailClient();
 
@@ -444,13 +462,7 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
             gmailClient.pushText("\n");
         }
 
-        try {
-            gmailClient.call();
-        } catch (Exception ex) {
-            Logger.getLogger(JTotusMethodView.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-
+        gmailClient.sendThreaded();
     }
 
 }

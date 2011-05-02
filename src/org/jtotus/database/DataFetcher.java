@@ -20,8 +20,16 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.math.BigDecimal;
+
+import brokerwatcher.BrokerWatcher;
+import brokerwatcher.eventtypes.MarketData;
+import brokerwatcher.generators.EsperEventGenerator;
+import com.espertech.esper.client.EPRuntime;
+import com.espertech.esper.client.EPServiceProvider;
 import org.jtotus.common.DayisHoliday;
 import org.jtotus.common.Helper;
+import org.jtotus.config.ConfPortfolio;
+import org.jtotus.config.ConfigLoader;
 
 /**
  *
@@ -34,6 +42,7 @@ public class DataFetcher {
     private DayisHoliday holidays = null;
     private CacheServer cache = null;
     private LocalJDBC localJDBC = null;
+    private boolean debug = true;
 
     public DataFetcher() {
         listOfResources = new LinkedList<InterfaceDataBase>();
@@ -51,8 +60,8 @@ public class DataFetcher {
 
     }
 
-    //TRUE  failuer
-    //FALSE success
+    //TRUE  Failuer
+    //FALSE Success
     private boolean timeFailsSanityCheck(Calendar date) {
         boolean result = false;
 
@@ -83,10 +92,9 @@ public class DataFetcher {
 
         result = localJDBC.fetchClosingPrice(stockName, date);
         if (result == null) {
-            Iterator<InterfaceDataBase> resources = listOfResources.iterator();
 
-            while (resources.hasNext()) {
-                InterfaceDataBase res = resources.next();
+            for (InterfaceDataBase listOfResource : listOfResources) {
+                InterfaceDataBase res = listOfResource;
 
                 result = res.fetchClosingPrice(stockName, date);
                 if (result != null) {
@@ -118,23 +126,21 @@ public class DataFetcher {
             return result;
         }
 
-
         Iterator<InterfaceDataBase> resources = listOfResources.iterator();
 
         result = localJDBC.fetchVolume(stockName, date);
 
         if (result == null) {
             help.debug("DataFetcher",
-                    "Volume is not found int in javadb stock:%s time:%s\n",
-                    stockName,
-                    date.toString());
+                       "Volume is not found int in javadb stock:%s time:%s\n",
+                       stockName,
+                       date.toString());
 
             while (resources.hasNext()) {
                 InterfaceDataBase res = resources.next();
 
                 result = res.fetchVolume(stockName, date);
                 if (result != null) {
-                    //  System.out.printf("Searching for volume3\n");
                     localJDBC.storeVolume(stockName, date, result);
                     return result;
                 }
@@ -142,5 +148,75 @@ public class DataFetcher {
         }
 
         return result;
+    }
+
+    public double[] fetchClosingPricePeriod(final String stockName, final Calendar startDate, final Calendar endDate) {
+
+        if (debug) {
+            System.out.printf("Fetching data for: %s\n", stockName);
+        }
+        localJDBC.setFetcher(this);
+        return localJDBC.fetchPeriod(stockName,
+                                     startDate,
+                                     endDate);
+    }
+
+    public void sendMarketData(final String[] listOfStocks, final Calendar startDate, final Calendar endDate) {
+
+        final MarketData marketData = new MarketData()
+                .setAsClosingPrice();
+
+        EPRuntime runtime = BrokerWatcher.getMainEngine()
+                .getEPRuntime();
+
+
+        for (int i = 0; i < listOfStocks.length; i++) {
+            final int point = i;
+//            final Thread thread = new Thread() {
+//                public void run() {
+            if (debug) {
+                System.out.printf("Fetching data for: %s\n", listOfStocks[point]);
+            }
+
+            LocalJDBCFactory factory = LocalJDBCFactory.getInstance();
+            LocalJDBC locJDBC = factory.jdbcFactory();
+            locJDBC.setFetcher(new DataFetcher());
+            double[] data = locJDBC.fetchPeriod(listOfStocks[point],
+                                                startDate,
+                                                endDate);
+
+            marketData.data.put(listOfStocks[point],
+                    data);
+//                }
+//            };
+//            thread.start();
+        }
+
+        if (debug) {
+                System.out.printf("Sending market data : %d\n",marketData.data.size());
+            }
+        runtime.sendEvent(marketData);
+    }
+
+
+    public static void main(String[] arv) {
+        LocalJDBCFactory factory = LocalJDBCFactory.getInstance();
+        LocalJDBC localJDBC = factory.jdbcFactory();
+        System.out.printf("Fetching data..\n");
+        DataFetcher fetcher = new DataFetcher();
+        localJDBC.setFetcher(fetcher);
+        localJDBC.setDebug(true);
+
+        Calendar endDate = Calendar.getInstance();
+        Calendar startDate = Calendar.getInstance();
+        startDate.add(Calendar.DATE, -25);
+//        localJDBC.fetchPeriod("Outokumpu Oyj", startDate, endDate);
+        String[] list;
+        list = new String[]{"Outokumpu Oyj", "Metso Oyj", "Nokia Oyj"};
+//        list = new String[]{"Outokumpu Oyj"};
+
+        fetcher.sendMarketData(list, startDate, endDate);
+
+
     }
 }

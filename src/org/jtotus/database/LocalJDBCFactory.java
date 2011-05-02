@@ -27,7 +27,7 @@ import org.h2.jdbcx.JdbcConnectionPool;
  */
 public class LocalJDBCFactory {
     private static LocalJDBCFactory localFactory = null;
-    private static JdbcConnectionPool pool = null;
+    private static JdbcConnectionPool pool;
 
     protected LocalJDBCFactory() {
         try {
@@ -53,17 +53,15 @@ public class LocalJDBCFactory {
         if(localFactory == null) {
             localFactory = new LocalJDBCFactory();
         }
-        
+
         return localFactory;
     }
 
     public synchronized LocalJDBC jdbcFactory() {
         LocalJDBC localJDBC = new LocalJDBC();
         localJDBC.setPool(pool);
-        
+
         return localJDBC;
     }
-
-    
 
 }

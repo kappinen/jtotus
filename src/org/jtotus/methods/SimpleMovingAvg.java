@@ -17,6 +17,7 @@
 
 package org.jtotus.methods;
 
+import com.espertech.esper.client.EventBean;
 import org.jtotus.common.Helper;
 import org.jtotus.common.MethodResults;
 import org.jtotus.common.StockType;
@@ -112,4 +113,9 @@ public class SimpleMovingAvg implements MethodEntry {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public void update(EventBean[] eventBeans, EventBean[] eventBeans1) {
+        //To change body of implemented methods use File | Settings | File Templates.
+        throw new RuntimeException("This feature not yet supported.");
+    }
 }

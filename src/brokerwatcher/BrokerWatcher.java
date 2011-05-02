@@ -18,6 +18,7 @@ package brokerwatcher;
 
 import brokerwatcher.eventtypes.EsperEventRsi;
 import brokerwatcher.eventtypes.IndicatorData;
+import brokerwatcher.eventtypes.MarketData;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPAdministrator;
 import com.espertech.esper.client.EPServiceProvider;
@@ -34,6 +35,8 @@ import brokerwatcher.generators.HistoryTicksFromFile;
 import brokerwatcher.generators.TickGenerator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.jtotus.common.MethodResults;
 import org.jtotus.gui.graph.GraphPacket;
 import org.jtotus.threads.MethodFuture;
 
@@ -57,16 +60,16 @@ public class BrokerWatcher implements Callable, Runnable{
     }
 
     public static EPServiceProvider initializeEngine(String mainEngine) {
-        EPServiceProvider provider = null;
-
         Configuration cepConfig = new Configuration();
 
         cepConfig.addEventType("StockTick", StockTick.class.getName());
         cepConfig.addEventType("IndicatorData", IndicatorData.class.getName());
         cepConfig.addEventType("EsperEventRsi", EsperEventRsi.class.getName());
         cepConfig.addEventType("GraphPacket", GraphPacket.class.getName());
+        cepConfig.addEventType("MarketData", MarketData.class.getName());
+        cepConfig.addEventType("MethodResults", MethodResults.class.getName());
 
-        provider = EPServiceProviderManager.getProvider(mainEngine, cepConfig);
+        EPServiceProvider provider = EPServiceProviderManager.getProvider(mainEngine, cepConfig);
 
         return provider;
     }
@@ -99,7 +102,7 @@ public class BrokerWatcher implements Callable, Runnable{
     }
 
     public void startTicker() {
-        startService(new TickGenerator(cep.getEPRuntime()));
+       startService(new TickGenerator(cep.getEPRuntime()));
     }
 
     private void startService(EsperEventGenerator tickGenerator) {
@@ -119,22 +122,8 @@ public class BrokerWatcher implements Callable, Runnable{
     
 
     public Object call() {
-
-//        EsperEventGenerator tickGenerator = new HistoryTicksFromFile(cep.getEPRuntime());
-//        EsperEventGenerator tickGenerator = new TickGenerator(cep.getEPRuntime());
-//        futureTask = new MethodFuture<String>(tickGenerator);
-//        threadExecutor.submit(futureTask);
-
-        startHistoryGenerator();
-
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(BrokerWatcher.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        //startHistoryGenerator();
         startTicker();
-        
-
         return null;
     }
 

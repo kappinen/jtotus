@@ -26,6 +26,10 @@ import brokerwatcher.generators.VrocGenerator;
 import brokerwatcher.listeners.TicksToFile;
 import org.jtotus.methods.MethodEntry;
 import org.jtotus.methods.DummyMethod;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import org.apache.commons.logging.Log;
@@ -50,8 +54,7 @@ import org.jtotus.threads.*;
  * @author Evgeni Kappinen
  */
 public class Engine {
-
-    private static Engine singleton = null;
+    private static final Engine singleton = new Engine();
     private PortfolioDecision portfolioDecision = null;
     private JtotusView mainWindow = null;
     private ConfPortfolio portfolioConfig = null;
@@ -59,35 +62,38 @@ public class Engine {
     private HashMap<String, HashMap<String, TickInterface>> listOfGenerators = null;
     private final static Log log = LogFactory.getLog(Engine.class);
     private MethodResultsPrinter resultsPrinter = null;
-    private BrokerWatcher watcher = new BrokerWatcher();
+    private BrokerWatcher watcher = null;
 
-    
+    private Engine() {
+
+        watcher = new BrokerWatcher();
+        this.prepareMethodsList();
+    }
+
+
     public HashMap<String, HashMap<String, TickInterface>> getListOfGenerators() {
         return listOfGenerators;
     }
 
     private void prepareMethodsList() {
         // Available methods
-        if (portfolioDecision == null) {
-            portfolioDecision = new PortfolioDecision();
-        }
 
         listOfGenerators = new HashMap<String, HashMap<String, TickInterface>>();
-
-        portfolioDecision.addLongTermMethod(new DummyMethod(portfolioDecision));
-        portfolioDecision.addLongTermMethod(new PotentialWithIn());
-        portfolioDecision.addLongTermMethod(new TaLibRSI());
-        portfolioDecision.addLongTermMethod(new TaLibSMA());
-        portfolioDecision.addLongTermMethod(new TaLibEMA());
-        portfolioDecision.addLongTermMethod(new TaLibMOM());
-        portfolioDecision.addLongTermMethod(new TaLibMACD());
-        portfolioDecision.addLongTermMethod(new SpearmanCorrelation());
-        portfolioDecision.addLongTermMethod(new StatisticsFreqPeriod());
+        LinkedList<MethodEntry> listOfLongTermIndicators = new LinkedList<MethodEntry>();
+        listOfLongTermIndicators.add(new DummyMethod());
+        listOfLongTermIndicators.add(new PotentialWithIn());
+        listOfLongTermIndicators.add(new TaLibRSI());
+        listOfLongTermIndicators.add(new TaLibSMA());
+        listOfLongTermIndicators.add(new TaLibEMA());
+        listOfLongTermIndicators.add(new TaLibMOM());
+        listOfLongTermIndicators.add(new TaLibMACD());
+        listOfLongTermIndicators.add(new SpearmanCorrelation());
+        listOfLongTermIndicators.add(new StatisticsFreqPeriod());
 
         try {
             Class groovyClass = Class.forName("org.jtotus.methods.DecisionScript");
             GroovyScipts scripts = (GroovyScipts) groovyClass.newInstance();
-            scripts.loadScripts(portfolioDecision);
+            scripts.loadScripts(listOfLongTermIndicators);
 
         } catch (InstantiationException ex) {
             log.info("GroovyScipt is disabled : InstantiationException");
@@ -97,18 +103,10 @@ public class Engine {
             log.info("GroovyScipt is disabled");
         }
 
-    }
-
-    private Engine() {
-        this.prepareMethodsList();
+        portfolioDecision = new PortfolioDecision(listOfLongTermIndicators);
     }
 
     public synchronized static Engine getInstance() {
-
-        if (singleton == null) {
-            singleton = new Engine();
-        }
-
         return singleton;
     }
 
@@ -123,9 +121,8 @@ public class Engine {
     public void run() {
 
         log.info("Engine is started");
-
-        this.prepareMethodsList();
-        //Auto-update stock values
+        portfolioDecision.checkForAutoStartIndicators();
+        //Update market data
         portfolioConfig = ConfPortfolio.getPortfolioConfig();
         String[] stocks = portfolioConfig.inputListOfStocks;
         for (int i = stocks.length - 1; i >= 0; i--) {
@@ -160,13 +157,13 @@ public class Engine {
         addGeneratorToList("select * from StockTick", new IndicatorIndexGenerator());
         watcher.addStatement("select * from StockTick", new TicksToFile());
 
+
         mainWindow.fetchGeneratorList();
         watcher.call();
 
     }
 
     public void train() {
-
         LinkedList<String> methodNames = mainWindow.getMethodList();
         portfolioDecision.startLongTermMethods(methodNames);
     }

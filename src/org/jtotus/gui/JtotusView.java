@@ -24,7 +24,9 @@ package org.jtotus.gui;
 import brokerwatcher.generators.TickInterface;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.*;
+import org.jtotus.config.ConfPortfolio;
 import org.jtotus.crypt.JtotusKeyRingPassword;
+import org.jtotus.database.DataFetcher;
 import org.jtotus.engine.Engine;
 import org.jtotus.gui.passwords.JtotusPasswordGUI;
 import org.jtotus.gui.passwords.JtotusSetPasswordsGUI;
@@ -45,20 +47,26 @@ import java.util.logging.Logger;
  */
 public class JtotusView extends FrameView {
 
-    private Engine mainEngine = null;
     private JFrame mainFrame = null;
 
 
     public void initialize() {
         ((JTotusMethodView) methodTabbedPane).initialize();
-
         JtotusPortfolioView portTabTable = new JtotusPortfolioView();
         portTabTable.initialize();
-
         portTabTable.setMainPane(((JTotusMethodView) methodTabbedPane).getMainPane());
         ((JTotusMethodView) methodTabbedPane).addComponentToInternalWindow(portTabTable, "PortfolioView");
-
-
+        try {
+            UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(JtotusView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(JtotusView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(JtotusView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnsupportedLookAndFeelException ex) {
+            Logger.getLogger(JtotusView.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public LinkedList<String> getMethodList() {
@@ -68,23 +76,10 @@ public class JtotusView extends FrameView {
     }
 
 
-    public void checkKeyRingPassword() {
-        //Ask for Keyring password first
-        JtotusPasswordGUI keyRingGUI = new JtotusPasswordGUI(mainFrame, true);
-        keyRingGUI.askForKeyRing();
-
-        JtotusKeyRingPassword password = JtotusKeyRingPassword.getInstance();
-        if (password.getKeyRingPassword() == null) {
-            keyRingGUI.dispose();
-            System.exit(-1);
-        }
-    }
-
     public JtotusView(SingleFrameApplication app) {
         super(app);
         mainFrame = app.getMainFrame();
 
-        this.checkKeyRingPassword();
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         initComponents();
@@ -145,22 +140,6 @@ public class JtotusView extends FrameView {
 
 
     }
-
-    public void setListener(Engine engine) {
-        try {
-            UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(JtotusView.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            Logger.getLogger(JtotusView.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(JtotusView.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (UnsupportedLookAndFeelException ex) {
-            Logger.getLogger(JtotusView.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        mainEngine = engine;
-    }
-
 
     @Action
     public Task showConfigView() {
@@ -402,17 +381,14 @@ public class JtotusView extends FrameView {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
-        // TODO Tell engine to start training
-//       ConfigLoader<JTable> tableState = new ConfigLoader<JTable>("GuiTableState");
-//       tableState.storeConfig(portfolioTable);
-
-        mainEngine.train();
-
-
+        Engine engine = Engine.getInstance();
+        engine.train();
     }//GEN-LAST:event_jButton1MouseClicked
 
     private void jButtonRunScriptsMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonRunScriptsMousePressed
-
+        ConfPortfolio portfolio = ConfPortfolio.getPortfolioConfig();
+        DataFetcher fetcher = new DataFetcher();
+        fetcher.sendMarketData(portfolio.inputListOfStocks, portfolio.inputStartingDate, portfolio.inputEndingDate);
     }//GEN-LAST:event_jButtonRunScriptsMousePressed
 
     private void configMenuItemMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_configMenuItemMouseClicked
@@ -429,17 +405,15 @@ public class JtotusView extends FrameView {
     }//GEN-LAST:event_configMenuItemMousePressed
 
     private void jMenuItem1MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenuItem1MousePressed
-        // TODO add your handling code here:
         MethodResultsPrinter printer = (MethodResultsPrinter) methodTabbedPane;
         printer.sendReport();
-
-
     }//GEN-LAST:event_jMenuItem1MousePressed
 
     private void jMenuItem2MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenuItem2MousePressed
     }//GEN-LAST:event_jMenuItem2MousePressed
 
     private void jMenuItem2MouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenuItem2MouseReleased
+
         JtotusSetPasswordsGUI passwords = new JtotusSetPasswordsGUI(mainFrame, false);
         passwords.doShow();
     }//GEN-LAST:event_jMenuItem2MouseReleased

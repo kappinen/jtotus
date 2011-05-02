@@ -18,10 +18,12 @@
 
 package org.jtotus.gui;
 
+import org.jtotus.crypt.JtotusKeyRingPassword;
 import org.jtotus.engine.Engine;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
 import org.jtotus.engine.StartUpLoader;
+import org.jtotus.gui.passwords.JtotusPasswordGUI;
 
 
 /**
@@ -37,17 +39,23 @@ public class JtotusApp extends SingleFrameApplication {
         StartUpLoader loader = StartUpLoader.getInstance();
         loader.load("js");
 
-        Engine mainEngine = Engine.getInstance();
+        //Request for key-ring password
+        JtotusPasswordGUI keyRingGUI = new JtotusPasswordGUI(new javax.swing.JFrame(), true);
+        keyRingGUI.askForKeyRing();
 
+        JtotusKeyRingPassword password = JtotusKeyRingPassword.getInstance();
+        if (password.getKeyRingPassword() == null) {
+            keyRingGUI.dispose();
+            System.exit(-1);
+        }
         JtotusView mainWindow = new JtotusView(this);
-        mainWindow.setListener(mainEngine);
         mainWindow.initialize();
-        
-        mainEngine.setGUI(mainWindow);
-
-        mainEngine.run();
         show(mainWindow);
-        
+
+        Engine mainEngine = Engine.getInstance();
+        mainEngine.setGUI(mainWindow);
+        mainEngine.run();
+
     }
 
 
@@ -70,7 +78,6 @@ public class JtotusApp extends SingleFrameApplication {
     /**
      * Main method launching the application.
      * @param args
-     * @param engine 
      */
     public static void main(String[] args) {
 

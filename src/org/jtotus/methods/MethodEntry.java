@@ -19,6 +19,8 @@
 package org.jtotus.methods;
 
 import java.util.concurrent.Callable;
+
+import com.espertech.esper.client.UpdateListener;
 import org.jtotus.common.MethodResults;
 
 
@@ -26,7 +28,7 @@ import org.jtotus.common.MethodResults;
  *
  * @author Evgeni Kappinen
  */
-public interface MethodEntry extends Runnable, Callable<MethodResults> {
+public interface MethodEntry extends Runnable, Callable<MethodResults>, UpdateListener {
     
     public String getMethName();
 

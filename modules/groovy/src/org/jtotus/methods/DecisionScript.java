@@ -14,23 +14,22 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  *
- * 
- * TODO: result from scripts
- * http://groovy.codehaus.org/Embedding+Groovy
  */
 package org.jtotus.methods;
 
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.jtotus.common.MethodResults;
 import org.jtotus.config.ConfPortfolio;
 import org.jtotus.threads.PortfolioDecision;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -94,9 +93,7 @@ public class DecisionScript extends TaLibAbstract implements MethodEntry, Groovy
         return path_to_script.substring(sep + 1, dot);
     }
 
-    
-    @Override
-    public MethodResults performMethod(String stockName) {
+    public MethodResults performMethod(String stockName, double[] input) {
         File file = new File(path_to_script);
 
         if (!file.isFile() || !file.canRead()) {
@@ -124,7 +121,7 @@ public class DecisionScript extends TaLibAbstract implements MethodEntry, Groovy
         return fileFilter;
     }
 
-    public void loadScripts(PortfolioDecision portfolio) {
+    public void loadScripts(LinkedList<MethodEntry> list) {
 
         File scriptDir = new File(ConfPortfolio.getPathToGroovyScripts());
         if (!scriptDir.isDirectory()) {
@@ -136,10 +133,14 @@ public class DecisionScript extends TaLibAbstract implements MethodEntry, Groovy
 
         for (File tmp : listOfFiles) {
             try {
-                portfolio.addLongTermMethod(new DecisionScript(tmp.getCanonicalPath()));
+                list.add(new DecisionScript(tmp.getCanonicalPath()));
             } catch (IOException ex) {
                 Logger.getLogger(DecisionScript.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+
+    public void loadScripts(PortfolioDecision portfolio) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

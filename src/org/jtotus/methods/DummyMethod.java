@@ -21,9 +21,10 @@ package org.jtotus.methods;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.espertech.esper.client.EventBean;
 import org.jtotus.common.Helper;
 import org.jtotus.common.MethodResults;
-import org.jtotus.threads.PortfolioDecision;
 
 /**
  *
@@ -33,17 +34,7 @@ public class DummyMethod implements MethodEntry {
 
     private Helper help = Helper.getInstance();
     private static Random genNum = new Random();
-    private PortfolioDecision control = null;
     private String methodName = "DummyMethod";
-
-    public DummyMethod(PortfolioDecision tmp) {
-        control = tmp;
-    }
-
-    public DummyMethod(PortfolioDecision tmp, String name) {
-        methodName = name;
-        control = tmp;
-    }
 
     public void run() {
         try {
@@ -67,4 +58,8 @@ public class DummyMethod implements MethodEntry {
     }
 
 
+    @Override
+    public void update(EventBean[] eventBeans, EventBean[] eventBeans1) {
+        throw new RuntimeException("This feature not yet supported.");
+    }
 }

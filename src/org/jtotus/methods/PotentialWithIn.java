@@ -1,4 +1,4 @@
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      /*
+/*
     This file is part of jTotus.
 
     jTotus is free software: you can redistribute it and/or modify
@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map.Entry;
 import java.util.Set;
+import com.espertech.esper.client.EventBean;
 import org.jtotus.common.Helper;
 import org.jtotus.common.MethodResults;
 import org.jtotus.common.StockNames;
@@ -120,7 +121,7 @@ public class PotentialWithIn implements MethodEntry {
                }
            }
         }
-       
+
        //IF current price is the minimum of the period
        //substract its  position in the table
 
@@ -147,7 +148,6 @@ public class PotentialWithIn implements MethodEntry {
            help.debug(this.getClass().getName(),
                     "Minimim value:%f for %s\n",
                     min.floatValue(),stockPer.getStockName());
-
 
            for(int i=listOfPrices.size()-1;i>0;i--) {
 
@@ -216,11 +216,6 @@ public class PotentialWithIn implements MethodEntry {
            }
         }
 
-
-
-
-        //Normilize
-
        listOfPrices.clear();
        //  Find out which Stock has most potentials
        iterPer = periodList.iterator();
@@ -272,25 +267,14 @@ public class PotentialWithIn implements MethodEntry {
         dumpVotes(voteCounter);
        }
 
-
-
-
     public MethodResults call() throws Exception {
         MethodResults results = new MethodResults();
-        
+
         results.setMethodName(this.getMethName());
 
-        System.out.printf("Callable calls run method\n");
-        //Perform action
-         this.run();
+        this.run();
 
-         System.out.printf("Callable calls run method done:%s\n", voteCounter.size());
-        //FIXME:Normilize
-        Set<Entry<String,Integer>> set = voteCounter.entrySet();
-        Iterator <Entry<String,Integer>>entryIter = set.iterator();
-        while(entryIter.hasNext()) {
-            Entry<String,Integer> entry = entryIter.next();
-
+        for(Entry<String,Integer> entry : voteCounter.entrySet()) {
             System.out.printf("Results for %s:%s votes:%d\n",
                     this.getMethName(),entry.getKey(),entry.getValue());
             
@@ -305,4 +289,8 @@ public class PotentialWithIn implements MethodEntry {
         return true;
     }
 
+    @Override
+    public void update(EventBean[] eventBeans, EventBean[] eventBeans1) {
+        return;
+    }
 }

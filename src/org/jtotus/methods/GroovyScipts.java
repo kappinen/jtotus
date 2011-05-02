@@ -5,7 +5,7 @@
 
 package org.jtotus.methods;
 
-import org.jtotus.threads.PortfolioDecision;
+import java.util.LinkedList;
 
 /**
  *
@@ -13,5 +13,5 @@ import org.jtotus.threads.PortfolioDecision;
  */
 public interface GroovyScipts {
 
-    public void loadScripts(PortfolioDecision portfolio);
+    public void loadScripts(LinkedList<MethodEntry> list);
 }

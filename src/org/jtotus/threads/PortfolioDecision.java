@@ -30,6 +30,12 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.threads;
 
+import brokerwatcher.BrokerWatcher;
+import com.espertech.esper.client.EPAdministrator;
+import com.espertech.esper.client.EPServiceProvider;
+import com.espertech.esper.client.EPStatement;
+import org.jtotus.config.ConfigLoader;
+import org.jtotus.database.DataFetcher;
 import org.jtotus.methods.MethodEntry;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -48,56 +54,77 @@ public class PortfolioDecision implements Runnable {
     private Helper help = null;
     private LinkedList<MethodEntry> threadList = null;
     private ExecutorService threadExecutor = null;
-    
 
-    private void init() {
+//    public void addLongTermMethod(MethodEntry entry) {
+//        ConfPortfolio portfolioConfig = ConfPortfolio.getPortfolioConfig();
+//        threadList.add(entry);
+//
+//        if (portfolioConfig.isAutoStared(entry.getMethName())) {
+//            startTask(entry);
+//        }
+//    }
+
+    public PortfolioDecision(LinkedList<MethodEntry> threads) {
+        super();
+
+        threadList = (LinkedList<MethodEntry>) threads.clone();
         if (help == null) {
             help = Helper.getInstance();
         }
-        if (threadList == null) {
-            threadList = new LinkedList<MethodEntry>();
-        }
+
         if (threadExecutor == null) {
             threadExecutor = Executors.newCachedThreadPool();
         }
-        
+
     }
 
-    public PortfolioDecision() {
-        super();
-        init();
-    }
+    public void checkForAutoStartIndicators() {
+        LinkedList<MethodEntry> autoStarts = new LinkedList<MethodEntry>();
 
-    public void addLongTermMethod(MethodEntry entry) {
         ConfPortfolio portfolioConfig = ConfPortfolio.getPortfolioConfig();
-        threadList.add(entry);
-        
-        if (portfolioConfig.isAutoStared(entry.getMethName())) {
-            startTask(entry);
-        }
-    }
 
-    public PortfolioDecision(LinkedList<MethodEntry> threads) {
-
-        init();
-
-        Iterator<MethodEntry> iterator = threadList.iterator();
-        while (iterator.hasNext()) {
-            threadList.add(iterator.next());
+        for (MethodEntry entry : threadList) {
+            if (portfolioConfig.isAutoStared(entry.getMethName())) {
+                autoStarts.add(entry);
+            }
         }
 
+        this.startIndicators(autoStarts);
     }
 
     public void startLongTermMethods(LinkedList<String> methodNames) {
 
-        Iterator<MethodEntry> methodIter = threadList.iterator();
-        while (methodIter.hasNext()) {
-            MethodEntry entry = methodIter.next();
-            if (methodNames.contains(entry.getMethName())){
+        for (MethodEntry aThreadList : threadList) {
+            MethodEntry entry = aThreadList;
+            if (methodNames.contains(entry.getMethName())) {
                 startTask(entry);
             }
         }
     }
+
+
+    public void startIndicators(LinkedList<MethodEntry> listOfIndicators) {
+
+        System.out.printf("Starting auto-start LongTermIndicators");
+
+        if (listOfIndicators.isEmpty()) {
+            System.err.printf("Not auto-started tasks for Portfolio Decision\n");
+        }
+
+        EPServiceProvider provider = BrokerWatcher.getMainEngine();
+        EPAdministrator cepAdm = provider.getEPAdministrator();
+        EPStatement eps = cepAdm.createEPL("select * from MarketData");
+        for ( MethodEntry longTermIndicator : listOfIndicators) {
+            System.out.printf("--- Adding ---> %s\n", longTermIndicator.getMethName());
+            eps.addListener(longTermIndicator);
+        }
+
+        ConfPortfolio portfolio = ConfPortfolio.getPortfolioConfig();
+        DataFetcher fetcher = new DataFetcher();
+        fetcher.sendMarketData(portfolio.inputListOfStocks, portfolio.inputStartingDate, portfolio.inputEndingDate);
+    }
+
+
   
     public void run() {
 
