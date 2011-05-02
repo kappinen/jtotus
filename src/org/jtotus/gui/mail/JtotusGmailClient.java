@@ -151,6 +151,19 @@ public class JtotusGmailClient implements Callable {
         return true;
     }
 
+    public void sendThreaded() {
+        Thread thread = new Thread() {
+            public void run() {
+                sendMail(getDefaultLogin(),
+                         getDefaultPassword(),
+                         getSubject(),
+                         getMessage());
+            }
+        };
+        thread.start();
+    }
+
+
     public Object call() throws Exception {
 
         boolean result = false;
