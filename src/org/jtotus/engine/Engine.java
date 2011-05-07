@@ -17,6 +17,7 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 package org.jtotus.engine;
 
 import brokerwatcher.BrokerWatcher;
+import brokerwatcher.broker.MarketBrokerSimulator;
 import brokerwatcher.generators.AccdistGenerator;
 import brokerwatcher.generators.IndicatorIndexGenerator;
 import brokerwatcher.generators.RsiGenerator;
@@ -156,11 +157,10 @@ public class Engine {
         addGeneratorToList("select * from StockTick", new RsiGenerator());
         addGeneratorToList("select * from StockTick", new IndicatorIndexGenerator());
         watcher.addStatement("select * from StockTick", new TicksToFile());
-
+        watcher.addStatement("select * from MarketSignal", new MarketBrokerSimulator());
 
         mainWindow.fetchGeneratorList();
         watcher.call();
-
     }
 
     public void train() {

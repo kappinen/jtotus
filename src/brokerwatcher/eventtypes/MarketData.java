@@ -1,5 +1,6 @@
 package brokerwatcher.eventtypes;
 
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,9 +32,18 @@ public class MarketData {
     //StockName, Values
     public Map<String, double[]> data;
     public MarketDataType type = MarketDataType.NotSet;
+    public Calendar date;
 
     public MarketData() {
         data = Collections.synchronizedMap(new HashMap<String, double[]>());
+    }
+
+    public Calendar getDate() {
+        return date;
+    }
+
+    public void setDate(Calendar date) {
+        this.date = date;
     }
 
     static private enum MarketDataType {

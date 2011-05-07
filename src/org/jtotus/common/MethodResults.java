@@ -17,6 +17,7 @@
 
 package org.jtotus.common;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -31,6 +32,15 @@ public class MethodResults implements Iterator, Iterable{
     private HashMap<String, Double> results = null;
     private Iterator<Entry<String, Double>> iterator=null;
     private Double avrSuccessRate=null;
+    private Calendar date=null;
+
+    public Calendar getDate() {
+        return date;
+    }
+
+    public void setDate(Calendar date) {
+        this.date = date;
+    }
 
     private HashMap<String, Double> statistics = null;
 

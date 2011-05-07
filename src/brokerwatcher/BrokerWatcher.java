@@ -16,9 +16,7 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package brokerwatcher;
 
-import brokerwatcher.eventtypes.EsperEventRsi;
-import brokerwatcher.eventtypes.IndicatorData;
-import brokerwatcher.eventtypes.MarketData;
+import brokerwatcher.eventtypes.*;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPAdministrator;
 import com.espertech.esper.client.EPServiceProvider;
@@ -29,13 +27,9 @@ import java.util.HashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import brokerwatcher.eventtypes.StockTick;
 import brokerwatcher.generators.EsperEventGenerator;
 import brokerwatcher.generators.HistoryTicksFromFile;
 import brokerwatcher.generators.TickGenerator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.jtotus.common.MethodResults;
 import org.jtotus.gui.graph.GraphPacket;
 import org.jtotus.threads.MethodFuture;
@@ -68,6 +62,7 @@ public class BrokerWatcher implements Callable, Runnable{
         cepConfig.addEventType("GraphPacket", GraphPacket.class.getName());
         cepConfig.addEventType("MarketData", MarketData.class.getName());
         cepConfig.addEventType("MethodResults", MethodResults.class.getName());
+        cepConfig.addEventType("MarketSignal", MarketSignal.class.getName());
 
         EPServiceProvider provider = EPServiceProviderManager.getProvider(mainEngine, cepConfig);
 
@@ -122,7 +117,6 @@ public class BrokerWatcher implements Callable, Runnable{
     
 
     public Object call() {
-        //startHistoryGenerator();
         startTicker();
         return null;
     }

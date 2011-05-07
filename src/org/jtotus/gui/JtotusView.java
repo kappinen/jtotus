@@ -22,6 +22,7 @@ package org.jtotus.gui;
 
 
 import brokerwatcher.generators.TickInterface;
+import brokerwatcher.training.TrainManager;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.*;
 import org.jtotus.config.ConfPortfolio;
@@ -386,13 +387,24 @@ public class JtotusView extends FrameView {
     }//GEN-LAST:event_jButton1MouseClicked
 
     private void jButtonRunScriptsMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonRunScriptsMousePressed
-        ConfPortfolio portfolio = ConfPortfolio.getPortfolioConfig();
-        DataFetcher fetcher = new DataFetcher();
-        fetcher.sendMarketData(portfolio.inputListOfStocks, portfolio.inputStartingDate, portfolio.inputEndingDate);
+//        ConfPortfolio portfolio = ConfPortfolio.getPortfolioConfig();
+//        DataFetcher fetcher = new DataFetcher();
+//        fetcher.sendMarketData(portfolio.inputListOfStocks, portfolio.inputStartingDate, portfolio.inputEndingDate);
+
+        System.err.printf("Starting trining...\n");
+        Thread thread = new Thread() {
+
+            public void run() {
+                TrainManager manager = new TrainManager();
+                manager.startTraining();
+            }
+        };
+        thread.start();
+
     }//GEN-LAST:event_jButtonRunScriptsMousePressed
 
     private void configMenuItemMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_configMenuItemMouseClicked
-        System.out.printf("Staring config view\n");
+        System.out.printf("Stdsaring config view\n");
         ConfigView configView = new ConfigView(mainFrame, true);
         configView.setVisible(true);
     }//GEN-LAST:event_configMenuItemMouseClicked

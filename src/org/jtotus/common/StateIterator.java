@@ -91,7 +91,6 @@ public class StateIterator {
 
             //FIXME:check return value
 
-
             String step = rangeType.substring(rangeType.lastIndexOf("{") + 1,
                     rangeType.lastIndexOf("}"));
             Integer dateStep = new Integer(step);

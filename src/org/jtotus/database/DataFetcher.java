@@ -23,13 +23,9 @@ import java.math.BigDecimal;
 
 import brokerwatcher.BrokerWatcher;
 import brokerwatcher.eventtypes.MarketData;
-import brokerwatcher.generators.EsperEventGenerator;
 import com.espertech.esper.client.EPRuntime;
-import com.espertech.esper.client.EPServiceProvider;
 import org.jtotus.common.DayisHoliday;
 import org.jtotus.common.Helper;
-import org.jtotus.config.ConfPortfolio;
-import org.jtotus.config.ConfigLoader;
 
 /**
  *
@@ -42,7 +38,7 @@ public class DataFetcher {
     private DayisHoliday holidays = null;
     private CacheServer cache = null;
     private LocalJDBC localJDBC = null;
-    private boolean debug = true;
+    private boolean debug = false;
 
     public DataFetcher() {
         listOfResources = new LinkedList<InterfaceDataBase>();
@@ -65,10 +61,7 @@ public class DataFetcher {
     private boolean timeFailsSanityCheck(Calendar date) {
         boolean result = false;
 
-        if (date.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY
-                || date.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-            result = true;
-        } else if (holidays.isHoliday(date)) {
+        if (holidays.isHoliday(date)) {
             result = true;
         }
 
@@ -161,7 +154,7 @@ public class DataFetcher {
                                      endDate);
     }
 
-    public void sendMarketData(final String[] listOfStocks, final Calendar startDate, final Calendar endDate) {
+    public boolean sendMarketData(final String[] listOfStocks, final Calendar startDate, final Calendar endDate) {
 
         final MarketData marketData = new MarketData()
                 .setAsClosingPrice();
@@ -170,34 +163,40 @@ public class DataFetcher {
                 .getEPRuntime();
 
 
-        for (int i = 0; i < listOfStocks.length; i++) {
-            final int point = i;
+        for (String stockName : listOfStocks) {
 //            final Thread thread = new Thread() {
 //                public void run() {
             if (debug) {
-                System.out.printf("Fetching data for: %s\n", listOfStocks[point]);
+                System.out.printf("Fetching data for: %s\n", stockName);
             }
 
             LocalJDBCFactory factory = LocalJDBCFactory.getInstance();
             LocalJDBC locJDBC = factory.jdbcFactory();
             locJDBC.setFetcher(new DataFetcher());
-            double[] data = locJDBC.fetchPeriod(listOfStocks[point],
+            double[] data = locJDBC.fetchPeriod(stockName,
                                                 startDate,
                                                 endDate);
 
-            marketData.data.put(listOfStocks[point],
-                    data);
+            if (data == null) {
+                return false;
+            }
+
+            marketData.data.put(stockName, data);
+            marketData.setDate(endDate);
 //                }
 //            };
 //            thread.start();
         }
 
         if (debug) {
-                System.out.printf("Sending market data : %d\n",marketData.data.size());
-            }
+            System.out.printf("Sending market data : %d\n", marketData.data.size());
+        }
+        
         runtime.sendEvent(marketData);
-    }
 
+
+        return true;
+    }
 
     public static void main(String[] arv) {
         LocalJDBCFactory factory = LocalJDBCFactory.getInstance();

@@ -26,11 +26,11 @@ import java.util.Calendar;
  * @author Evgeni Kappinen
  */
 public class ConfPortfolio {
-    private String portofoliName = null;
     public String[] inputListOfStocks;
     public double inputAssumedBudjet;
     public Calendar inputStartingDate = null;
     public Calendar inputEndingDate = null;
+    public Calendar inputStartIndicatorDate = null;
     public boolean useCurentDayAsEndingDate = true;
     public ArrayList<String> autoStartedMethods;
 
@@ -44,8 +44,10 @@ public class ConfPortfolio {
 
         inputEndingDate = Calendar.getInstance();
         inputStartingDate = Calendar.getInstance();
-        inputStartingDate.add(Calendar.DATE, -300);
-        portofoliName = "OMXHelsinki";
+        inputStartingDate.add(Calendar.DATE, -350);
+
+        inputStartIndicatorDate = (Calendar)inputStartingDate.clone();
+        inputStartIndicatorDate.add(Calendar.DATE, -350);
 
         autoStartedMethods = new ArrayList<String>();
     }
@@ -53,15 +55,9 @@ public class ConfPortfolio {
     /**
      * @return the portofoliName
      */
-    public String getPortofoliName() {
-        return portofoliName;
-    }
+    public String getPortfolioName() {
+        return portfolioName;
 
-    /**
-     * @param portofoliName the portofoliName to set
-     */
-    public void setPortofoliName(String portofoliName) {
-        this.portofoliName = portofoliName;
     }
 
     public String[] fetchGUIStockNames() {
