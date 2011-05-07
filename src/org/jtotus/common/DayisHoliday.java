@@ -24,15 +24,21 @@ import java.util.Calendar;
  * @author Evgeni Kappinen
  */
 public class DayisHoliday {
-    private int[]  days= {1012010, 6012010, 2042010, 5042010,
-                          13052010, 6122010, 25062010, 10042009, 13042009,
-                          1052009, 21052009, 19062009, 24122009, 25122009,
-                          31122009, 24122010, 31122010, 6012011, 22042011, 25042011};
+    private static final int[]days= {1012010, 6012010, 2042010, 5042010,
+                                      13052010, 6122010, 25062010, 10042009, 13042009,
+                                      1052009, 21052009, 19062009, 24122009, 25122009,
+                                      31122009, 24122010, 31122010, 6012011, 22042011,
+                                      25042011};
 
-    public boolean isHoliday(Calendar date) {
+    public static boolean isHoliday(Calendar date) {
 
         if (date == null) {
             return false;
+        }
+
+        if (date.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY ||
+                date.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+            return true;
         }
 
         int toSearch =  date.get(Calendar.DATE)*1000000+(date.get(Calendar.MONTH)+1)*10000+date.get(Calendar.YEAR);
