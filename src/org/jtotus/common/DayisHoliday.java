@@ -18,6 +18,8 @@
 package org.jtotus.common;
 
 import java.util.Calendar;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
 
 /**
  *
@@ -25,10 +27,10 @@ import java.util.Calendar;
  */
 public class DayisHoliday {
     private static final int[]days= {1012010, 6012010, 2042010, 5042010,
-                                      13052010, 6122010, 25062010, 10042009, 13042009,
-                                      1052009, 21052009, 19062009, 24122009, 25122009,
-                                      31122009, 24122010, 31122010, 6012011, 22042011,
-                                      25042011};
+                                     13052010, 6122010, 25062010, 10042009, 13042009,
+                                     1052009, 21052009, 19062009, 24122009, 25122009,
+                                     31122009, 24122010, 31122010, 6012011, 22042011,
+                                     25042011};
 
     public static boolean isHoliday(Calendar date) {
 
@@ -45,6 +47,26 @@ public class DayisHoliday {
         //System.out.printf("To search:%d == %d:%d:%d\n", toSearch, date.get(Calendar.DATE), date.get(Calendar.MONTH)+1, date.get(Calendar.YEAR));
         for (int i = 0;i < days.length;i++) {
             if (days[i] == toSearch) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isHoliday(DateTime date) {
+
+        if (date == null ||
+            date.getDayOfWeek() == DateTimeConstants.SATURDAY ||
+            date.getDayOfWeek() == DateTimeConstants.SUNDAY) {
+            return true;
+        }
+
+        
+        //int toSearch =  date.get(Calendar.DATE)*1000000+(date.get(Calendar.MONTH)+1)*10000+date.get(Calendar.YEAR);
+        int toSearch =  date.getDayOfMonth()*1000000+date.getMonthOfYear()*10000+date.getYear();
+        //System.out.printf("To search:%d == %d:%d:%d\n", toSearch, date.get(Calendar.DATE), date.get(Calendar.MONTH)+1, date.get(Calendar.YEAR));
+        for (int day : days) {
+            if (day == toSearch) {
                 return true;
             }
         }

@@ -108,14 +108,18 @@ public class TickGenerator implements EsperEventGenerator {
 
         try {
             time = new DateTime(timeZone);
+
+            System.out.printf("Timezone:%s and week:%d - %d", timeZone.toString(), time.getDayOfWeek(), DateTimeConstants.SATURDAY);
             if (DateTimeConstants.SATURDAY == time.getDayOfWeek()) {
                 long toSleep = 24 * 60 - time.getMinuteOfDay() + 24*60;
                 System.out.printf("TickGenerator sleeps until Monday, because it is Saturday\n");
-                Thread.sleep(toSleep);
+                Thread.sleep(toSleep * 60 * 1000);
+                toContinue = true;
             } else if (DateTimeConstants.SUNDAY == time.getDayOfWeek()) {
                 long toSleep = 24 * 60 - time.getMinuteOfDay();
                 System.out.printf("TickGenerator sleeps until Monday, because it is Sunday\n");
-                Thread.sleep(toSleep);
+                Thread.sleep(toSleep * 60 * 1000);
+                toContinue = true;
             }
 
 
