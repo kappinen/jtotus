@@ -19,21 +19,19 @@ package org.jtotus.methods.evaluators;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Date;
+
+import org.jtotus.config.ConfPortfolio;
 import org.jtotus.gui.graph.GraphSender;
 
 /**
- *
  * @author Evgeni Kappinen
-
-
-
-    TODO:all data in cents!
+ *         TODO:all data in cents!
  */
 public class EvaluateMethodSignals {
 
     private BigDecimal currentCapital = null;
     private BigDecimal assumedCapital = null;
-    private BigDecimal stockCount = null;
+    private long stockCount = 0;
     private BigDecimal previousCapital = null;
     private GraphSender graphSender = null;
     private double numberOfWinningTrades = 0;
@@ -44,18 +42,29 @@ public class EvaluateMethodSignals {
     private BigDecimal currentBestCapital = null;
     private double bestNumberOfWinningTrades = 0;
     private double bestNumberOfLosingTrades = 0;
-    
+    private final ConfPortfolio portfolio = ConfPortfolio.getPortfolioConfig();
+
+
+    public EvaluateMethodSignals() {
+        assumedCapital = BigDecimal.valueOf(portfolio.inputAssumedBudjet);
+        currentCapital = BigDecimal.valueOf(assumedCapital.doubleValue());
+        if (this.getCurrentBestCapital() == null) {
+            this.setCurrentBestCapital(BigDecimal.valueOf(0.0));
+        }
+    }
+
+
     /* Initialization function, should be run
-     * for each state for StateIterator.
-     *
-     * @param reviewTarget Current stock name
-     * @param seriesName   Method related series name
-     * @param originalCapital Assumed Capital from portofolio
-     * @param stockGraph   Stores values for each iteration of StateIterator.class
-     *
-     * @return boolean  Currently, Always returns true
-     *
-     */
+    * for each state for StateIterator.
+    *
+    * @param reviewTarget Current stock name
+    * @param seriesName   Method related series name
+    * @param originalCapital Assumed Capital from portofolio
+    * @param stockGraph   Stores values for each iteration of StateIterator.class
+    *
+    * @return boolean  Currently, Always returns true
+    *
+    */
 
     public boolean initialize(String reviewTarget,
                               String seriesName,
@@ -63,16 +72,16 @@ public class EvaluateMethodSignals {
 
         setCurrentCapital(BigDecimal.valueOf(originalCapital));
         assumedCapital = BigDecimal.valueOf(originalCapital);
-        
-        if(this.getCurrentBestCapital() == null){
+
+        if (this.getCurrentBestCapital() == null) {
             this.setCurrentBestCapital(BigDecimal.valueOf(0.0));
         }
-        stockCount = BigDecimal.valueOf(0.0);
-        
+        stockCount = 0;
+
         /*All points, which lead to signal are stored
-           in Graph container. 
-         */
-         
+          in Graph container.
+        */
+
         graphSender = new GraphSender(reviewTarget);
         graphSender.setSeriesName(seriesName);
         this.numberOfLosingTrades = 0.0;
@@ -83,10 +92,10 @@ public class EvaluateMethodSignals {
     }
 
     public BigDecimal brockerExpensePerAction(BigDecimal tradingVolume) {
-        //Nordent State 3 -> 0.15% /Min. 7
+        //Nordnet State 3 -> 0.15% /Min. 7
         BigDecimal payment = tradingVolume.setScale(5, RoundingMode.HALF_UP)
-                                          .divide(BigDecimal.valueOf(100.0))
-                                          .multiply(BigDecimal.valueOf(0.15));
+                .divide(BigDecimal.valueOf(100.0))
+                .multiply(BigDecimal.valueOf(0.15));
 
         if (payment.compareTo(BigDecimal.valueOf(7)) > 0) {
             return payment;
@@ -95,21 +104,26 @@ public class EvaluateMethodSignals {
         return BigDecimal.valueOf(7.00);
     }
 
+    public  long getStockCount() {
+        return  stockCount;
+    }
+
     public EvaluateMethodSignals buy(double price, int amount) {
 
         if (getCurrentCapital().subtract(this.brockerExpensePerAction(getCurrentCapital()))
-                         .compareTo(BigDecimal.valueOf(0.0)) <= 0) {
-           // System.err.printf("There is no money left\n");
+                .compareTo(BigDecimal.valueOf(0.0)) <= 0) {
+            // System.err.printf("There is no money left\n");
             return null;
         }
 
         if (amount == -1) {//ALL-in
             stockCount = getCurrentCapital().subtract(this.brockerExpensePerAction(getCurrentCapital()))
-                                      .divide(BigDecimal.valueOf(price), 3, RoundingMode.HALF_DOWN);
+                    .divide(BigDecimal.valueOf(price), 3, RoundingMode.HALF_DOWN)
+                    .intValue();
 
             setPreviousCapital(getCurrentCapital());
             setCurrentCapital(BigDecimal.valueOf(0.0));
-            
+
         } else {
             //TODO: implement
         }
@@ -122,48 +136,48 @@ public class EvaluateMethodSignals {
 
         String annotation = "Buy";
         graphSender.addForSending(date, price, annotation);
-        
+
         return this;
     }
 
 
     public EvaluateMethodSignals sell(double price, int amount) {
 
-        if(stockCount.compareTo(BigDecimal.valueOf(0.0))<=0) {
+        if (stockCount <= 0) {
             return this;
         }
-        
+
         if (amount == -1) {//ALL-in
-            setCurrentCapital(stockCount.multiply(BigDecimal.valueOf(price)));
+            setCurrentCapital(BigDecimal.valueOf(price).multiply(BigDecimal.valueOf(stockCount)));
             setCurrentCapital(getCurrentCapital().subtract(this.brockerExpensePerAction(getCurrentCapital())));
 
-            if(getPreviousCapital().compareTo(getCurrentCapital()) >= 0) {
+            if (getPreviousCapital().compareTo(getCurrentCapital()) >= 0) {
                 this.numberOfLosingTrades++;
-            }else {
+            } else {
                 this.numberOfWinningTrades++;
             }
-            
+
             //Best Capital is found
             if (getCurrentBestCapital().compareTo(getCurrentCapital()) < 0) {
                 setCurrentBestCapital(getCurrentCapital());
                 bestResultsGraph = graphSender;
                 bestNumberOfWinningTrades = numberOfWinningTrades;
                 bestNumberOfLosingTrades = numberOfLosingTrades;
-                newBestIsFound = true;                
+                newBestIsFound = true;
             }
 
-            stockCount = BigDecimal.valueOf(0.0);
+            stockCount = 0;
         }
         return this;
     }
 
 
-        public EvaluateMethodSignals sell(double price, int amount, Date date) {
-            
-            this.sell(price,amount);
+    public EvaluateMethodSignals sell(double price, int amount, Date date) {
 
-            String annotation = "Sell";
-            graphSender.addForSending(date, price, annotation);
+        this.sell(price, amount);
+
+        String annotation = "Sell";
+        graphSender.addForSending(date, price, annotation);
 
         return this;
     }
@@ -185,10 +199,9 @@ public class EvaluateMethodSignals {
     }
 
 
-
     public Double getProfitInProcents() {
-        Double tmp =  currentBestCapital.doubleValue();
-        return ((tmp / this.assumedCapital.doubleValue()) -1) * 100;
+        Double tmp = currentBestCapital.doubleValue();
+        return ((tmp / this.assumedCapital.doubleValue()) - 1) * 100;
     }
 
     /**

@@ -139,8 +139,8 @@ public class TaLibEMA extends TaLibAbstract implements MethodEntry {
         if (config.inputPrintResults) {
             sender = new GraphSender(this.getMethName());
             sender.setSeriesName(this.getMethName());
-            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
-                                                         portfolioConfig.inputEndingDate.getTime());
+            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate,
+                                                         portfolioConfig.inputEndingDate);
             dateIterator.move(outBegIdx.value);
             for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
                 Date stockDate = dateIterator.next();
@@ -222,8 +222,8 @@ public class TaLibEMA extends TaLibAbstract implements MethodEntry {
 
                     if (changed) {
                         if (config.inputPrintResults && decEMAPeriod == config.inputEMAPeriod) {
-                            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
-                                                                         portfolioConfig.inputEndingDate.getTime());
+                            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate,
+                                                                         portfolioConfig.inputEndingDate);
                             dateIterator.move(elem + outBegIdxDec.value);
                             sender.setSeriesName("CrossingPoint");
                             sender.addForSending(dateIterator.getCurrent(), input[elem + outBegIdxDec.value] + 0.1);

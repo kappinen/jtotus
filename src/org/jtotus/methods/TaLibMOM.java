@@ -127,8 +127,8 @@ public class TaLibMOM extends TaLibAbstract implements MethodEntry {
         if (config.inputPrintResults) {
             sender = new GraphSender(stockName);
             sender.setSeriesName(this.getMethName());
-            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
-                                                         portfolioConfig.inputEndingDate.getTime());
+            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate,
+                                                         portfolioConfig.inputEndingDate);
             dateIterator.move(outBegIdx.value);
             for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
                 Date stockDate = dateIterator.next();
@@ -211,8 +211,8 @@ public class TaLibMOM extends TaLibAbstract implements MethodEntry {
 
                     if (changed) {
                         if (config.inputPrintResults && decMOMPeriod == config.inputMOMPeriod) {
-                            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
-                                                                         portfolioConfig.inputEndingDate.getTime());
+                            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate,
+                                                                         portfolioConfig.inputEndingDate);
                             dateIterator.move(elem + outBegIdxDec.value);
 
                             sender.setSeriesName("Sell/Buy signals");

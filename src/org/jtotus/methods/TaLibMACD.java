@@ -172,8 +172,8 @@ public class TaLibMACD extends TaLibAbstract implements MethodEntry {
 
         sender = new GraphSender(stockName);
         for (int elem = 0; elem <= outNbElement.value; elem++) {
-            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
-                                                         portfolioConfig.inputEndingDate.getTime());
+            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate,
+                                                         portfolioConfig.inputEndingDate);
             dateIterator.move(elem + outBegIdx.value);
             sender.setSeriesName("Original");
             sender.addForSending(dateIterator.getCurrent(), input[elem + outBegIdx.value]);
@@ -187,8 +187,8 @@ public class TaLibMACD extends TaLibAbstract implements MethodEntry {
             sender.setPlotName("MACD");
             sender.setSeriesName(this.getMethName());
 
-            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
-                                                         portfolioConfig.inputEndingDate.getTime());
+            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate,
+                                                         portfolioConfig.inputEndingDate);
             dateIterator.move(outBegIdx.value);
             for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
                 Date stockDate = dateIterator.next();

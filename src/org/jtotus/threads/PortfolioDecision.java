@@ -37,6 +37,8 @@ import com.espertech.esper.client.EPStatement;
 import org.jtotus.config.ConfigLoader;
 import org.jtotus.database.DataFetcher;
 import org.jtotus.methods.MethodEntry;
+
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
@@ -121,7 +123,9 @@ public class PortfolioDecision implements Runnable {
 
         ConfPortfolio portfolio = ConfPortfolio.getPortfolioConfig();
         DataFetcher fetcher = new DataFetcher();
-        fetcher.sendMarketData(portfolio.inputListOfStocks, portfolio.inputStartingDate, portfolio.inputEndingDate);
+        fetcher.sendMarketData(portfolio.inputListOfStocks, 
+                               portfolio.inputStartingDate,
+                               portfolio.inputEndingDate);
     }
 
 
@@ -135,11 +139,9 @@ public class PortfolioDecision implements Runnable {
         }
 
         //Start threads       
-        Iterator<MethodEntry> iterator = threadList.iterator();
         MethodFuture<MethodResults> futureTask = null;
         InterfaceMethodListner methodListener = null;
-        while (iterator.hasNext()) {
-            MethodEntry task = iterator.next();
+        for (MethodEntry task : threadList) {
 
             if (task.isCallable()) {
                 //Callable<MethodResults> callableTmp = task;
@@ -154,6 +156,24 @@ public class PortfolioDecision implements Runnable {
             }
         }
     }
+
+//    private void train(MethodResults results) {
+//        final ConfPortfolio portfolio = ConfPortfolio.getPortfolioConfig();
+//        ArrayList<MethodFuture> longTermIndicators = new ArrayList<MethodFuture>();
+//
+//        MethodFuture<MethodResults> futureTask = null;
+//        InterfaceMethodListner methodListener = null;
+//        for (MethodEntry task : threadList) {
+//            if (task.isCallable() && portfolio.isAutoStared(task.getMethName())) {
+//                //Callable<MethodResults> callableTmp = task;
+//                futureTask = new MethodFuture<MethodResults>(task);
+//
+//                longTermIndicators.add(futureTask);
+//                threadExecutor.execute(futureTask);
+//            }
+//        }
+//    }
+
 
     private void startTask(MethodEntry task) {
 

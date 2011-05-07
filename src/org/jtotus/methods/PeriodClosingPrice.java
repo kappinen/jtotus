@@ -131,8 +131,7 @@ public class PeriodClosingPrice {
         startCal.setTime(endingDate);
         startCal.add(Calendar.DATE, -1*period);
 
-        DateIterator iter = new DateIterator(startCal.getTime(),
-                                             endCal.getTime());
+        DateIterator iter = new DateIterator(startCal, endCal);
 
         BigDecimal closingPrice = null;
         BigDecimal previous = null;

@@ -60,17 +60,16 @@ public class PotentialWithIn implements MethodEntry {
 
     }
 
-
     public void run() {
-       ConfPortfolio portfolioConfig = ConfPortfolio.getPortfolioConfig();
-       voteCounter = new HashMap<String, Integer>();
-       periodList = new ArrayList<PeriodClosingPrice>();
-       
-       
-       String []stockNames = portfolioConfig.inputListOfStocks;
-       //Build period history for stock
-       for(int i = 0; i < stockNames.length; i++) {
-           StockType stock = new StockType(stockNames[i]);
+        ConfPortfolio portfolioConfig = ConfPortfolio.getPortfolioConfig();
+        voteCounter = new HashMap<String, Integer>();
+        periodList = new ArrayList<PeriodClosingPrice>();
+
+
+        String[] stockNames = portfolioConfig.inputListOfStocks;
+        //Build period history for stock
+        for (String stockName : stockNames) {
+            StockType stock = new StockType(stockName);
             periodList.add(new PeriodClosingPrice(stock));
             help.debug(this.getClass().getName(),
                     "StockName for period:%s\n", stock.getStockName());
@@ -258,14 +257,10 @@ public class PotentialWithIn implements MethodEntry {
                    }
                    break;
                }
-           }
+            }
         }
-
-           //Find out potentials and sort them
-
-//
         dumpVotes(voteCounter);
-       }
+    }
 
     public MethodResults call() throws Exception {
         MethodResults results = new MethodResults();
@@ -274,16 +269,15 @@ public class PotentialWithIn implements MethodEntry {
 
         this.run();
 
-        for(Entry<String,Integer> entry : voteCounter.entrySet()) {
+        for (Entry<String, Integer> entry : voteCounter.entrySet()) {
             System.out.printf("Results for %s:%s votes:%d\n",
-                    this.getMethName(),entry.getKey(),entry.getValue());
-            
+                    this.getMethName(), entry.getKey(), entry.getValue());
+
             results.putResult(entry.getKey(), entry.getValue());
         }
-        
+
         return results;
     }
-
 
     public boolean isCallable() {
         return true;

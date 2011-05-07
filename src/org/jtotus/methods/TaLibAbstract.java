@@ -16,26 +16,18 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.methods;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import brokerwatcher.BrokerWatcher;
 import brokerwatcher.eventtypes.MarketData;
-import brokerwatcher.eventtypes.StockTick;
 import com.espertech.esper.client.EPRuntime;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.UpdateListener;
-import org.apache.commons.lang.ArrayUtils;
 import org.jtotus.common.MethodResults;
 import java.util.Calendar;
-import java.util.List;
-import org.jtotus.common.DateIterator;
 import org.jtotus.common.StockType;
 import org.jtotus.config.ConfigLoader;
-import org.jtotus.gui.graph.GraphPacket;
 import org.jtotus.gui.graph.GraphSender;
 import org.jtotus.config.ConfPortfolio;
 import org.jtotus.config.MainMethodConfig;
@@ -59,8 +51,7 @@ public abstract class TaLibAbstract implements UpdateListener {
 
 
     public String getMethName() {
-        String tmp = this.getClass().getName();
-        return tmp.substring(tmp.lastIndexOf(".") + 1, tmp.length());
+        return this.getClass().getSimpleName();
     }
 
     public boolean isCallable() {
@@ -151,7 +142,7 @@ public abstract class TaLibAbstract implements UpdateListener {
                 MarketData data = (MarketData) eb.getUnderlying();
                 methodResults = new MethodResults(this.getMethName());
                 for (Map.Entry<String, double[]> stockData : data.data.entrySet()) {
-                    System.out.printf("Handeling : %s\n", stockData.getKey());
+//                    System.out.printf("Handeling : %s\n", stockData.getKey());
                     this.performMethod(stockData.getKey(), stockData.getValue());
                 }
 
@@ -164,7 +155,7 @@ public abstract class TaLibAbstract implements UpdateListener {
                     runtime = BrokerWatcher.getMainEngine()
                             .getEPRuntime();
                 }
-
+                methodResults.setDate(data.getDate());
                 runtime.sendEvent(methodResults);
             }
         }

@@ -49,11 +49,9 @@ import com.tictactec.ta.lib.MInteger;
 import com.tictactec.ta.lib.RetCode;
 import java.io.File;
 import java.util.Date;
-import java.util.List;
 import org.jtotus.common.DateIterator;
 import org.jtotus.gui.graph.GraphSender;
 import org.jtotus.config.ConfTaLibRSI;
-import org.apache.commons.lang.ArrayUtils;
 import org.jtotus.common.StateIterator;
 import org.jtotus.config.ConfigLoader;
 import org.jtotus.methods.evaluators.EvaluateMethodSignals;
@@ -64,7 +62,7 @@ import org.jtotus.methods.evaluators.EvaluateMethodSignals;
  */
 public class TaLibRSI extends TaLibAbstract implements MethodEntry {
     /*Stock list */
-
+    private boolean debug = false;
     protected ConfTaLibRSI config = null;
     public ConfigLoader<ConfTaLibRSI> configFile = null;
 
@@ -112,8 +110,8 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
                                         outNbElement,
                                         decRSIPeriod);
 
-        DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
-                                                     portfolioConfig.inputEndingDate.getTime());
+        DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate,
+                                                     portfolioConfig.inputEndingDate);
 
         dateIterator.move(outBegIdx.value);
         for (int elem = 0; elem < outNbElement.value && dateIterator.hasNext(); elem++) {
@@ -167,8 +165,9 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
 
         this.loadInputs(stockName);
 
-        System.out.printf("period:%d\n", config.inputRSIPeriod);
-
+        if (debug) {
+            System.out.printf("RSI period:%d\n", config.inputRSIPeriod);
+        }
         //************* DECISION TEST *************//
 
         MInteger outBegIdx = new MInteger();
@@ -198,8 +197,8 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
             sender.setPlotName("RSI");
             sender.setSeriesName(this.getMethName());
 
-            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate.getTime(),
-                                                         portfolioConfig.inputEndingDate.getTime());
+            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate,
+                                                         portfolioConfig.inputEndingDate);
             dateIterator.move(outBegIdx.value);
             for (int i = 0; i < outNbElement.value && dateIterator.hasNext(); i++) {
                 Date stockDate = dateIterator.next();
@@ -208,8 +207,10 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
             sender.sendAllStored();
         }
 
-        System.out.printf("%s (%s) has %d successrate\n", this.getMethName(),
-                stockName, methodResults.getSuccessRate().intValue());
+        if (debug) {
+            System.out.printf("%s (%s) has %d successrate\n", this.getMethName(),
+                    stockName, methodResults.getSuccessRate().intValue());
+        }
 
         return methodResults;
 
@@ -252,8 +253,10 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
             this.config.outputSuccessRate = budjetCounter.getProfitInProcents();
             methodResults.putSuccessRate(stockName, budjetCounter.getProfitInProcents());
             this.configFile.storeConfig(config);
-            //budjetCounter.printBestResults();
-            budjetCounter.dumpResults();
+            if (debug) {
+                budjetCounter.printBestResults();
+                budjetCounter.dumpResults();
+            }
         }
 
         //Perform method
