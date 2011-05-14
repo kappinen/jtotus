@@ -21,20 +21,22 @@
 
 package org.jtotus.database;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Iterator;
+import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.math.BigDecimal;
-import org.jtotus.common.Helper;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.BasicConfigurator;
 import org.joda.time.DateTime;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.jtotus.common.StockNames;
 
 
 
@@ -45,73 +47,26 @@ import org.jsoup.select.Elements;
 
 
 public class NetworkGoogle implements InterfaceDataBase {
-    Helper help = null;
-    public String urlName="http://www.google.com/finance/historical?q=PINK:FOJCF";
-    public String patternString="MMM dd, yyyy";
-
+    private static final String url = "http://www.google.com/finance/historical";
+    private static final String timePatternForWrite = "MMMM+d'%2C'+Y";
+    private static final String timePatternForRead = "dd-MMMM-yy";
+    private DefaultHttpClient client = new DefaultHttpClient();
+    private static final StockNames names = new StockNames();
     
     public NetworkGoogle (){
-        help = Helper.getInstance();
         BasicConfigurator.configure();
     }
 
-
     public BigDecimal fetchClosingPrice(String stockName, DateTime calendar) {
-        BigDecimal result = null;
-        URL url;
-
-        help.debug("NetworkGoogle", "fetchClosingPrice(%s,%s)\n",stockName, calendar.toString());
-
-        
-        try {
-            url = new URL(urlName);
-            Document doc = Jsoup.parse(url, 3*1000);
-
-                String title  = doc.title();
-                Elements elems = doc.select("td");
-
-                Iterator <Element>iter = elems.iterator();
-                while(iter.hasNext()){
-                    Element elem = iter.next();
-                    String data = elem.html();
-
-                    SimpleDateFormat trueDate = new SimpleDateFormat(patternString);
-                    trueDate.setCalendar(calendar.toGregorianCalendar());
-                    
-                    if(data.compareTo(help.dateToString(trueDate)) == 0)
-                    {
-
-                        for(int i=0;i<4;i++) {
-                            elem = iter.next();
-                        }
-
-
-                        data = elem.html();
-                        System.out.printf("Closing Price:%s\n", data);
-                        
-                    }
-                   
-
-                }
-
-                System.out.printf("The host title:%s found:%d\n", title, elems.size());
-
-
-
-            
-        } catch (IOException ex) {
-            Logger.getLogger(NetworkGoogle.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        
-        return result;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public BigDecimal fetchAveragePrice(String stockName, DateTime time) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public BigDecimal fetchVolume(String stockName, DateTime date) {
-       return null;
+       throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void storeClosingPrice(String stockName, DateTime date, BigDecimal value) {
@@ -122,7 +77,40 @@ public class NetworkGoogle implements InterfaceDataBase {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-
-
+    public HashMap<DateTime, Double> fetchPeriodAsMap(String stockName, DateTime startDate, DateTime endDate) {
+        HashMap<DateTime, Double> retMap = new HashMap<DateTime, Double>();
+        try {
+            DateTimeFormatter formatterOUT = DateTimeFormat.forPattern(timePatternForWrite);
+            DateTimeFormatter formatterIN = DateTimeFormat.forPattern(timePatternForRead);
+            
+            String query = url + "?q=" + names.getHexName(stockName) + "&"
+                               + "startdate=" + formatterOUT.print(startDate) + "&"
+                               + "enddate=" + formatterOUT.print(endDate) + "&"
+                               + "output=csv&num=30&start=0";
+            
+            System.out.printf("HttpGet:%s : date:%s\n", query, formatterOUT.print(startDate));
+            HttpGet httpGet = new HttpGet(query);
+            
+            HttpResponse response = client.execute(httpGet);
+            HttpEntity entity = response.getEntity();
+            
+            BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
+            
+//            Date, Open,High,Low,Close,Volume
+            String line = reader.readLine(); //Header
+            while ((line = reader.readLine()) != null) {
+                String []values = line.split(",");
+                DateTime date = formatterIN.parseDateTime(values[0]);
+                double value = Double.parseDouble(values[4]);
+                System.out.printf("Pushing:%s - %f\n", date.toString(), value);
+                retMap.put(date, value);
+            }
+            
+        } catch (IOException ex) {
+            Logger.getLogger(NetworkGoogle.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return retMap;
+    }
 
 }
