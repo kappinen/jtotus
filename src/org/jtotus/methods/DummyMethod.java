@@ -18,6 +18,7 @@
 
 package org.jtotus.methods;
 
+import brokerwatcher.eventtypes.MarketData;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,5 +62,17 @@ public class DummyMethod implements MethodEntry {
     @Override
     public void update(EventBean[] eventBeans, EventBean[] eventBeans1) {
         throw new RuntimeException("This feature not yet supported.");
+    }
+
+    public MethodResults runCalculation() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public MethodResults runCalculation(MarketData data) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setMarketData(MarketData data) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

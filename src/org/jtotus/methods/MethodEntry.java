@@ -18,6 +18,7 @@
 
 package org.jtotus.methods;
 
+import brokerwatcher.eventtypes.MarketData;
 import java.util.concurrent.Callable;
 
 import com.espertech.esper.client.UpdateListener;
@@ -35,5 +36,7 @@ public interface MethodEntry extends Runnable, Callable<MethodResults>, UpdateLi
     //If Method supports return value this
     // method will return true
     public boolean isCallable();
-
+    public MethodResults runCalculation();
+    public MethodResults runCalculation(MarketData data);
+    public void setMarketData(MarketData data);
 }

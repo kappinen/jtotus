@@ -35,6 +35,7 @@ import org.jtotus.common.Helper;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Cell;
+import org.joda.time.DateTime;
 
 
 /**
@@ -87,32 +88,32 @@ public class FileSystemFromHex implements InterfaceDataBase {
 
     
     
-public BigDecimal fetchHighestPrice(String stockName, Calendar calendar){
+public BigDecimal fetchHighestPrice(String stockName, DateTime calendar){
     return this.fetchValue(stockName, calendar, columnHighestPrice);
 }
 
-public BigDecimal fetchLowestPrice(String stockName, Calendar calendar){
+public BigDecimal fetchLowestPrice(String stockName, DateTime calendar){
     return this.fetchValue(stockName, calendar, columnLowestPrice);
 }
 
-public BigDecimal fetchClosingPrice(String stockName, Calendar calendar){
+public BigDecimal fetchClosingPrice(String stockName, DateTime calendar){
     return this.fetchValue(stockName, calendar, columnClosingPrice);
 }
 
-public BigDecimal fetchAveragePrice(String stockName, Calendar calendar){
+public BigDecimal fetchAveragePrice(String stockName, DateTime calendar){
     return this.fetchValue(stockName, calendar, columnAvrPrice);
 }
 
-public BigDecimal fetchTurnOver(String stockName, Calendar calendar){
+public BigDecimal fetchTurnOver(String stockName, DateTime calendar){
     return this.fetchValue(stockName, calendar, columnTurnOver);
 }
 
-public BigDecimal fetchTrades(String stockName, Calendar calendar){
+public BigDecimal fetchTrades(String stockName, DateTime calendar){
     return this.fetchValue(stockName, calendar, columnTrades);
 }
 
 
-private BigDecimal fetchValue(String stockName, Calendar date, int row)
+private BigDecimal fetchValue(String stockName, DateTime date, int row)
 {
     BigDecimal result = null;
     
@@ -146,7 +147,7 @@ private BigDecimal fetchValue(String stockName, Calendar date, int row)
 
 
 
-    public BigDecimal omxNordicFile(String fileName, Calendar calendar,int row) {
+    public BigDecimal omxNordicFile(String fileName, DateTime calendar,int row) {
         BigDecimal result = null;
 
         try {
@@ -161,7 +162,7 @@ private BigDecimal fetchValue(String stockName, Calendar date, int row)
 
             // Year-Mount-Data
             SimpleDateFormat time =  new SimpleDateFormat(filePattern);
-            time.setCalendar(calendar);
+            time.setCalendar(calendar.toGregorianCalendar());
 
             //System.out.printf("Class :%s : %s\n",this.getClass().toString(), this.toString());
             String correctTime = help.dateToString(time);
@@ -211,15 +212,15 @@ private BigDecimal fetchValue(String stockName, Calendar date, int row)
         return result;
     }
 
-    public BigDecimal fetchVolume(String stockName, Calendar calendar) {
+    public BigDecimal fetchVolume(String stockName, DateTime calendar) {
         return this.fetchValue(stockName, calendar, columnTotalVolume);
     }
 
-    public void storeClosingPrice(String stockName, Calendar date, BigDecimal value) {
+    public void storeClosingPrice(String stockName, DateTime date, BigDecimal value) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public void storeVolume(String stockName, Calendar date, BigDecimal value) {
+    public void storeVolume(String stockName, DateTime date, BigDecimal value) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

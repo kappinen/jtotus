@@ -43,20 +43,17 @@ Vaihtoehtoisesti:
  */
 package org.jtotus.methods;
 
+import brokerwatcher.eventtypes.MarketData;
 import org.jtotus.common.MethodResults;
 import com.tictactec.ta.lib.Core;
 import com.tictactec.ta.lib.MInteger;
 import com.tictactec.ta.lib.RetCode;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import org.jtotus.common.DateIterator;
 import org.jtotus.config.ConfigLoader;
 import org.jtotus.gui.graph.GraphSender;
-import org.apache.commons.lang.ArrayUtils;
 import java.io.File;
-import java.math.BigDecimal;
 import org.jtotus.common.NumberRangeIter;
 import org.jtotus.config.ConfTaLibEMA;
 
@@ -252,5 +249,13 @@ public class TaLibEMA extends TaLibAbstract implements MethodEntry {
     @Override
     public MethodResults performMethod(String stockName, double []input) {
         return this.performEMA(stockName, input);
+    }
+
+    public MethodResults runCalculation() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public MethodResults runCalculation(MarketData data) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

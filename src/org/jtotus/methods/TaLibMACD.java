@@ -27,17 +27,16 @@ MACD
  */
 package org.jtotus.methods;
 
+import brokerwatcher.eventtypes.MarketData;
 import org.jtotus.common.MethodResults;
 import com.tictactec.ta.lib.Core;
 import com.tictactec.ta.lib.MInteger;
 import com.tictactec.ta.lib.RetCode;
 import java.io.File;
 import java.util.Date;
-import java.util.List;
 import org.jtotus.common.DateIterator;
 import org.jtotus.gui.graph.GraphSender;
 import org.jtotus.config.ConfTaLibMACD;
-import org.apache.commons.lang.ArrayUtils;
 import org.jtotus.common.StateIterator;
 import org.jtotus.config.ConfigLoader;
 import org.jtotus.methods.evaluators.EvaluateMethodSignals;
@@ -249,5 +248,13 @@ public class TaLibMACD extends TaLibAbstract implements MethodEntry {
 
         //Perform method
         return this.performMACD(stockName, input);
+    }
+
+    public MethodResults runCalculation() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public MethodResults runCalculation(MarketData data) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

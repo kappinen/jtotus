@@ -16,7 +16,6 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.common;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import org.joda.time.DateTime;
@@ -56,9 +55,9 @@ public class DateIterator implements Iterator<Date>, Iterable<Date> {
     }
 
     // Starts with past date(start) and going towards ending date
-    public DateIterator(Calendar tmpStart, Calendar tmpEnd) {
-        end = new DateTime(tmpEnd.getTime());
-        start = new DateTime(tmpStart.getTime()).minusDays(1);
+    public DateIterator(DateTime tmpStart, DateTime tmpEnd) {
+        end = tmpEnd.toDateTime();
+        start = tmpStart.toDateTime().minusDays(1);
 
         if (end.compareTo(start) < 0) {
             System.err.printf("Warning startin date is afte ending date! Reversing dates("
@@ -95,7 +94,7 @@ public class DateIterator implements Iterator<Date>, Iterable<Date> {
         return rangeCheck.compareTo(end) < 0;
     }
 
-    public Calendar nextInCalendar() {
+    public DateTime nextInCalendar() {
         current = current.plusDays(step);
 
         //Skip weekends
@@ -103,16 +102,15 @@ public class DateIterator implements Iterator<Date>, Iterable<Date> {
             current = current.plusDays(1);
         }
 
-        return current.toGregorianCalendar();
+        return current.toDateTime();
     }
 
     public Date next() {
-        return nextInCalendar().getTime();
+        return nextInCalendar().toDate();
     }
 
     public void remove() {
-        throw new UnsupportedOperationException(
-                "Cannot remove");
+        throw new UnsupportedOperationException("Cannot remove");
     }
 
     public void reset() {

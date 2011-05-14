@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Calendar;
 import java.util.Date;
+import org.joda.time.DateTime;
 import org.jtotus.database.DataFetcher;
 
 
@@ -93,19 +94,19 @@ public class StockType implements Iterator{
     }
 
     public BigDecimal fetchCurrentClosingPrice() {
-        Calendar cal = Calendar.getInstance();
+        DateTime cal = new DateTime();
+        BigDecimal retValue = null;
+        help.debug("StockType", "Fetching:%s: Time:" + cal.toDate() + "\n" , stockName);
 
-        help.debug("StockType", "Fetching:%s: Time:" + cal.getTime() + "\n" , stockName);
-
-        while(fetcher.fetchClosingPrice(stockName, cal) == null) {
+        while((retValue = fetcher.fetchClosingPrice(stockName, cal)) == null) {
             //TODO:check end
-            cal.add(Calendar.DATE, -1);
+            cal = cal.minusDays(1);
         }
 
-        return fetcher.fetchClosingPrice(stockName, cal);
+        return retValue;
     }
 
-    public BigDecimal fetchClosingPrice(Calendar calendar) {
+    public BigDecimal fetchClosingPrice(DateTime calendar) {
 
         help.debug("StockType", "Fetching:%s: Time:%s\n", stockName, calendar.toString());
 
@@ -118,43 +119,39 @@ public class StockType implements Iterator{
             return null;
         }
         
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(time);
+        DateTime cal = new DateTime(time);
 
         help.debug("StockType", "Fetching:%s: Time:" + time + "\n" , stockName);
 
         return fetcher.fetchClosingPrice(stockName, cal);
     }
 
-    public double []fetchClosingPricePeriod(final String stockName, final Calendar startDate, final Calendar endDate) {
+    public double []fetchClosingPricePeriod(final String stockName, final DateTime startDate, final DateTime endDate) {
         return fetcher.fetchClosingPricePeriod(stockName, startDate, endDate);
     }
 
     public BigDecimal fetchPastDayClosingPrice(int count){
         BigDecimal tmp = null;
 
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, count*-1);
-
+        DateTime cal = new DateTime().minusDays(count);
         tmp = fetcher.fetchClosingPrice(stockName, cal);
-        
         return tmp;
     }
 
     public BigDecimal fetchCurrentVolume(){
-       Calendar cal = Calendar.getInstance();
+       DateTime cal = new DateTime();
        BigDecimal retVolume = null;
 
-        help.debug("StockType", "Fetching:%s: Time:" + cal.getTime() + "\n" , stockName);
+        help.debug("StockType", "Fetching:%s: Time:" + cal.toDate() + "\n" , stockName);
         while((retVolume=fetcher.fetchVolumeForDate(stockName, cal)) == null) {
             //TODO:check end
-            cal.add(Calendar.DATE, -1);
+            cal = cal.minusDays(1);
         }
 
         return retVolume;
     }
 
-    public BigDecimal fetchVolume(Calendar calendar){
+    public BigDecimal fetchVolume(DateTime calendar){
 
         return fetcher.fetchVolumeForDate(stockName, calendar);
     }

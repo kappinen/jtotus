@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.joda.time.DateTime;
 
 /**
  *
@@ -32,14 +33,14 @@ public class MethodResults implements Iterator, Iterable{
     private HashMap<String, Double> results = null;
     private Iterator<Entry<String, Double>> iterator=null;
     private Double avrSuccessRate=null;
-    private Calendar date=null;
+    private DateTime date=null;
 
-    public Calendar getDate() {
+    public DateTime getDate() {
         return date;
     }
 
-    public void setDate(Calendar date) {
-        this.date = date;
+    public void setDate(DateTime date) {
+        this.date = date.toDateTime();
     }
 
     private HashMap<String, Double> statistics = null;

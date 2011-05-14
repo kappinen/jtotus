@@ -171,7 +171,7 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
 
                     for (int selectedRow : selectedRows) {
                         String method = table.getModel().getValueAt(selectedRow, 0).toString();
-                        portfolioConfig.setAutoStared(method);
+                        portfolioConfig.setAutoStarted(method);
                     }
                     configPortfolio.storeConfig(portfolioConfig);
                 }
@@ -207,7 +207,7 @@ public class JTotusMethodView extends JTabbedPane implements MethodResultsPrinte
 
                 for (int row = 0; row < selectedRows.length; row++) {
                     String method = table.getModel().getValueAt(selectedRows[row], 0).toString();
-                    if (portfolioConfig.isAutoStared(method)) {
+                    if (portfolioConfig.isAutoStarted(method)) {
                         auto.setSelected(true);
                     } else {
                         auto.setSelected(false);

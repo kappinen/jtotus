@@ -1,27 +1,32 @@
 package brokerwatcher.training;
 
 import brokerwatcher.BrokerWatcher;
+import brokerwatcher.eventtypes.MarketData;
 import brokerwatcher.eventtypes.MarketSignal;
 import brokerwatcher.strategy.DecisionStrategy;
 import brokerwatcher.strategy.SimpleIndicatorsOnlyStrategy;
-import com.espertech.esper.client.EPAdministrator;
 import com.espertech.esper.client.EPRuntime;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.UpdateListener;
-import org.jtotus.common.DayisHoliday;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jtotus.common.MethodResults;
 import org.jtotus.config.ConfPortfolio;
 import org.jtotus.config.ConfTrainWithLongTermIndicators;
 import org.jtotus.config.ConfigLoader;
 import org.jtotus.database.DataFetcher;
-
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.jtotus.methods.MethodEntry;
+import org.jtotus.methods.StatisticsFreqPeriod;
+import org.jtotus.methods.TaLibRSI;
+import org.jtotus.threads.MethodFuture;
 
 /**
  * This file is part of JTotus.
@@ -46,71 +51,104 @@ import java.util.HashMap;
 * Date: 5/2/11
 * Time: 6:38 PM
 */
-public class TrainManager implements UpdateListener {
-    private HashMap<String, MethodResults> inputs = new HashMap<String, MethodResults>();
-    private ArrayList<String> waitForLongTermIndicators = null;
+public class TrainManager {
     private final ConfPortfolio portfolio = ConfPortfolio.getPortfolioConfig();
     private final DecisionStrategy strategy = new SimpleIndicatorsOnlyStrategy();
     private final EPRuntime epRuntime = BrokerWatcher.getMainEngine().getEPRuntime();
     private final DataFetcher fetcher = new DataFetcher();
-    private Calendar currentDate = null;
-
+    private LinkedList<MethodEntry> methods = new LinkedList<MethodEntry>();
+    private LinkedList<MethodFuture> indResults = new LinkedList<MethodFuture>();
+    private ConfTrainWithLongTermIndicators config = null;
+    private ExecutorService threadExecutor = Executors.newCachedThreadPool();
+    
 
     public TrainManager() {
-        currentDate = portfolio.inputStartingDate;
-        EPServiceProvider cep = BrokerWatcher.getMainEngine();
-        EPAdministrator cepAdm = cep.getEPAdministrator();
-        EPStatement eps = cepAdm.createEPL("select * from MethodResults");
-        eps.addListener(this);
-    }
-
-    private boolean isAutoStarted(String indicator) {
-
-        if (waitForLongTermIndicators == null) {
-            waitForLongTermIndicators = (ArrayList<String>) portfolio.autoStartedMethods.clone();
+        ConfigLoader<ConfTrainWithLongTermIndicators> loader
+                = new ConfigLoader<ConfTrainWithLongTermIndicators>("ConfTrainWithLongTermIndicators");
+        config = loader.getConfig();
+        if (config == null) {
+            config = new ConfTrainWithLongTermIndicators();
+            loader.storeConfig(config);
         }
-
-        return waitForLongTermIndicators.contains(indicator);
+        
+        methods.add(new TaLibRSI());
+        methods.add(new StatisticsFreqPeriod());
     }
 
-    private void train(MethodResults results) {
+    public void train() {
+        HashMap<String, MethodResults> inputs = new HashMap<String, MethodResults>();
+        DateTime currentDate = portfolio.inputStartingDate;
+        
+        while (currentDate.isBefore(portfolio.inputEndingDate.minusDays(1))) {
+            final MarketData data = fetcher.prepareMarketData(portfolio.inputListOfStocks,
+                                                        portfolio.inputStartIndicatorDate,
+                                                        currentDate);
 
-        if (!inputs.containsKey(results.getMethodName()) && isAutoStarted(results.getMethodName())) {
-            inputs.put(results.getMethodName(), results);
-
-            if (waitForLongTermIndicators.size() == inputs.size()) {
-                //TODO: all inputs are available, perform test
-                Calendar endDay = performStrategyTest();
-                if (endDay != null) {
-                    inputs.clear();
-                    fetcher.sendMarketData(portfolio.inputListOfStocks, portfolio.inputStartIndicatorDate, endDay);
+            MethodFuture<MethodResults> futureTask = null;
+            for (MethodEntry task : methods) {
+                if (task.isCallable()) {
+                    task.setMarketData(data);
+                    futureTask = new MethodFuture<MethodResults>(task);
+                    threadExecutor.execute(futureTask);
+                    indResults.push(futureTask);
+                } else {
+                    //Lets support Runnable for now.
+                    System.err.printf("TrainManager support only callable indicators ! : %s\n", task.getMethName());
                 }
             }
 
-        } else {
-            System.err.println("BUG: all inputs did not arrived on time !");
+            MethodResults res = null;
+            while (indResults.size() > 0) {
+                for (Iterator<MethodFuture> iter = indResults.iterator(); iter.hasNext();) {
+                    MethodFuture<MethodResults> iterTask = iter.next();
+                    if (iterTask.isDone()) {
+                        try {
+                            if ((res = iterTask.get()) != null) {
+                                iter.remove();
+                                inputs.put(res.getMethodName(), res);
+                            }
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(TrainManager.class.getName()).log(Level.SEVERE, null, ex);
+                            ex.printStackTrace();
+                            System.exit(-1);
+                        } catch (ExecutionException ex) {
+                            Logger.getLogger(TrainManager.class.getName()).log(Level.SEVERE, null, ex);
+                            ex.printStackTrace();
+                            System.exit(-1);
+                        }
+
+                    }
+                }
+            }
+            
+            currentDate = performStrategyTest(inputs, currentDate);
+            if (currentDate == null) {
+                break;
+            }
+            System.out.printf("%s processing %s\n", this.getClass().getSimpleName(), currentDate.toDate().toString());
+            inputs.clear();
         }
     }
 
-    private Calendar performStrategyTest() {
+    private DateTime performStrategyTest(HashMap<String, MethodResults> inputs, DateTime currentDate) {
         boolean sold = false;
         MarketSignal signal = strategy.makeDecision(inputs);
 
         if (signal != null) {
             epRuntime.sendEvent(signal); // Buying
 
-            BigDecimal maxWin = BigDecimal.valueOf(signal.getPriceToBuy()).multiply(BigDecimal.valueOf(1.015));
-            BigDecimal maxLoss = BigDecimal.valueOf(signal.getPriceToBuy()).multiply(BigDecimal.valueOf(0.97));
+            BigDecimal maxWin = BigDecimal.valueOf(signal.getPriceToBuy()).multiply(BigDecimal.valueOf(config.maxWin));
+            BigDecimal maxLoss = BigDecimal.valueOf(signal.getPriceToBuy()).multiply(BigDecimal.valueOf(config.maxLost));
 
             while (!sold) {
-                currentDate.add(Calendar.DATE, 1);
-                if (currentDate.after(portfolio.inputEndingDate)) {
+                currentDate = currentDate.plusDays(1);
+                if (currentDate.isAfter(portfolio.inputEndingDate.minusDays(1))) {
                     System.out.printf("%s is done!\n", this.getClass().getSimpleName());
                     return null;
                 }
                 
-                SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
-                System.out.printf("Train manager %s\n", format.format(currentDate.getTime()));
+                DateTimeFormatter formatter = DateTimeFormat.forPattern("dd-MM-yyyy");
+                System.out.printf("Train manager %s\n", formatter.print(currentDate));
                 BigDecimal price = fetcher.fetchClosingPrice(signal.getStockName(), currentDate);
 
                 if (price == null) {
@@ -125,48 +163,7 @@ public class TrainManager implements UpdateListener {
             }
         }
 
-        //TODO: fetcher.sendMarketData(portfolio.inputListOfStocks, )
-        currentDate.add(Calendar.DATE, 1);
+        currentDate = currentDate.plusDays(1);
         return currentDate;
-    }
-
-
-    public void startTraining() {
-    ConfigLoader<ConfTrainWithLongTermIndicators> loader
-            = new ConfigLoader<ConfTrainWithLongTermIndicators>("ConfTrainWithLongTermIndicators");
-        ConfTrainWithLongTermIndicators config = loader.getConfig();
-        if (config ==null) {
-            config = new ConfTrainWithLongTermIndicators();
-            loader.storeConfig(config);
-        }
-
-        Calendar startDate = Calendar.getInstance();
-        startDate.add(Calendar.DATE, -1*config.indicatorPeriodLength);
-
-        fetcher.sendMarketData(portfolio.inputListOfStocks, startDate, currentDate);
-    }
-
-    @Override
-    public void update(EventBean[] eventBeans, EventBean[] eventBeans1) {
-
-        for (EventBean bean : eventBeans) {
-            if (bean.getUnderlying() instanceof MethodResults) {
-
-                MethodResults results = (MethodResults)bean.getUnderlying();
-
-                SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
-                System.out.printf("%s processing : %s - %s dates Method:%s date:%s\n",
-                        this.getClass().getSimpleName(),
-                        format.format(currentDate.getTime()), 
-                        format.format(portfolio.inputEndingDate.getTime()),
-                        results.getMethodName(),
-                        format.format(results.getDate().getTime()));
-                if (currentDate.before(portfolio.inputEndingDate)) {
-                    this.train(results);
-                } else {
-                    System.out.printf("Data is not available for testing\n");
-                }
-            }
-        }
     }
 }

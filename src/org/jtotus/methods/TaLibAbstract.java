@@ -25,7 +25,7 @@ import com.espertech.esper.client.EPRuntime;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.UpdateListener;
 import org.jtotus.common.MethodResults;
-import java.util.Calendar;
+import org.joda.time.DateTime;
 import org.jtotus.common.StockType;
 import org.jtotus.config.ConfigLoader;
 import org.jtotus.gui.graph.GraphSender;
@@ -43,13 +43,18 @@ public abstract class TaLibAbstract implements UpdateListener {
     private EPRuntime runtime = null;
     GraphSender sender = null;
     //INPUTS TO METHOD:
-
     protected MethodResults methodResults = null;
-
     protected MainMethodConfig child_config = null;
     protected ConfPortfolio portfolioConfig = null;
+    private DateTime startTime = null;
+    private DateTime endTime = null;
+    private MarketData marketData = null;
 
 
+    public void setMarketData(MarketData data) {
+        this.marketData = data;
+    }
+    
     public String getMethName() {
         return this.getClass().getSimpleName();
     }
@@ -75,7 +80,7 @@ public abstract class TaLibAbstract implements UpdateListener {
         configPortfolio.applyInputsToObject(this);
     }
 
-    public double[] createClosingPriceList(String stockName, Calendar start, Calendar end) {
+    public double[] createClosingPriceList(String stockName, DateTime start, DateTime end) {
 
         StockType stockType = new StockType(stockName);
         return stockType.fetchClosingPricePeriod(stockName, start, end);
@@ -112,16 +117,23 @@ public abstract class TaLibAbstract implements UpdateListener {
     }
 
     public MethodResults call() throws Exception {
+
+        if (this.marketData != null) {
+            MethodResults ret = runCalculation(this.marketData);
+            this.marketData = null;
+            return ret;
+        }
+
         this.loadPortofolioInputs();
 
         methodResults = new MethodResults(this.getMethName());
 
-        for (int stockCount = 0; stockCount < portfolioConfig.inputListOfStocks.length; stockCount++) {
-            double[] input = this.createClosingPriceList(portfolioConfig.inputListOfStocks[stockCount],
-                    portfolioConfig.inputStartingDate,
-                    portfolioConfig.inputEndingDate);
+        for (String stockName : portfolioConfig.inputListOfStocks) {
+            double[] input = this.createClosingPriceList(stockName,
+                               startTime == null ?portfolioConfig.inputStartingDate : startTime,
+                               endTime == null ? portfolioConfig.inputEndingDate : endTime);
 
-            this.performMethod(portfolioConfig.inputListOfStocks[stockCount], input);
+            this.performMethod(stockName, input);
         }
 
         if (child_config != null && child_config.inputNormilizerType != null) {
@@ -139,26 +151,41 @@ public abstract class TaLibAbstract implements UpdateListener {
         //Update list of the price
         for (EventBean eb : ebs) {
             if (eb.getUnderlying() instanceof MarketData) {
-                MarketData data = (MarketData) eb.getUnderlying();
-                methodResults = new MethodResults(this.getMethName());
-                for (Map.Entry<String, double[]> stockData : data.data.entrySet()) {
-//                    System.out.printf("Handeling : %s\n", stockData.getKey());
-                    this.performMethod(stockData.getKey(), stockData.getValue());
-                }
-
-                if (child_config != null && child_config.inputNormilizerType != null) {
-                    Normalizer norm = new Normalizer();
-                    methodResults = norm.perform(child_config.inputNormilizerType, methodResults);
-                }
-
+                final MarketData data = (MarketData) eb.getUnderlying();
+                runCalculation(data);
                 if (runtime == null) {
-                    runtime = BrokerWatcher.getMainEngine()
-                            .getEPRuntime();
+                    runtime = BrokerWatcher.getMainEngine().getEPRuntime();
                 }
-                methodResults.setDate(data.getDate());
                 runtime.sendEvent(methodResults);
             }
         }
     }
 
+    public MethodResults runCalculation() {
+        this.loadPortofolioInputs();
+        try {
+            return call();
+        } catch (Exception ex) {
+            Logger.getLogger(TaLibRSI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    public MethodResults runCalculation(MarketData data) {
+        this.loadPortofolioInputs();
+        
+        methodResults = new MethodResults(this.getMethName());
+        for (Map.Entry<String, double[]> stockData : data.data.entrySet()) {
+            //System.out.printf("Handeling : %s - > %d\n", stockData.getKey(), ebs.length);
+            this.performMethod(stockData.getKey(), stockData.getValue());
+        }
+
+        if (child_config != null && child_config.inputNormilizerType != null) {
+            Normalizer norm = new Normalizer();
+            methodResults = norm.perform(child_config.inputNormilizerType, methodResults);
+        }
+
+        methodResults.setDate(data.getDate());
+        return methodResults;
+    }
 }

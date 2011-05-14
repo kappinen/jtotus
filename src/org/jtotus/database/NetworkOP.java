@@ -27,9 +27,9 @@ import java.util.Iterator;
 import org.jtotus.common.Helper;
 import org.jtotus.common.StockType;
 import java.math.BigDecimal;
-import java.util.Calendar;
 import org.jtotus.common.StockNames;
 import org.apache.log4j.BasicConfigurator;
+import org.joda.time.DateTime;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -52,19 +52,17 @@ public class NetworkOP implements InterfaceDataBase {
         BasicConfigurator.configure();
     }
 
-   public BigDecimal fetchClosingPrice(String stockName, Calendar calendar) {
+   public BigDecimal fetchClosingPrice(String stockName, DateTime calendar) {
         return this.fetchData(stockName, calendar, 1);
     }
 
-   public BigDecimal fetchAveragePrice(String stockName, Calendar calendar){
+   public BigDecimal fetchAveragePrice(String stockName, DateTime calendar){
         return this.fetchData(stockName, calendar, 4);
    }
 
-  private String buildRequest(Calendar calendar, String stockName) {
+  private String buildRequest(DateTime calendar, String stockName) {
     //&from_year=2002&from_month=01&from_day=02&to_year=2010&to_month=10&to_day=01
-    Calendar fromDate = Calendar.getInstance();
-    fromDate.setTime(calendar.getTime());
-    fromDate.add(Calendar.DATE, -4);
+    DateTime fromDate = calendar.toDateTime().minusDays(4);
 
     SimpleDateFormat startingDate = new SimpleDateFormat("'&from_year='yyyy'&from_month='MM'&from_day='dd");
     SimpleDateFormat endingDate = new SimpleDateFormat("'&to_year='yyyy'&to_month='MM'&to_day='dd");
@@ -72,15 +70,15 @@ public class NetworkOP implements InterfaceDataBase {
     String request = urlName 
                     +new StockNames().getHexName(stockName)
                     +urlParam
-                    +startingDate.format(fromDate.getTime())
-                    +endingDate.format(calendar.getTime());
+                    +startingDate.format(fromDate.toDate())
+                    +endingDate.format(calendar.toDate());
     
-    System.out.printf("("+ calendar.getTime() +")The full request: %s \n", request);
+    System.out.printf("("+ calendar.toDate() +")The full request: %s \n", request);
     return request;
   }
 
 
-  public BigDecimal fetchData(String stockName, Calendar calendar, int col) {
+  public BigDecimal fetchData(String stockName, DateTime calendar, int col) {
         BigDecimal result = null;
         URL url;
 
@@ -92,7 +90,7 @@ public class NetworkOP implements InterfaceDataBase {
 
 
         try {
-            url = new URL(this.buildRequest(calendar,stockName));
+            url = new URL(this.buildRequest(calendar, stockName));
 
             Document doc = Jsoup.parse(url, 2*1000);
 
@@ -105,7 +103,7 @@ public class NetworkOP implements InterfaceDataBase {
 
 
                     SimpleDateFormat trueDate = new SimpleDateFormat(patternString);
-                    trueDate.setCalendar(calendar);
+                    trueDate.setCalendar(calendar.toGregorianCalendar());
                    
                     String formatHttp = "<div class=\"Ensimmainen\">\n"+help.dateToString(trueDate)+"\n</div>";
                    // System.out.printf("Comparing:%s with true date:%s\n", data, formatHttp);
@@ -141,16 +139,16 @@ public class NetworkOP implements InterfaceDataBase {
         return result;
     }
 
-    public BigDecimal fetchVolume(String stockName, Calendar calendar) {
+    public BigDecimal fetchVolume(String stockName, DateTime calendar) {
         
         return this.fetchData(stockName, calendar, 3);
     }
 
-    public void storeClosingPrice(String stockName, Calendar date, BigDecimal value) {
+    public void storeClosingPrice(String stockName, DateTime date, BigDecimal value) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public void storeVolume(String stockName, Calendar date, BigDecimal value) {
+    public void storeVolume(String stockName, DateTime date, BigDecimal value) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

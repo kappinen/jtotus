@@ -1,15 +1,13 @@
 package brokerwatcher.strategy;
 
 import brokerwatcher.eventtypes.MarketSignal;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import org.jtotus.common.MethodResults;
 import org.jtotus.database.DataFetcher;
-
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.jtotus.common.DayisHoliday;
 
 
@@ -37,7 +35,7 @@ import org.jtotus.common.DayisHoliday;
 * Time: 7:48 PM
 */
 public class SimpleIndicatorsOnlyStrategy implements DecisionStrategy {
-    double bestRsi = Double.MAX_VALUE;
+    double bestRsi = Double.MIN_VALUE;
     String stockToBuy = null;
     DataFetcher fetcher = new DataFetcher();
 
@@ -45,38 +43,52 @@ public class SimpleIndicatorsOnlyStrategy implements DecisionStrategy {
 
     @Override
     public MarketSignal makeDecision(HashMap<String, MethodResults> inputs) {
-        bestRsi = Double.MIN_VALUE;
+        bestRsi = Double.MAX_VALUE;
         MethodResults res = inputs.get("TaLibRSI");
-        MarketSignal signal = new MarketSignal();
+        
 
         HashMap<String, Double> indResults = res.getResults();
         for (Map.Entry<String, Double> entry :  indResults.entrySet()) {
 
             if (entry.getKey().compareTo("Nokia Oyj") == 0)
                 continue;
-            if (bestRsi < entry.getValue()) {
-                bestRsi = entry.getValue();
+
+            double rsi = entry.getValue();
+            if (rsi > 40)
+                continue;
+            double freq = inputs.get("StatisticsFreqPeriod").getResults().get(entry.getKey());
+            if (freq < -0.04f || freq >= 0f) {
+                System.out.printf("rejected freq for:%s is :%f\n", entry.getKey(), freq);
+                continue;
+            }
+
+            if (bestRsi > freq * rsi) {
+                System.out.printf("Accpeted : rsi:%f  freq: %f\n", rsi, freq);
+                bestRsi = freq * rsi;
                 stockToBuy = entry.getKey();
             }
         }
 
-        if (bestRsi > 30) {
+        if (bestRsi == Double.MIN_VALUE) {
             return null;
         }
 
-        signal.setStockName(stockToBuy);
-        Calendar dateToFetch = res.getDate();
-        dateToFetch.add(Calendar.DATE, 1);
+        DateTime dateToFetch = res.getDate().plusDays(1);
         while(DayisHoliday.isHoliday(dateToFetch)) {
-            dateToFetch.add(Calendar.DATE, 1);
+            dateToFetch = dateToFetch.plusDays(1);
         }
-        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
-        System.out.printf("price to buy for date %s '%s'\n", format.format(dateToFetch.getTime()), stockToBuy);
-        //fixme:ensure that day corresponds to processing day!
-        double price  = fetcher.fetchClosingPrice(stockToBuy, dateToFetch)
-                               .doubleValue();
-        signal.setPriceToBuy(price);
+        if (res.getDate().isBefore(dateToFetch.plusDays(1))) {
+            return null;
+        }
 
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("dd-MM-yyyy");
+        System.out.printf("price to buy for date %s '%s'\n", formatter.print(dateToFetch), stockToBuy);
+        //fixme:ensure that day corresponds to processing day!
+        double price = fetcher.fetchClosingPrice(stockToBuy, dateToFetch).doubleValue();
+
+        final MarketSignal signal = new MarketSignal();
+        signal.setStockName(stockToBuy);
+        signal.setPriceToBuy(price);
 
         return signal;
     }

@@ -20,11 +20,6 @@
 package org.jtotus.methods;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.apache.commons.lang.ArrayUtils;
 import org.jtotus.common.Helper;
 import org.jtotus.common.MethodResults;
 import org.jtotus.common.StockType;
@@ -94,6 +89,32 @@ public class StatisticsFreqPeriod extends TaLibAbstract implements MethodEntry {
         return 0;
     }
 
+    public int lastTrend(double []table) {
+        int mainDirection = 0;
+        int strikes = 0;
+
+        if (table.length < 2) {
+            System.err.printf("Warning: no data available for %s\n", this.getClass().getSimpleName());
+            return Integer.MIN_VALUE;
+        }
+
+        for (int i = 1; i < this.getMaxPeriod() + 1; i++) {
+            strikes = 0;
+            mainDirection = normilize(table[table.length - i] - table[table.length - i - 1]);
+            for (int y = table.length - 1; y >= 0 ; y--) {
+                double delta = table[y] - table[y - 1];
+
+                if (mainDirection != normilize(delta)) {
+                    return mainDirection * strikes;
+                }
+                strikes++;
+            }
+        }
+        return 0;
+    }
+
+
+
     @Override
     public MethodResults performMethod(String stockName, double[] output) {
         int trendInDays = 0;
@@ -102,9 +123,11 @@ public class StatisticsFreqPeriod extends TaLibAbstract implements MethodEntry {
         MethodResults results = new MethodResults(this.getMethName());
 
         marketStat = statisticsForFreq(output);
-        printResultsToStdout(stockName, marketStat, output.length - 1);
+        if (debug) {
+            printResultsToStdout(stockName, marketStat, output.length - 1);
+        }
 
-        trendInDays = lastTrend(stockName);
+        trendInDays = lastTrend(output);
 
         if (debug) {
             System.out.printf("Last trend for :%s is : %d\n", output, trendInDays);

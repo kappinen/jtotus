@@ -21,7 +21,7 @@
 package org.jtotus.database;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
+import org.joda.time.DateTime;
 
 /**
  *
@@ -29,12 +29,12 @@ import java.util.Calendar;
  */
 public interface InterfaceDataBase {
 
-    public BigDecimal fetchClosingPrice(String stockName, Calendar date);
+    public BigDecimal fetchClosingPrice(String stockName, DateTime date);
 
-    public BigDecimal fetchVolume(String stockName, Calendar date);
+    public BigDecimal fetchVolume(String stockName, DateTime date);
     
-    public void storeClosingPrice(String stockName, Calendar date, BigDecimal value);
+    public void storeClosingPrice(String stockName, DateTime date, BigDecimal value);
 
-    public void storeVolume(String stockName, Calendar date, BigDecimal value);
+    public void storeVolume(String stockName, DateTime date, BigDecimal value);
     
 }

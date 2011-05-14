@@ -26,6 +26,7 @@ import java.util.Calendar;
 import java.util.RandomAccess;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.joda.time.DateTime;
 
 /**
  *
@@ -130,7 +131,7 @@ public class ConfigLoader<T> {
         if (retObj != null && retObj instanceof ConfPortfolio) {
             ConfPortfolio config = (ConfPortfolio)retObj;
             if (config.useCurentDayAsEndingDate){
-                config.inputEndingDate = Calendar.getInstance();
+                config.inputEndingDate = new DateTime();
             }
         }
 

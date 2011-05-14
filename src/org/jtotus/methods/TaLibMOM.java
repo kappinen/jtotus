@@ -31,23 +31,18 @@ valitulla aikavälillä. Se antaa seuraavat signaalit:
  */
 package org.jtotus.methods;
 
+import brokerwatcher.eventtypes.MarketData;
 import org.jtotus.common.MethodResults;
 import com.tictactec.ta.lib.Core;
 import com.tictactec.ta.lib.MInteger;
 import com.tictactec.ta.lib.RetCode;
 import java.io.File;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
-import org.apache.commons.lang.ArrayUtils;
 import org.jtotus.common.DateIterator;
 import org.jtotus.common.NumberRangeIter;
 import org.jtotus.config.ConfTaLibMOM;
 import org.jtotus.config.ConfigLoader;
 import org.jtotus.gui.graph.GraphSender;
-import org.jtotus.gui.graph.GraphSeriesType;
 import org.jtotus.methods.utils.Normalizer;
 
 /**
@@ -257,5 +252,13 @@ public class TaLibMOM extends TaLibAbstract implements MethodEntry {
         }
 
         return results;
+    }
+
+    public MethodResults runCalculation() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public MethodResults runCalculation(MarketData data) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

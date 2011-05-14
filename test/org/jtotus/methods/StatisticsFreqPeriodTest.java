@@ -40,6 +40,7 @@ public class StatisticsFreqPeriodTest {
         String expResult = "StatisticsFreqPeriod";
         String result = instance.getMethName();
         assertEquals(expResult, result);
+
     }
 
     /**
@@ -81,7 +82,20 @@ public class StatisticsFreqPeriodTest {
             }
         }
 
+        
+        double[] input2 = new double[]{1, 2, 3, 4,
+                                       1, 2, 3, 4,
+                                       4, 3, 2, 1};
+
+        double[] input3 = new double[] {1,2,3,4,
+                                        1,2,3,4,
+                                        1,2,3,4};
+
+//        System.out.printf("last trend:%d\n", instance.lastTrend(input2));
+//        System.out.printf("last trend:%d\n", instance.lastTrend(input3));
         Assert.assertFalse(count != 2);
+        Assert.assertFalse(instance.lastTrend(input2) != -3);
+        Assert.assertFalse(instance.lastTrend(input3) != 3);
         // TODO review the generated test code and remove the default call to fail.
     }
 
@@ -96,9 +110,6 @@ public class StatisticsFreqPeriodTest {
 
         int result = instance.lastTrend("Nokia Oyj");
         System.out.printf("trend:%d\n", result);
-
     }
-
-
 
 }

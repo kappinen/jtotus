@@ -16,14 +16,13 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.database;
 
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.math.BigDecimal;
-
 import brokerwatcher.BrokerWatcher;
 import brokerwatcher.eventtypes.MarketData;
 import com.espertech.esper.client.EPRuntime;
+import org.joda.time.DateTime;
 import org.jtotus.common.DayisHoliday;
 import org.jtotus.common.Helper;
 
@@ -56,23 +55,11 @@ public class DataFetcher {
 
     }
 
-    //TRUE  Failuer
-    //FALSE Success
-    private boolean timeFailsSanityCheck(Calendar date) {
-        boolean result = false;
-
-        if (holidays.isHoliday(date)) {
-            result = true;
-        }
-
-        return result;
-    }
-
     //TODO:generic fetcher with EnumFetcherCall
-    public BigDecimal fetchClosingPrice(String stockName, Calendar date) {
+    public BigDecimal fetchClosingPrice(String stockName, DateTime date) {
         BigDecimal result = null;
 
-        if (this.timeFailsSanityCheck(date)) {
+        if (DayisHoliday.isHoliday(date)) {
             return result;
         }
 
@@ -104,18 +91,18 @@ public class DataFetcher {
         return result;
     }
 
-    public BigDecimal fetchAveragePrice(String stockName, Calendar time) {
+    public BigDecimal fetchAveragePrice(String stockName, DateTime time) {
         BigDecimal result = null;
 
 
         return result;
     }
 
-    public BigDecimal fetchVolumeForDate(String stockName, Calendar date) {
+    public BigDecimal fetchVolumeForDate(String stockName, DateTime date) {
         BigDecimal result = null;
 
 
-        if (timeFailsSanityCheck(date)) {
+        if (DayisHoliday.isHoliday(date)) {
             return result;
         }
 
@@ -143,7 +130,7 @@ public class DataFetcher {
         return result;
     }
 
-    public double[] fetchClosingPricePeriod(final String stockName, final Calendar startDate, final Calendar endDate) {
+    public double[] fetchClosingPricePeriod(final String stockName, final DateTime startDate, final DateTime endDate) {
 
         if (debug) {
             System.out.printf("Fetching data for: %s\n", stockName);
@@ -154,14 +141,10 @@ public class DataFetcher {
                                      endDate);
     }
 
-    public boolean sendMarketData(final String[] listOfStocks, final Calendar startDate, final Calendar endDate) {
+    public boolean sendMarketData(final String[] listOfStocks, final DateTime startDate, final DateTime endDate) {
 
         final MarketData marketData = new MarketData()
                 .setAsClosingPrice();
-
-        EPRuntime runtime = BrokerWatcher.getMainEngine()
-                .getEPRuntime();
-
 
         for (String stockName : listOfStocks) {
 //            final Thread thread = new Thread() {
@@ -191,11 +174,51 @@ public class DataFetcher {
         if (debug) {
             System.out.printf("Sending market data : %d\n", marketData.data.size());
         }
-        
+        EPRuntime runtime = BrokerWatcher.getMainEngine()
+                .getEPRuntime();
         runtime.sendEvent(marketData);
 
 
         return true;
+    }
+
+    public MarketData prepareMarketData(final String[] listOfStocks, final DateTime startDate, final DateTime endDate) {
+
+        final MarketData marketData = new MarketData()
+                .setAsClosingPrice();
+
+        
+
+        for (String stockName : listOfStocks) {
+//            final Thread thread = new Thread() {
+//                public void run() {
+            if (debug) {
+                System.out.printf("Fetching data for: %s\n", stockName);
+            }
+
+            LocalJDBCFactory factory = LocalJDBCFactory.getInstance();
+            LocalJDBC locJDBC = factory.jdbcFactory();
+            locJDBC.setFetcher(new DataFetcher());
+            double[] data = locJDBC.fetchPeriod(stockName,
+                                                startDate,
+                                                endDate);
+
+            if (data == null) {
+                return null;
+            }
+
+            marketData.data.put(stockName, data);
+            marketData.setDate(endDate);
+//                }
+//            };
+//            thread.start();
+        }
+
+        if (debug) {
+            System.out.printf("Sending market data : %d\n", marketData.data.size());
+        }
+
+        return marketData;
     }
 
     public static void main(String[] arv) {
@@ -206,9 +229,8 @@ public class DataFetcher {
         localJDBC.setFetcher(fetcher);
         localJDBC.setDebug(true);
 
-        Calendar endDate = Calendar.getInstance();
-        Calendar startDate = Calendar.getInstance();
-        startDate.add(Calendar.DATE, -25);
+        DateTime endDate = new DateTime();
+        DateTime startDate = new DateTime().minusDays(25);
 //        localJDBC.fetchPeriod("Outokumpu Oyj", startDate, endDate);
         String[] list;
         list = new String[]{"Outokumpu Oyj", "Metso Oyj", "Nokia Oyj"};

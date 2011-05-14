@@ -28,11 +28,9 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.math.BigDecimal;
-import java.util.Calendar;
 import org.jtotus.common.Helper;
-
-
 import org.apache.log4j.BasicConfigurator;
+import org.joda.time.DateTime;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -58,7 +56,7 @@ public class NetworkGoogle implements InterfaceDataBase {
     }
 
 
-    public BigDecimal fetchClosingPrice(String stockName, Calendar calendar) {
+    public BigDecimal fetchClosingPrice(String stockName, DateTime calendar) {
         BigDecimal result = null;
         URL url;
 
@@ -78,7 +76,7 @@ public class NetworkGoogle implements InterfaceDataBase {
                     String data = elem.html();
 
                     SimpleDateFormat trueDate = new SimpleDateFormat(patternString);
-                    trueDate.setCalendar(calendar);
+                    trueDate.setCalendar(calendar.toGregorianCalendar());
                     
                     if(data.compareTo(help.dateToString(trueDate)) == 0)
                     {
@@ -108,19 +106,19 @@ public class NetworkGoogle implements InterfaceDataBase {
         return result;
     }
 
-    public BigDecimal fetchAveragePrice(String stockName, Calendar time) {
+    public BigDecimal fetchAveragePrice(String stockName, DateTime time) {
         return null;
     }
 
-    public BigDecimal fetchVolume(String stockName, Calendar date) {
+    public BigDecimal fetchVolume(String stockName, DateTime date) {
        return null;
     }
 
-    public void storeClosingPrice(String stockName, Calendar date, BigDecimal value) {
+    public void storeClosingPrice(String stockName, DateTime date, BigDecimal value) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public void storeVolume(String stockName, Calendar date, BigDecimal value) {
+    public void storeVolume(String stockName, DateTime date, BigDecimal value) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

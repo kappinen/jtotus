@@ -18,24 +18,19 @@ package org.jtotus.database;
 
 import java.math.BigDecimal;
 import java.sql.*;
-import java.sql.Date;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang.ArrayUtils;
 import org.h2.jdbcx.JdbcConnectionPool;
+import org.joda.time.DateTime;
 import org.jtotus.common.DateIterator;
 
 /**
  * @author Evgeni Kappinen
  */
 public class LocalJDBC implements InterfaceDataBase {
-
-    private Connection connection = null;
-    private JdbcConnectionPool mainPool = null;
-    private PreparedStatement createTableStatement = null;
+    
     private PreparedStatement fetchClosePriceStatement = null;
     private PreparedStatement fetchVolumeStatement = null;
     private PreparedStatement insertClosePriceStatement = null;
@@ -44,13 +39,13 @@ public class LocalJDBC implements InterfaceDataBase {
     private DataFetcher fetcher = null;
 
 
-    void setConnection(Connection localJDBC) {
-        connection = localJDBC;
+    private Connection getConnection() throws SQLException {
+        return DriverManager.getConnection("jdbc:h2:~/.jtotus/local_database", "sa", "sa");
     }
 
     //TODO;create procedures
     private void createTable(Connection con, String stockTable) {
-
+        PreparedStatement createTableStatement = null;
         try {
 
             String statement = "CREATE TABLE IF NOT EXISTS " + stockTable + " ("
@@ -73,7 +68,7 @@ public class LocalJDBC implements InterfaceDataBase {
         }
     }
 
-    public BigDecimal fetchClosingPrice(String stockName, Calendar date) {
+    public BigDecimal fetchClosingPrice(String stockName, DateTime date) {
 
         return this.fetchData(stockName, date, "CLOSE");
     }
@@ -82,22 +77,29 @@ public class LocalJDBC implements InterfaceDataBase {
         this.debug = debug;
     }
 
-    public BigDecimal fetchData(String tableName, Calendar date, String column) {
+    public BigDecimal fetchData(String tableName, DateTime date, String column) {
         BigDecimal retValue = null;
         PreparedStatement pstm = null;
+        Connection connection = null;
+        ResultSet results = null;
+
 
         try {
+            connection = getConnection();
             String statement = "SELECT " + column + " FROM " + this.normTableName(tableName) + " WHERE DATE=?";
-            connection = mainPool.getConnection();
+            
             this.createTable(connection, this.normTableName(tableName));
 
             pstm = connection.prepareStatement(statement);
 
-            java.sql.Date sqlDate = new java.sql.Date(date.getTimeInMillis());
+            java.sql.Date sqlDate = new java.sql.Date(date.getMillis());
             pstm.setDate(1, sqlDate);
 
-            //          System.out.printf("Fetching:'%s' from'%s' Time"+date.getTime()+"Stm:%s\n", column,tableName, statement);
-            ResultSet results = pstm.executeQuery();
+            if (debug) {
+                System.out.printf("Fetching:'%s' from'%s' Time"+date.toDate()+"Stm:%s\n", column,tableName, statement);
+            }
+            
+            results = pstm.executeQuery();
 
 //            System.out.printf("Results:%d :%d :%s (%d)\n",results.getType(), results.findColumn(column), results.getMetaData().getColumnLabel(1),java.sql.Types.DOUBLE);
 
@@ -106,16 +108,20 @@ public class LocalJDBC implements InterfaceDataBase {
             }
 
         } catch (SQLException ex) {
-            System.err.printf("LocalJDBC Unable to find date for:'%s' from'%s' Time" + date.getTime() + "\n", column, tableName);
+            System.err.printf("LocalJDBC Unable to find date for:'%s' from'%s' Time" + date.toDate() + "\n", column, tableName);
             //   Logger.getLogger(LocalJDBC.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
-                if (pstm != null) {
-                    pstm.close();
+                if (results != null) {
+                    results.close(); results = null;
                 }
 
-                if (connection != null && !connection.isClosed()) {
-                    connection.close();
+                if (pstm != null) {
+                    pstm.close(); pstm = null;
+                }
+                
+                if (connection != null) {
+                    connection.close(); connection = null;
                 }
             } catch (SQLException ex) {
                 Logger.getLogger(LocalJDBC.class.getName()).log(Level.SEVERE, null, ex);
@@ -129,28 +135,30 @@ public class LocalJDBC implements InterfaceDataBase {
         this.fetcher = fetcher;
     }
 
-    public double[] fetchPeriod(String tableName, Calendar startDate, Calendar endDate) {
+    public double[] fetchPeriod(String tableName, DateTime startDate, DateTime endDate) {
         BigDecimal retValue = null;
         PreparedStatement pstm = null;
         java.sql.Date retDate = null;
+        ResultSet results = null;
         ArrayList<Double> closingPrices = new ArrayList<Double>(600);
+        Connection connection = null;
 
         try {
             String query = "SELECT CLOSE, DATE FROM " + this.normTableName(tableName) + " WHERE DATE>=? AND DATE<=? ORDER BY DATE ASC";
-            connection = mainPool.getConnection();
             // this.createTable(connection, this.normTableName(tableName));
 
+            connection = this.getConnection();
             pstm = connection.prepareStatement(query);
 
-            java.sql.Date startSqlDate = new java.sql.Date(startDate.getTimeInMillis());
+            java.sql.Date startSqlDate = new java.sql.Date(startDate.getMillis());
             pstm.setDate(1, startSqlDate);
 
-            java.sql.Date endSqlDate = new java.sql.Date(endDate.getTimeInMillis());
+            java.sql.Date endSqlDate = new java.sql.Date(endDate.getMillis());
             pstm.setDate(2, endSqlDate);
 
             DateIterator iter = new DateIterator(startDate, endDate);
-            ResultSet results = pstm.executeQuery();
-            Calendar dateCheck;
+            results = pstm.executeQuery();
+            DateTime dateCheck;
 
             while (results.next()) {
                 retValue = results.getBigDecimal(1);
@@ -164,12 +172,11 @@ public class LocalJDBC implements InterfaceDataBase {
                 if (iter.hasNext()) {
                     dateCheck = iter.nextInCalendar();
 
-                    Calendar compCal = Calendar.getInstance();
-                    compCal.setTimeInMillis(retDate.getTime());
+                    DateTime compCal = new DateTime(retDate.getTime());
 
-                    while ((compCal.get(Calendar.DAY_OF_MONTH) != dateCheck.get(Calendar.DAY_OF_MONTH)) ||
-                            (compCal.get(Calendar.MONTH) != dateCheck.get(Calendar.MONTH)) ||
-                            (compCal.get(Calendar.YEAR) != dateCheck.get(Calendar.YEAR))) {
+                    while ((compCal.getDayOfMonth() != dateCheck.getDayOfMonth()) ||
+                            (compCal.getMonthOfYear() != dateCheck.getMonthOfYear()) ||
+                            (compCal.getYear() != dateCheck.getYear())) {
                         if (fetcher != null) {
                             BigDecimal failOverValue = fetcher.fetchClosingPrice(tableName, dateCheck);
                             if (failOverValue != null) {
@@ -207,16 +214,24 @@ public class LocalJDBC implements InterfaceDataBase {
                 }
             }
 
-            pstm.close();
+
 
         } catch (SQLException ex) {
-            System.err.printf("LocalJDBC Unable to find date for:'%s' from'%s' Time" + startDate.getTime() + "\n", "Cosing Price", tableName);
+            System.err.printf("LocalJDBC Unable to find date for:'%s' from'%s' Time" + startDate.toDate() + "\n", "Cosing Price", tableName);
             ex.printStackTrace();
+            SQLException xp = null;
+            while((xp = ex.getNextException()) != null) {
+                xp.printStackTrace();
+            }
+
         } finally {
             try {
-                if (connection != null && !connection.isClosed()) {
-                    connection.close();
-                }
+                if (results != null) results.close();
+                if (pstm != null) pstm.close();
+                if (connection != null) connection.close();
+//                System.out.printf("Max connect:%d in use:%d\n",mainPool.getMaxConnections(), mainPool.getActiveConnections());
+//                mainPool.dispose();
+
             } catch (SQLException ex) {
                 Logger.getLogger(LocalJDBC.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -226,42 +241,46 @@ public class LocalJDBC implements InterfaceDataBase {
     }
 
 
-    public BigDecimal fetchVolume(String stockName, Calendar date) {
+    public BigDecimal fetchVolume(String stockName, DateTime date) {
 
         return this.fetchData(this.normTableName(stockName), date, "VOLUME");
     }
 
-    public void storeData(String type, String stockName, Calendar date, BigDecimal value) {
+    public void storeData(String type, String stockName, DateTime date, BigDecimal value) {
         PreparedStatement pstm = null;
+        Connection connection = null;
         try {
 
             String table = this.normTableName(stockName);
-            connection = mainPool.getConnection();
+            connection = this.getConnection();
             //upsert
             this.createTable(connection, table);
 
             String query = "MERGE INTO " + table + " (ID,DATE," + type + ") VALUES((SELECT ID FROM " + table + " ID WHERE DATE=?), ?, ?)";
             pstm = connection.prepareStatement(query);
 
-            java.sql.Date sqlDate = new java.sql.Date(date.getTimeInMillis());
+            java.sql.Date sqlDate = new java.sql.Date(date.getMillis());
             pstm.setDate(1, sqlDate);
             pstm.setDate(2, sqlDate);
 
-            System.out.printf("Inserting :%f :%s time:%s\n", value.doubleValue(), stockName, date.getTime().toString());
+            System.out.printf("Inserting :%f :%s time:%s\n", value.doubleValue(), stockName, date.toDate().toString());
             pstm.setDouble(3, value.doubleValue());
             pstm.execute();
 
-            connection.close();
         } catch (SQLException ex) {
             Logger.getLogger(LocalJDBC.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            if (pstm != null) {
-                try {
+            try {
+                if (pstm != null) {
                     pstm.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(LocalJDBC.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(LocalJDBC.class.getName()).log(Level.SEVERE, null, ex);
             }
+
         }
 
     }
@@ -270,15 +289,15 @@ public class LocalJDBC implements InterfaceDataBase {
         return name.replace(" ", "").replace("-", "");
     }
 
-    public void storeClosingPrice(String stockName, Calendar date, BigDecimal value) {
+    public void storeClosingPrice(String stockName, DateTime date, BigDecimal value) {
         this.storeData("CLOSE", stockName, date, value);
     }
 
-    public void storeVolume(String stockName, Calendar date, BigDecimal value) {
+    public void storeVolume(String stockName, DateTime date, BigDecimal value) {
         this.storeData("VOLUME", stockName, date, value);
     }
 
-    public long entryExists(Connection con, String stockName, Calendar date) {
+    public long entryExists(Connection con, String stockName, DateTime date) {
         long retValue = 0;
         PreparedStatement pstm = null;
         try {
@@ -286,7 +305,7 @@ public class LocalJDBC implements InterfaceDataBase {
 
             pstm = con.prepareStatement(statement);
 
-            java.sql.Date sqlDate = new java.sql.Date(date.getTimeInMillis());
+            java.sql.Date sqlDate = new java.sql.Date(date.getMillis());
 
             pstm.setDate(1, sqlDate);
 
@@ -310,11 +329,4 @@ public class LocalJDBC implements InterfaceDataBase {
 
         return retValue;
     }
-
-
-    void setPool(JdbcConnectionPool pool) {
-        mainPool = pool;
-    }
-
-
 }

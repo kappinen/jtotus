@@ -26,6 +26,7 @@ public class MainMethodConfig {
    public boolean inputPrintResults = false;
    public boolean inputPerfomDecision = true;
    private boolean autoStart = false;
+   private boolean isForTraining = false;
    public String inputNormilizerType=null;
 
     //Methods sets, if available.

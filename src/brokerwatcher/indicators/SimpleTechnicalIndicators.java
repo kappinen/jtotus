@@ -21,8 +21,11 @@ import brokerwatcher.ranalyzer.Rexecutor;
 import com.tictactec.ta.lib.Core;
 import com.tictactec.ta.lib.MInteger;
 import com.tictactec.ta.lib.RetCode;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPMismatchException;
 import org.rosuda.REngine.REngineException;
@@ -190,17 +193,171 @@ public class SimpleTechnicalIndicators extends StockIndicator<StockTick> {
             Logger.getLogger(SimpleTechnicalIndicators.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        
         return cor;
     }
 
+    public static double[] crossCorrelation(double a[], double b[], String aName, String bName) {
+        int maxLag;
+        if (rexec == null) {
+            rexec = new Rexecutor();
 
+        }
+
+        double []cor = new double[2];
+        try {
+
+            rexec.getConnection().assign("a", a);
+            rexec.getConnection().assign("b", b);
+            maxLag = Math.max(30 , a.length / 5 );
+
+            //estimate
+            cor[0] = rexec.getConnection().eval("jpeg('crossCor"+aName+"_"+bName+".jpg');"
+                                        + "ab.ccf <- ccf(a, b, lag.max = "+maxLag+", main=\""+aName+" and "+bName+"\");"
+                                        + "dev.off();"
+                                        + "max(ab.ccf$acf)").asDouble();
+
+            //lag
+            cor[1] = rexec.getConnection().eval("ab.indx <- which(ab.ccf$acf==max(ab.ccf$acf));"
+                                                    + "ab.ccf$lag[ab.indx]").asDouble();
+
+            System.out.printf("Cross-Correlation estimate:%f with lag:%f\n", cor[0], cor[1]);
+
+        } catch (REXPMismatchException ex) {
+            Logger.getLogger(SimpleTechnicalIndicators.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (REngineException ex) {
+            Logger.getLogger(SimpleTechnicalIndicators.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return cor;
+    }
 
     //TODO:
     //http://en.wikipedia.org/wiki/Rate_of_change_%28technical_analysis%29
     //http://tadoc.org/indicator/ADOSC.htm
     //http://stockcharts.com/help/doku.php?id=chart_school:technical_indicators:force_index
-    
-    
 
+    public static void plotAB(double a[], double b[]) {
+
+        if (rexec == null) {
+            rexec = new Rexecutor();
+
+        }
+        
+        try {
+
+            rexec.getConnection().assign("a", a);
+            rexec.getConnection().assign("b", b);
+
+            rexec.getConnection().eval("plot(a, type=\"l\", col=1, xlim=c(0,210), ylim=c(8,15));");
+            rexec.getConnection().eval("lines(b, col=2);");
+//                                        + "lines(b, col=\"red\");");
+        } catch (REngineException ex) {
+            Logger.getLogger(SimpleTechnicalIndicators.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public static void plot(double a[], double b[]) {
+
+        if (rexec == null) {
+            rexec = new Rexecutor();
+
+        }
+
+        try {
+
+            rexec.getConnection().assign("a", a);
+            rexec.getConnection().assign("b", b);
+
+            rexec.getConnection().eval("plot(a, b, type=\"l\", col=1);");
+//                                        + "lines(b, col=\"red\");");
+        } catch (REngineException ex) {
+            Logger.getLogger(SimpleTechnicalIndicators.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public static double[] autocorrelation(double a[]) {
+
+        if (rexec == null) {
+            rexec = new Rexecutor();
+        }
+
+        double []cor = null;
+        try {
+            cor[0] = execute("a<-%d; a.ccf<-acf(a, lag=100);max(a.ccf$acf)", a).asDouble();
+
+            //lag
+            cor[1] = execute("a.indx <- which(a.ccf$acf==max(a.ccf$acf));"
+                                                    + "a.ccf$lag[a.indx]").asDouble();
+
+            System.out.printf("Cross-Correlation estimate:%f with lag:%f\n", cor[0], cor[1]);
+
+                //            cor = Math.pow(cor, 2);
+        } catch (REXPMismatchException ex) {
+                Logger.getLogger(SimpleTechnicalIndicators.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (REngineException ex) {
+            Logger.getLogger(SimpleTechnicalIndicators.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return cor;
+    }
+
+    //FIXME: (y <- c(3,3,)) assigments
+    //FIXME: y = c(1,2);
+    private static final Pattern patternForAssign = Pattern.compile("([\\w]+)[\\s]*<-[\\s]*%d[\\s]*;");
+    private static String [] paramParser(String cmds) {
+        ArrayList<String> listOfCmds = new ArrayList<String>();
+        StringBuilder cmd = new StringBuilder();
+        boolean startToSkip = false;
+        char []cmdsAsChar = cmds.toCharArray();
+
+        for (char c : cmdsAsChar) {
+
+            if (c == '\'') {
+                startToSkip = !startToSkip;
+                cmd.append(c);
+            } else if (c == ';') {
+                if (startToSkip) {
+                    cmd.append(c);
+                } else {
+                    cmd.append(c);
+                    listOfCmds.add(cmd.toString());
+                    cmd = new StringBuilder();
+                }
+            } else {
+                cmd.append(c);
+            }
+        }
+        listOfCmds.add(cmd.toString());
+        
+        return (String[]) listOfCmds.toArray(new String[listOfCmds.size()]);
+    }
+
+    public static REXP execute(final String command, double[]...b) throws REngineException, REXPMismatchException {
+        REXP retValue = null;
+        int counter = 0;
+        
+        if (rexec == null) {
+            rexec = new Rexecutor();
+        }
+
+
+        String[] cmds = paramParser(command);
+            for (String cmd : cmds) {
+                Matcher m = patternForAssign.matcher(cmd);
+                if (m.find()) {
+                    String name = m.group(1);
+                    System.out.printf("Assigning:%s\n", name);
+                    rexec.getConnection().assign(name, b[counter++]);
+                } else {
+                    retValue = rexec.getConnection().eval(cmd);
+                }
+            }
+
+        return retValue;
+    }
+
+    //TODO:
+    //http://en.wikipedia.org/wiki/Rate_of_change_%28technical_analysis%29
+    //http://tadoc.org/indicator/ADOSC.htm
+    //http://stockcharts.com/help/doku.php?id=chart_school:technical_indicators:force_index
 }

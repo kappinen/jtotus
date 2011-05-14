@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.joda.time.DateTime;
 
 /**
  * This file is part of JTotus.
@@ -32,18 +33,18 @@ public class MarketData {
     //StockName, Values
     public Map<String, double[]> data;
     public MarketDataType type = MarketDataType.NotSet;
-    public Calendar date;
+    public DateTime date;
 
     public MarketData() {
         data = Collections.synchronizedMap(new HashMap<String, double[]>());
     }
 
-    public Calendar getDate() {
+    public DateTime getDate() {
         return date;
     }
 
-    public void setDate(Calendar date) {
-        this.date = date;
+    public void setDate(DateTime date) {
+        this.date = date.toDateTime();
     }
 
     static private enum MarketDataType {

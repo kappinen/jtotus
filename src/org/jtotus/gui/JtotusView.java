@@ -23,13 +23,8 @@ package org.jtotus.gui;
 
 import brokerwatcher.generators.TickInterface;
 import brokerwatcher.training.TrainManager;
-import org.jdesktop.application.Action;
 import org.jdesktop.application.*;
-import org.jtotus.config.ConfPortfolio;
-import org.jtotus.crypt.JtotusKeyRingPassword;
-import org.jtotus.database.DataFetcher;
 import org.jtotus.engine.Engine;
-import org.jtotus.gui.passwords.JtotusPasswordGUI;
 import org.jtotus.gui.passwords.JtotusSetPasswordsGUI;
 
 import javax.swing.*;
@@ -142,7 +137,6 @@ public class JtotusView extends FrameView {
 
     }
 
-    @Action
     public Task showConfigView() {
         return new ShowConfigViewTask(getApplication());
     }
@@ -391,12 +385,12 @@ public class JtotusView extends FrameView {
 //        DataFetcher fetcher = new DataFetcher();
 //        fetcher.sendMarketData(portfolio.inputListOfStocks, portfolio.inputStartingDate, portfolio.inputEndingDate);
 
-        System.err.printf("Starting trining...\n");
+        System.err.printf("Starting training...\n");
         Thread thread = new Thread() {
 
             public void run() {
                 TrainManager manager = new TrainManager();
-                manager.startTraining();
+                manager.train();
             }
         };
         thread.start();
@@ -508,7 +502,6 @@ public class JtotusView extends FrameView {
     private int busyIconIndex = 0;
 
 
-    @Action
     public Task configMenuItemMouseClicked() {
         return new ConfigMenuItemMouseClickedTask(getApplication());
     }

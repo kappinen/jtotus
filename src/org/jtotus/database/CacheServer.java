@@ -18,12 +18,14 @@ package org.jtotus.database;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 /**
  *
@@ -74,14 +76,13 @@ public class CacheServer {
         return cacheRegions.get(stockName);
     }
 
-    private String getKeyValue(Calendar cal) {
-
-        SimpleDateFormat format = new SimpleDateFormat("MMddyyyy");
-        String newKey = format.format(cal.getTime());
+    private String getKeyValue(DateTime cal) {
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("MMddyyyy");
+        String newKey = formatter.print(cal);
         return newKey;
     }
 
-    public synchronized void putValue(String stockName, Calendar date, BigDecimal value) {
+    public synchronized void putValue(String stockName, DateTime date, BigDecimal value) {
         try {
             if (this.createRegion(stockName)) {
                 //     System.out.printf("Putting "+date.getTime()+"value:%d key:%s\n",value.intValue(), this.getKeyValue(date));
@@ -95,7 +96,7 @@ public class CacheServer {
 
     }
 
-    public synchronized BigDecimal getValue(String stockName, Calendar date) {
+    public synchronized BigDecimal getValue(String stockName, DateTime date) {
         if (this.createRegion(stockName)) {
             BigDecimal ret = (BigDecimal) this.getRegion(stockName).get(this.getKeyValue(date));
             //  System.out.printf("gettng value:%s key:%s\n",ret != null ?ret.toString() : "null", this.getKeyValue(date));

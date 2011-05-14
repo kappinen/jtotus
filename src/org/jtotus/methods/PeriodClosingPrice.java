@@ -27,9 +27,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map.Entry;
-import java.util.Set;
+import org.joda.time.DateTime;
 import org.jtotus.common.DateIterator;
 import org.jtotus.common.Helper;
 import org.jtotus.common.StockType;
@@ -124,12 +122,8 @@ public class PeriodClosingPrice {
             endingDate = Calendar.getInstance().getTime();
         }
 
-        Calendar endCal = Calendar.getInstance();
-        Calendar startCal = Calendar.getInstance();
-
-        endCal.setTime(endingDate);
-        startCal.setTime(endingDate);
-        startCal.add(Calendar.DATE, -1*period);
+        DateTime endCal = new DateTime(endingDate);
+        DateTime startCal = new DateTime(endingDate).minusDays(period);
 
         DateIterator iter = new DateIterator(startCal, endCal);
 

@@ -17,49 +17,58 @@
 
 package org.jtotus.database;
 
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import org.h2.jdbcx.JdbcConnectionPool;
+import org.h2.jdbcx.JdbcDataSource;
+
 
 /**
  *
  * @author Evgeni Kappinen
  */
 public class LocalJDBCFactory {
-    private static LocalJDBCFactory localFactory = null;
+    private static final LocalJDBCFactory localFactory = new LocalJDBCFactory();
     private static JdbcConnectionPool pool;
 
-    protected LocalJDBCFactory() {
-        try {
-            Class.forName("org.h2.Driver").newInstance();
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(LocalJDBCFactory.class.getName()).log(Level.SEVERE, null, ex);
-            return;
-        } catch (InstantiationException ex) {
-            Logger.getLogger(LocalJDBCFactory.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(LocalJDBCFactory.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        if (pool == null) {
-            pool = JdbcConnectionPool.create("jdbc:h2:~/.jtotus/local_database", "sa", "sa");
-            pool.setMaxConnections(100);
-        }
+    private LocalJDBCFactory() {
+//        try {
+//            Class.forName("org.h2.Driver").newInstance();
+//        } catch (ClassNotFoundException ex) {
+//            Logger.getLogger(LocalJDBCFactory.class.getName()).log(Level.SEVERE, null, ex);
+//            return;
+//        } catch (InstantiationException ex) {
+//            Logger.getLogger(LocalJDBCFactory.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (IllegalAccessException ex) {
+//            Logger.getLogger(LocalJDBCFactory.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//
+//        if (pool == null) {
+//                JdbcDataSource ds = new JdbcDataSource();
+//                ds.setURL("jdbc:h2:~/.jtotus/local_database");
+//                ds.setUser("sa");
+//                ds.setPassword("sa");
+//
+////                Properties env = new Properties();
+////                env.put("java.naming.factory.initial", "com.sun.jndi.cosnaming.CNCtxFactory");
+////                Context ctx = new InitialContext(env);
+////                ctx.bind("org.h2.jdbcx.JdbcDataSource", ds);
+//                pool = JdbcConnectionPool.create(ds);
+//                pool.setMaxConnections(200);
+//
+//        }
     }
 
-
-
     public synchronized static LocalJDBCFactory getInstance() {
-        if(localFactory == null) {
-            localFactory = new LocalJDBCFactory();
-        }
-
         return localFactory;
     }
 
     public synchronized LocalJDBC jdbcFactory() {
         LocalJDBC localJDBC = new LocalJDBC();
-        localJDBC.setPool(pool);
 
         return localJDBC;
     }

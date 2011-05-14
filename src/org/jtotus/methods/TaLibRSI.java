@@ -110,23 +110,34 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
                                         outNbElement,
                                         decRSIPeriod);
 
-        DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate,
-                                                     portfolioConfig.inputEndingDate);
+        if (config.inputPrintResults) {
+            DateIterator dateIterator = new DateIterator(portfolioConfig.inputStartingDate,
+                    portfolioConfig.inputEndingDate);
 
-        dateIterator.move(outBegIdx.value);
-        for (int elem = 0; elem < outNbElement.value && dateIterator.hasNext(); elem++) {
-            Date date = dateIterator.next();
-            if (output[elem] < lowestThreshold && change == false) {
-                evaluator.buy(input[elem + outBegIdx.value], -1, date);
-                change=true;
-            } else if (output[elem] > highestThreshold && change == true) {
-                evaluator.sell(input[elem + outBegIdx.value], -1, date);
-                change=false;
+            dateIterator.move(outBegIdx.value);
+            for (int elem = 0; elem < outNbElement.value && dateIterator.hasNext(); elem++) {
+                Date date = dateIterator.next();
+                if (output[elem] < lowestThreshold && change == false) {
+                    evaluator.buy(input[elem + outBegIdx.value], -1, date);
+                    change = true;
+                } else if (output[elem] > highestThreshold && change == true) {
+                    evaluator.sell(input[elem + outBegIdx.value], -1, date);
+                    change = false;
+                }
+            }
+        } else {
+            for (int elem = 0; elem < outNbElement.value; elem++) {
+                if (output[elem] < lowestThreshold && change == false) {
+                    evaluator.buy(input[elem + outBegIdx.value], -1);
+                    change = true;
+                } else if (output[elem] > highestThreshold && change == true) {
+                    evaluator.sell(input[elem + outBegIdx.value], -1);
+                    change = false;
+                }
             }
         }
     }
-    
-
+ 
     public double[] actionRSI(double[] input,
             MInteger outBegIdxDec,
             MInteger outNbElementDec,
@@ -179,18 +190,6 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
 
 
         methodResults.putResult(stockName, output[output.length - 1]);
-
-//        sender = new GraphSender(stockType.getStockName());
-//        for (int elem = 0; elem <= outNbElement.value; elem++) {
-//            DateIterator dateIterator = new DateIterator(config.inputStartingDate.getTime(),
-//                    config.inputEndingDate.getTime());
-//            dateIterator.move(elem + outBegIdx.value);
-//            sender.setSeriesName("Original");
-//            sender.addForSending(dateIterator.getCurrent(), input[elem + outBegIdx.value]);
-//
-//        }
-//        sender.sendAllStored();
-        
 
         if (config.inputPrintResults) {
             sender = new GraphSender(stockName);
@@ -262,4 +261,5 @@ public class TaLibRSI extends TaLibAbstract implements MethodEntry {
         //Perform method
         return this.performRSI(stockName, input);
     }
+
 }

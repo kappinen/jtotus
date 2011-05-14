@@ -17,13 +17,13 @@
 
 package org.jtotus.methods;
 
+import brokerwatcher.eventtypes.MarketData;
 import brokerwatcher.indicators.SimpleTechnicalIndicators;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.lang.ArrayUtils;
 import org.jtotus.common.MethodResults;
 import org.jtotus.methods.utils.Normalizer;
 
@@ -176,6 +176,14 @@ public class SpearmanCorrelation extends TaLibAbstract implements MethodEntry {
      */
     public void setStockList(String[] stockList) {
         this.stockList = stockList;
+    }
+
+    public MethodResults runCalculation() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public MethodResults runCalculation(MarketData data) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 

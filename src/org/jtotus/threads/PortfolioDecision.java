@@ -34,12 +34,8 @@ import brokerwatcher.BrokerWatcher;
 import com.espertech.esper.client.EPAdministrator;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPStatement;
-import org.jtotus.config.ConfigLoader;
 import org.jtotus.database.DataFetcher;
 import org.jtotus.methods.MethodEntry;
-
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -55,7 +51,7 @@ public class PortfolioDecision implements Runnable {
 
     private Helper help = null;
     private LinkedList<MethodEntry> threadList = null;
-    private ExecutorService threadExecutor = null;
+    private ExecutorService threadExecutor = Executors.newCachedThreadPool();
 
 //    public void addLongTermMethod(MethodEntry entry) {
 //        ConfPortfolio portfolioConfig = ConfPortfolio.getPortfolioConfig();
@@ -73,11 +69,6 @@ public class PortfolioDecision implements Runnable {
         if (help == null) {
             help = Helper.getInstance();
         }
-
-        if (threadExecutor == null) {
-            threadExecutor = Executors.newCachedThreadPool();
-        }
-
     }
 
     public void checkForAutoStartIndicators() {
@@ -86,7 +77,7 @@ public class PortfolioDecision implements Runnable {
         ConfPortfolio portfolioConfig = ConfPortfolio.getPortfolioConfig();
 
         for (MethodEntry entry : threadList) {
-            if (portfolioConfig.isAutoStared(entry.getMethName())) {
+            if (portfolioConfig.isAutoStarted(entry.getMethName())) {
                 autoStarts.add(entry);
             }
         }

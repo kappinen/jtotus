@@ -18,9 +18,10 @@
 package org.jtotus.config;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 /**
  * @author Evgeni Kappinen
@@ -28,9 +29,9 @@ import java.util.Calendar;
 public class ConfPortfolio {
     public String[] inputListOfStocks;
     public double inputAssumedBudjet;
-    public Calendar inputStartingDate = null;
-    public Calendar inputEndingDate = null;
-    public Calendar inputStartIndicatorDate = null;
+    public DateTime inputStartingDate = null;
+    public DateTime inputEndingDate = null;
+    public DateTime inputStartIndicatorDate = null;
     public boolean useCurentDayAsEndingDate = true;
     public ArrayList<String> autoStartedMethods;
 
@@ -42,13 +43,10 @@ public class ConfPortfolio {
         inputListOfStocks = fetchGUIStockNames();
         inputAssumedBudjet = 6000;
 
-        inputEndingDate = Calendar.getInstance();
-        inputStartingDate = Calendar.getInstance();
-        inputStartingDate.add(Calendar.DATE, -350);
+        inputEndingDate = new DateTime();
+        inputStartingDate = new DateTime().minusDays(350);
 
-        inputStartIndicatorDate = (Calendar)inputStartingDate.clone();
-        inputStartIndicatorDate.add(Calendar.DATE, -350);
-
+        inputStartIndicatorDate = inputStartingDate.toDateTime().minusDays(350);
         autoStartedMethods = new ArrayList<String>();
     }
 
@@ -91,11 +89,11 @@ public class ConfPortfolio {
         return portfolioConfig;
     }
 
-    public boolean isAutoStared(String methodName) {
+    public boolean isAutoStarted(String methodName) {
         return autoStartedMethods.contains(methodName);
     }
 
-    public void setAutoStared(String methodName) {
+    public void setAutoStarted(String methodName) {
         autoStartedMethods.add(methodName);
     }
 
@@ -105,11 +103,11 @@ public class ConfPortfolio {
     }
 
     public static String getPathToResults() {
-        Calendar cal = Calendar.getInstance();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        DateTime cal = new DateTime();
+        DateTimeFormatter formater = DateTimeFormat.forPattern("yyyy-MM-dd");
 
         String path = pathToResults + File.separator
-                + format.format(cal.getTime()) + File.separator;
+                + formater.print(cal) + File.separator;
 
         File dirs = new File(path);
         if (dirs.exists()) {

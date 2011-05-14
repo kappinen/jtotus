@@ -17,6 +17,7 @@
 
 package org.jtotus.methods;
 
+import brokerwatcher.eventtypes.MarketData;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.math.BigDecimal;
@@ -27,7 +28,6 @@ import java.util.Set;
 import com.espertech.esper.client.EventBean;
 import org.jtotus.common.Helper;
 import org.jtotus.common.MethodResults;
-import org.jtotus.common.StockNames;
 import org.jtotus.common.StockType;
 import org.jtotus.config.ConfPortfolio;
 
@@ -286,5 +286,17 @@ public class PotentialWithIn implements MethodEntry {
     @Override
     public void update(EventBean[] eventBeans, EventBean[] eventBeans1) {
         return;
+    }
+
+    public MethodResults runCalculation() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public MethodResults runCalculation(MarketData data) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setMarketData(MarketData data) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

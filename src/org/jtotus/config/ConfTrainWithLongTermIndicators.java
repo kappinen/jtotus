@@ -51,6 +51,8 @@ public class ConfTrainWithLongTermIndicators {
     public final int indicatorPeriodLength = 300 + trainPeriodLength;
 
     public final int []CrossValidationRange = new int []{15};
+    public final float maxLost = 0.985f;
+    public final float maxWin = 1.012f;
 
 
 }

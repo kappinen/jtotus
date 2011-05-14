@@ -17,6 +17,7 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 package org.jtotus.database;
 
 import java.util.Calendar;
+import org.joda.time.DateTime;
 import org.jtotus.common.Helper;
 import org.jtotus.common.StockType;
 
@@ -38,12 +39,12 @@ public class AutoUpdateStocks implements Runnable {
     private int updateClosingPrice(StockType stock, LocalJDBC javadb) {
         int counter = 0;
 
-        Calendar calendar = Calendar.getInstance();
+        DateTime calendar = new DateTime();
 
         final int failureLimit = -8;
         final int foundLimit = 8;
         for (int i = 0; (failureLimit < i) && (i < foundLimit); i++) {
-            calendar.add(Calendar.DATE, stepToRemove);
+            calendar = calendar.plusDays(stepToRemove);
             stepToRemove = -1;
 
             if (javadb.fetchClosingPrice(stockName, calendar) != null) {
@@ -51,7 +52,7 @@ public class AutoUpdateStocks implements Runnable {
                 counter++;
                 continue;
             } else {
-                calendar.add(Calendar.DATE, stepToRemove);
+                calendar = calendar.plusDays(stepToRemove);
                 if (stock.fetchClosingPrice(calendar) != null) {
                     // Found somewhere in resources..
                     // Database should be updated already.
@@ -75,7 +76,7 @@ public class AutoUpdateStocks implements Runnable {
 
     public void run() {
 
-        LocalJDBCFactory factory = new LocalJDBCFactory().getInstance();
+        LocalJDBCFactory factory = LocalJDBCFactory.getInstance();
         javadb = factory.jdbcFactory();
         if (stockName == null) {
             System.err.printf("Error autoupdator failure.\n");

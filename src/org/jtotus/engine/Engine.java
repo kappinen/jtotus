@@ -25,13 +25,9 @@ import brokerwatcher.generators.TickInterface;
 import brokerwatcher.generators.VPTGenerator;
 import brokerwatcher.generators.VrocGenerator;
 import brokerwatcher.listeners.TicksToFile;
+import java.util.HashMap;
 import org.jtotus.methods.MethodEntry;
 import org.jtotus.methods.DummyMethod;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -148,7 +144,6 @@ public class Engine {
         //watcher.addPattern("every tick=StockTick(stockName='Kemira')", printer);
         //watcher.addStatement("select * from StockTick", new TickListenerPrinter());
         //watcher.addStatement("select * from EsperEventRsi", new TickListenerPrinter());
-
 
         //addGeneratorToList("select * from StockTick", new ListenerRsiIndicator());
         addGeneratorToList("select * from StockTick", new VrocGenerator());
