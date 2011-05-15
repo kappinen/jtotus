@@ -52,9 +52,10 @@ public class NetworkGoogle implements InterfaceDataBase {
     private static final String timePatternForRead = "dd-MMMM-yy";
     private DefaultHttpClient client = new DefaultHttpClient();
     private static final StockNames names = new StockNames();
+    private static final DateTimeFormatter formatter = DateTimeFormat.forPattern("dd-MM-yyyy");
     
     public NetworkGoogle (){
-        BasicConfigurator.configure();
+//        BasicConfigurator.configure();
     }
 
     public BigDecimal fetchClosingPrice(String stockName, DateTime calendar) {
@@ -77,8 +78,8 @@ public class NetworkGoogle implements InterfaceDataBase {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public HashMap<DateTime, Double> fetchPeriodAsMap(String stockName, DateTime startDate, DateTime endDate) {
-        HashMap<DateTime, Double> retMap = new HashMap<DateTime, Double>();
+    public HashMap<String, Double> fetchPeriodAsMap(String stockName, DateTime startDate, DateTime endDate) {
+        HashMap<String, Double> retMap = new HashMap<String, Double>(500);
         try {
             DateTimeFormatter formatterOUT = DateTimeFormat.forPattern(timePatternForWrite);
             DateTimeFormatter formatterIN = DateTimeFormat.forPattern(timePatternForRead);
@@ -102,8 +103,7 @@ public class NetworkGoogle implements InterfaceDataBase {
                 String []values = line.split(",");
                 DateTime date = formatterIN.parseDateTime(values[0]);
                 double value = Double.parseDouble(values[4]);
-                System.out.printf("Pushing:%s - %f\n", date.toString(), value);
-                retMap.put(date, value);
+                retMap.put(formatter.print(date), value);
             }
             
         } catch (IOException ex) {

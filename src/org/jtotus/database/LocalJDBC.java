@@ -22,15 +22,16 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang.ArrayUtils;
-import org.h2.jdbcx.JdbcConnectionPool;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.jtotus.common.DateIterator;
 
 /**
  * @author Evgeni Kappinen
  */
 public class LocalJDBC implements InterfaceDataBase {
-    
+    private static final DateTimeFormatter formatter = DateTimeFormat.forPattern("dd-MM-yyyy");
     private PreparedStatement fetchClosePriceStatement = null;
     private PreparedStatement fetchVolumeStatement = null;
     private PreparedStatement insertClosePriceStatement = null;
@@ -173,10 +174,17 @@ public class LocalJDBC implements InterfaceDataBase {
                     dateCheck = iter.nextInCalendar();
 
                     DateTime compCal = new DateTime(retDate.getTime());
+                    if (compCal.getDayOfMonth() == dateCheck.getDayOfMonth()
+                            && compCal.getMonthOfYear() == dateCheck.getMonthOfYear()
+                            && compCal.getYear() == dateCheck.getYear()) {
+                        closingPrices.add(retValue.doubleValue());
+                        continue;
+                    }
 
-                    while ((compCal.getDayOfMonth() != dateCheck.getDayOfMonth()) ||
-                            (compCal.getMonthOfYear() != dateCheck.getMonthOfYear()) ||
-                            (compCal.getYear() != dateCheck.getYear())) {
+                    while (((compCal.getDayOfMonth() != dateCheck.getDayOfMonth())
+                            || (compCal.getMonthOfYear() != dateCheck.getMonthOfYear())
+                            || (compCal.getYear() != dateCheck.getYear())) &&
+                            dateCheck.isBefore(compCal)) {
                         if (fetcher != null) {
                             BigDecimal failOverValue = fetcher.fetchClosingPrice(tableName, dateCheck);
                             if (failOverValue != null) {
@@ -197,14 +205,15 @@ public class LocalJDBC implements InterfaceDataBase {
                 }
 
                 if (debug) {
-                    if (retValue != null)
+                    if (retValue != null) {
                         System.out.printf("Fetched:\'%s\' from \'%s\' : value:%f date:%s\n",
                                 "Closing Price", tableName, retValue.doubleValue(), retDate.toString());
-                    else
+                    } else {
                         System.out.printf("Fetched:\'%s\' from \'%s\' : value:%s date:%s\n",
                                 "Closing Price", tableName, "is null", retDate.toString());
+                    }
                 }
-                closingPrices.add(retValue.doubleValue());
+
             }
 
             while (iter.hasNext()) {
@@ -285,7 +294,124 @@ public class LocalJDBC implements InterfaceDataBase {
 
     }
 
-    private String normTableName(String name) {
+    public HashMap<String, Double> fetchPeriodAsMap(String tableName, DateTime startDate, DateTime endDate) {
+
+        HashMap<String, Double> retMap = new HashMap<String, Double>();
+        BigDecimal retValue = null;
+        PreparedStatement pstm = null;
+        java.sql.Date retDate = null;
+        ResultSet results = null;
+        Connection connection = null;
+
+        try {
+            String query = "SELECT CLOSE, DATE FROM " + this.normTableName(tableName) + " WHERE DATE>=? AND DATE<=? ORDER BY DATE ASC";
+            // this.createTable(connection, this.normTableName(tableName));
+
+            connection = this.getConnection();
+            pstm = connection.prepareStatement(query);
+
+            java.sql.Date startSqlDate = new java.sql.Date(startDate.getMillis());
+            pstm.setDate(1, startSqlDate);
+
+            java.sql.Date endSqlDate = new java.sql.Date(endDate.getMillis());
+            pstm.setDate(2, endSqlDate);
+
+            System.out.printf("fetchPeriod : %s : %s\n", startSqlDate, endSqlDate);
+            DateIterator iter = new DateIterator(startDate, endDate);
+            results = pstm.executeQuery();
+            DateTime dateCheck;
+
+            while (results.next()) {
+                retValue = results.getBigDecimal(1);
+                retDate = results.getDate(2);
+
+                if (retValue == null || retDate == null) {
+                    System.err.println("Database is corrupted!");
+                    System.exit(-1);
+                }
+
+                if (iter.hasNext()) {
+                    dateCheck = iter.nextInCalendar();
+
+                    DateTime compCal = new DateTime(retDate.getTime());
+
+                    if (debug) {
+                        if (retValue != null) {
+                            System.out.printf("Fetched:\'%s\' from \'%s\' : value:%f date:%s\n",
+                                    "Closing Price", tableName, retValue.doubleValue(), retDate.toString());
+                        } else {
+                            System.out.printf("Fetched:\'%s\' from \'%s\' : value:%s date:%s\n",
+                                    "Closing Price", tableName, "is null", retDate.toString());
+                        }
+                    }
+
+                    if (compCal.getDayOfMonth() == dateCheck.getDayOfMonth()
+                            && compCal.getMonthOfYear() == dateCheck.getMonthOfYear()
+                            && compCal.getYear() == dateCheck.getYear()) {
+                        retMap.put(formatter.print(compCal), retValue.doubleValue());
+                        continue;
+                    }
+                    
+                    while (((compCal.getDayOfMonth() != dateCheck.getDayOfMonth())
+                            || (compCal.getMonthOfYear() != dateCheck.getMonthOfYear())
+                            || (compCal.getYear() != dateCheck.getYear())) &&
+                            dateCheck.isBefore(compCal)) {
+                        if (fetcher != null) {
+                            BigDecimal failOverValue = fetcher.fetchClosingPrice(tableName, dateCheck);
+                            if (failOverValue != null) {
+                                retMap.put(formatter.print(dateCheck), retValue.doubleValue());
+                            }
+
+                            if (iter.hasNext()) {
+                                System.err.printf("Warning : Miss matching dates for: %s - %s\n", retDate.toString(), dateCheck.toString());
+                                dateCheck = iter.nextInCalendar();
+                                continue;
+                            }
+                        } else {
+                            System.err.printf("Fatal missing fetcher : Miss matching dates: %s - %s\n", retDate.toString(), dateCheck.toString());
+                            return null;
+                        }
+                    }
+                }
+            }
+
+            while (iter.hasNext()) {
+                retValue = fetcher.fetchClosingPrice(tableName, iter.nextInCalendar());
+                if (retValue != null) {
+                    retMap.put(formatter.print(iter.getCurrentAsCalendar()), retValue.doubleValue());
+                }
+            }
+
+
+
+        } catch (SQLException ex) {
+            System.err.printf("LocalJDBC Unable to find date for:'%s' from'%s' Time" + startDate.toDate() + "\n", "Cosing Price", tableName);
+            ex.printStackTrace();
+            SQLException xp = null;
+            while((xp = ex.getNextException()) != null) {
+                xp.printStackTrace();
+            }
+
+        } finally {
+            try {
+                if (results != null) results.close();
+                if (pstm != null) pstm.close();
+                if (connection != null) connection.close();
+//                System.out.printf("Max connect:%d in use:%d\n",mainPool.getMaxConnections(), mainPool.getActiveConnections());
+//                mainPool.dispose();
+
+            } catch (SQLException ex) {
+                Logger.getLogger(LocalJDBC.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        return retMap;
+    }
+    
+    
+    
+    
+    public static String normTableName(String name) {
         return name.replace(" ", "").replace("-", "");
     }
 

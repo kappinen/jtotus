@@ -19,8 +19,6 @@ package org.jtotus.common;
 import java.util.Date;
 import java.util.Iterator;
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 /**
  *
@@ -121,6 +119,11 @@ public class DateIterator implements Iterator<Date>, Iterable<Date> {
     public Date getCurrent() {
         //return current.getTime();
         return current.toDate();
+    }
+    
+    public DateTime getCurrentAsCalendar() {
+        //return current.getTime();
+        return current.toDateTime();
     }
 
     public void move(int i) {

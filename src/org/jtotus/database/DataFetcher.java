@@ -92,10 +92,7 @@ public class DataFetcher {
     }
 
     public BigDecimal fetchAveragePrice(String stockName, DateTime time) {
-        BigDecimal result = null;
-
-
-        return result;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public BigDecimal fetchVolumeForDate(String stockName, DateTime date) {

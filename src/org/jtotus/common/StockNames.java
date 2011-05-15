@@ -28,8 +28,6 @@ import java.util.Map;
 public class StockNames {
     private Map<String, IndexMarketData> stockMap = new HashMap<String, IndexMarketData>();
 
-    private Iterator mapIter = null;
-
     public StockNames() {
 
         //Aliases
@@ -61,6 +59,14 @@ public class StockNames {
         stockMap.put("UPM-Kymmene Oyj", new IndexMarketData("UPM1V.HSE", 6.4));
         stockMap.put("Wärtsilä Corporation", new IndexMarketData("WRT1V.HSE", 4.0));
         stockMap.put("YIT Oyj", new IndexMarketData("YTY1V.HSE", 2.6));
+        
+        
+        
+        
+        
+        stockMap.put("NIKKEI225", new IndexMarketData("INDEXNIKKEI:NI225", 1.0));
+        stockMap.put("IP", new IndexMarketData("NYSE:IP", 1.0));
+        
 
     }
 
