@@ -212,7 +212,7 @@ public class SimpleTechnicalIndicators extends StockIndicator<StockTick> {
 
             //estimate
             cor[0] = rexec.getConnection().eval("jpeg('crossCor"+aName+"_"+bName+".jpg');"
-                                        + "ab.ccf <- ccf(a, b, lag.max = "+maxLag+", main=\""+aName+" and "+bName+"\");"
+                                        + "ab.ccf <- ccf(diff(a),diff(b), lag.max = "+maxLag+", main=\""+aName+" and "+bName+"\");"
                                         + "dev.off();"
                                         + "max(ab.ccf$acf)").asDouble();
 
@@ -248,8 +248,8 @@ public class SimpleTechnicalIndicators extends StockIndicator<StockTick> {
             rexec.getConnection().assign("a", a);
             rexec.getConnection().assign("b", b);
 
-            rexec.getConnection().eval("plot(a, type=\"l\", col=1, xlim=c(0,210), ylim=c(8,15));");
-            rexec.getConnection().eval("lines(b, col=2);");
+            rexec.getConnection().eval("plot(scale(a), type=\"l\", col=1, xlim=c(0,"+a.length+"), ylim=c(-5,5));");
+            rexec.getConnection().eval("lines(scale(b), col=2);");
 //                                        + "lines(b, col=\"red\");");
         } catch (REngineException ex) {
             Logger.getLogger(SimpleTechnicalIndicators.class.getName()).log(Level.SEVERE, null, ex);
