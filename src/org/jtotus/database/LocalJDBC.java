@@ -39,7 +39,11 @@ public class LocalJDBC implements InterfaceDataBase {
     private boolean debug = false;
     private DataFetcher fetcher = null;
 
-
+    public static enum DataTypes {
+        CLOSE,
+        VOLUME
+    };
+    
     private Connection getConnection() throws SQLException {
         return DriverManager.getConnection("jdbc:h2:~/.jtotus/local_database", "sa", "sa");
     }
@@ -70,7 +74,6 @@ public class LocalJDBC implements InterfaceDataBase {
     }
 
     public BigDecimal fetchClosingPrice(String stockName, DateTime date) {
-
         return this.fetchData(stockName, date, "CLOSE");
     }
 
@@ -136,7 +139,7 @@ public class LocalJDBC implements InterfaceDataBase {
         this.fetcher = fetcher;
     }
 
-    public double[] fetchPeriod(String tableName, DateTime startDate, DateTime endDate) {
+    public double[] fetchPeriod(String tableName, DateTime startDate, DateTime endDate, String type) {
         BigDecimal retValue = null;
         PreparedStatement pstm = null;
         java.sql.Date retDate = null;
@@ -145,7 +148,7 @@ public class LocalJDBC implements InterfaceDataBase {
         Connection connection = null;
 
         try {
-            String query = "SELECT CLOSE, DATE FROM " + this.normTableName(tableName) + " WHERE DATE>=? AND DATE<=? ORDER BY DATE ASC";
+            String query = "SELECT "+type+", DATE FROM " + this.normTableName(tableName) + " WHERE DATE>=? AND DATE<=? ORDER BY DATE ASC";
             // this.createTable(connection, this.normTableName(tableName));
 
             connection = this.getConnection();
@@ -165,9 +168,19 @@ public class LocalJDBC implements InterfaceDataBase {
                 retValue = results.getBigDecimal(1);
                 retDate = results.getDate(2);
 
-                if (retValue == null || retDate == null) {
+                if (retDate == null) {
                     System.err.println("Database is corrupted!");
                     System.exit(-1);
+                } else if (retValue == null) {
+                    if (type.equals("CLOSE")) {
+                        retValue = fetcher.fetchClosingPrice(tableName, new DateTime(retDate.getTime()));
+                    } else if (type.equals("VOLUME")) {
+                        retValue = fetcher.fetchVolumeForDate(tableName, new DateTime(retDate.getTime()));
+                    }
+                    if (retValue == null) {
+                        System.err.println("Unable to find" + type + "from databases");
+                        System.exit(-1);
+                    }
                 }
 
                 if (iter.hasNext()) {
@@ -186,7 +199,7 @@ public class LocalJDBC implements InterfaceDataBase {
                             || (compCal.getYear() != dateCheck.getYear())) &&
                             dateCheck.isBefore(compCal)) {
                         if (fetcher != null) {
-                            BigDecimal failOverValue = fetcher.fetchClosingPrice(tableName, dateCheck);
+                            BigDecimal failOverValue = this.fetchData(tableName, dateCheck, type);
                             if (failOverValue != null) {
                                 closingPrices.add(retValue.doubleValue());
                             }
@@ -217,7 +230,7 @@ public class LocalJDBC implements InterfaceDataBase {
             }
 
             while (iter.hasNext()) {
-                retValue = fetcher.fetchClosingPrice(tableName, iter.nextInCalendar());
+                retValue = this.fetchData(tableName, iter.nextInCalendar(), type);
                 if (retValue != null) {
                     closingPrices.add(retValue.doubleValue());
                 }
@@ -386,11 +399,11 @@ public class LocalJDBC implements InterfaceDataBase {
 
         } catch (SQLException ex) {
             System.err.printf("LocalJDBC Unable to find date for:'%s' from'%s' Time" + startDate.toDate() + "\n", "Cosing Price", tableName);
-            ex.printStackTrace();
-            SQLException xp = null;
-            while((xp = ex.getNextException()) != null) {
-                xp.printStackTrace();
-            }
+//            ex.printStackTrace();
+//            SQLException xp = null;
+//            while((xp = ex.getNextException()) != null) {
+//                xp.printStackTrace();
+//            }
 
         } finally {
             try {

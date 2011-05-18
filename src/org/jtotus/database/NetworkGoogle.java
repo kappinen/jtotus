@@ -30,6 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.BasicConfigurator;
@@ -50,7 +51,7 @@ public class NetworkGoogle implements InterfaceDataBase {
     private static final String url = "http://www.google.com/finance/historical";
     private static final String timePatternForWrite = "MMMM+d'%2C'+Y";
     private static final String timePatternForRead = "dd-MMMM-yy";
-    private DefaultHttpClient client = new DefaultHttpClient();
+    
     private static final StockNames names = new StockNames();
     private static final DateTimeFormatter formatter = DateTimeFormat.forPattern("dd-MM-yyyy");
     
@@ -80,6 +81,8 @@ public class NetworkGoogle implements InterfaceDataBase {
 
     public HashMap<String, Double> fetchPeriodAsMap(String stockName, DateTime startDate, DateTime endDate) {
         HashMap<String, Double> retMap = new HashMap<String, Double>(500);
+        DefaultHttpClient client = new DefaultHttpClient();
+        HttpGet httpGet = null;
         try {
             DateTimeFormatter formatterOUT = DateTimeFormat.forPattern(timePatternForWrite);
             DateTimeFormatter formatterIN = DateTimeFormat.forPattern(timePatternForRead);
@@ -87,12 +90,17 @@ public class NetworkGoogle implements InterfaceDataBase {
             String query = url + "?q=" + names.getHexName(stockName) + "&"
                                + "startdate=" + formatterOUT.print(startDate) + "&"
                                + "enddate=" + formatterOUT.print(endDate) + "&"
-                               + "output=csv&num=30&start=0";
+                               + "&num=30&output=csv";
             
             System.out.printf("HttpGet:%s : date:%s\n", query, formatterOUT.print(startDate));
-            HttpGet httpGet = new HttpGet(query);
+            httpGet = new HttpGet(query);
             
             HttpResponse response = client.execute(httpGet);
+            StatusLine status = response.getStatusLine();
+            if (status.getStatusCode() != 200) {
+                throw new IOException("Invalid response from server: " + status.toString());
+            }
+
             HttpEntity entity = response.getEntity();
             
             BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
@@ -107,9 +115,16 @@ public class NetworkGoogle implements InterfaceDataBase {
             }
             
         } catch (IOException ex) {
-            Logger.getLogger(NetworkGoogle.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.printf("Unable to find market data for: %s - %s\n", names.getHexName(stockName), stockName);
+        } catch (IllegalArgumentException ex) {
+            System.err.printf("Unable to find market data for: %s - %s\n", names.getHexName(stockName), stockName);
+        } finally {
+            if (httpGet != null) {
+                
+            }
         }
         
+        System.out.printf("NetworkGoogle fetched : %d values\n", retMap.size());
         return retMap;
     }
 

@@ -19,9 +19,7 @@ package org.jtotus.database;
 import java.sql.*;
 import java.sql.Connection;
 import java.util.HashMap;
-import java.util.Iterator;
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.jtotus.common.DateIterator;
@@ -37,6 +35,12 @@ public class StockMerger {
     private static final NetworkGoogle google = new NetworkGoogle();
     private static final boolean debug = true;
 
+    public StockMerger() {
+        DataFetcher fetch = new DataFetcher();
+        fetcher.setFetcher(fetch);
+    }
+
+    
     private Connection getConnection() throws SQLException {
         return DriverManager.getConnection("jdbc:h2:~/.jtotus/local_database", "sa", "sa");
     }

@@ -135,7 +135,20 @@ public class DataFetcher {
         localJDBC.setFetcher(this);
         return localJDBC.fetchPeriod(stockName,
                                      startDate,
-                                     endDate);
+                                     endDate,
+                                     "CLOSE");
+    }
+
+    public double[] fetchVolumePeriod(final String stockName, final DateTime startDate, final DateTime endDate) {
+
+        if (debug) {
+            System.out.printf("Fetching data for: %s\n", stockName);
+        }
+        localJDBC.setFetcher(this);
+        return localJDBC.fetchPeriod(stockName,
+                                     startDate,
+                                     endDate,
+                                     "VOLUME");
     }
 
     public boolean sendMarketData(final String[] listOfStocks, final DateTime startDate, final DateTime endDate) {
@@ -155,7 +168,8 @@ public class DataFetcher {
             locJDBC.setFetcher(new DataFetcher());
             double[] data = locJDBC.fetchPeriod(stockName,
                                                 startDate,
-                                                endDate);
+                                                endDate,
+                                                "CLOSE");
 
             if (data == null) {
                 return false;
@@ -198,7 +212,8 @@ public class DataFetcher {
             locJDBC.setFetcher(new DataFetcher());
             double[] data = locJDBC.fetchPeriod(stockName,
                                                 startDate,
-                                                endDate);
+                                                endDate,
+                                                "CLOSE");
 
             if (data == null) {
                 return null;
