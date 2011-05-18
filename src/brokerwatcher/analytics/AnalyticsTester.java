@@ -6,9 +6,15 @@ import brokerwatcher.indicators.SimpleTechnicalIndicators;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.joda.time.DateTime;
+import org.jtotus.common.StockNames;
 import org.jtotus.config.ConfPortfolio;
 import org.jtotus.database.DataFetcher;
+import org.jtotus.database.StockMerger;
+import org.rosuda.REngine.REXPMismatchException;
+import org.rosuda.REngine.REngineException;
 
 /**
  *
@@ -18,9 +24,7 @@ public class AnalyticsTester {
 
     public static void test1() {
         ConfPortfolio config = ConfPortfolio.getPortfolioConfig();
-        DataFetcher fetcher = new DataFetcher();
-//        portfolioConfig.inputListOfStocks
-        DateTime time = new DateTime().minusDays(900);
+        DateTime time = new DateTime().minusDays(100);
         DateTime timeEnd = new DateTime();
 
         HashMap<String, Double> abCorr = new HashMap<String, Double>();
@@ -34,16 +38,19 @@ public class AnalyticsTester {
 //        SimpleTechnicalIndicators.executeR("stl(log(a), \"per\");", aValues, bValues);
 
 
-        for (String a : config.inputListOfStocks) {
-            for (String b : config.inputListOfStocks) {
+        
+        StockNames names = new StockNames();
+        for (String a : names.getNames()) {
+//            for (String b : names.getNames()) {
+            for (String b : names.getExternals()) {
                 if (a.compareTo(b) == 0) {
                     continue;
                 }
 
-                double[] aValues = fetcher.fetchClosingPricePeriod(a, time, timeEnd);
-                double[] bValues = fetcher.fetchClosingPricePeriod(b, time, timeEnd);
-                System.out.printf("%s -> %s have: ", a, b);
-                double[] res = SimpleTechnicalIndicators.crossCorrelation(aValues, bValues, a, b);
+                StockMerger merge = new StockMerger();
+                double [][]values = merge.mergedPeriods(a, b, time, timeEnd);
+                System.out.printf("AnalyticsTester : %s -> %s have: %d \n", a, b, values[0].length);
+                double[] res = SimpleTechnicalIndicators.crossCorrelation(values[0], values[1], a, b);
 
                 if (res[0] > 0.8f) {
                     HashSet<String> links = null;
@@ -90,5 +97,44 @@ public class AnalyticsTester {
             Double lag = abLags.get(entry.getKey());
             System.out.printf("%s - %f - lag: %f\n", entry.getKey(), entry.getValue(), lag);
         }
+    }
+
+    public static void test2() {
+        try {
+            ConfPortfolio config = ConfPortfolio.getPortfolioConfig();
+            DateTime time = new DateTime().minusDays(100);
+            DateTime timeEnd = new DateTime();
+            DataFetcher fetcher = new DataFetcher();
+            
+            StockMerger merge = new StockMerger();
+//            double[][] values2 = merge.mergedPeriods("Neste Oil", "Tieto Oyj", time, timeEnd);
+//            double[][] values = merge.mergedPeriods("Outotec Oyj","Metso Oyj", time, timeEnd);
+            
+            double[] svalues = fetcher.fetchClosingPricePeriod("Metso Oyj", time, timeEnd);
+            double[] svvalues = fetcher.fetchVolumePeriod("Metso Oyj", time, timeEnd);
+            
+            
+//            SimpleTechnicalIndicators.execute("a<-%d;plot(density(diff(log(a))), type=\"l\")", values);
+//            SimpleTechnicalIndicators.execute("a<-%d;plot(diff(a), col=1, type=\"l\")", values);
+//            SimpleTechnicalIndicators.execute("lines(diff(a,2), col=\"red\");");
+//            System.out.printf("Got:%d\n", values[1].length);
+//            double vo = SimpleTechnicalIndicators.execute("a<-%d; b<-%d; ab <- ccf(diff(a),diff(b)); max(ab$acf)", values[0], values[1])
+//                    .asDouble();
+//            double vo1 = SimpleTechnicalIndicators.execute("a<-%d; b<-%d; ab <- ccf(diff(a),diff(b)); max(ab$acf)", values2[0], values2[1])
+//                    .asDouble();
+            double vo = SimpleTechnicalIndicators.execute("a<-%d; b<-%d; ab <- ccf(diff(a),diff(b)); max(ab$acf)", svalues, svvalues).asDouble();
+                    
+            
+            System.out.printf("Estimator:%f and \n", vo);
+//            SimpleTechnicalIndicators.plotAB(values[0], values[1]);
+        }
+        catch (REngineException ex) {
+            Logger.getLogger(AnalyticsTester.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
+        } catch (REXPMismatchException ex) {
+            Logger.getLogger(AnalyticsTester.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
     }
 }
