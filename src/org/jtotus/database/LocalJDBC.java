@@ -21,6 +21,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.text.DateFormatter;
 import org.apache.commons.lang.ArrayUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -39,13 +40,15 @@ public class LocalJDBC implements InterfaceDataBase {
     private boolean debug = false;
     private DataFetcher fetcher = null;
 
+
     public static enum DataTypes {
         CLOSE,
         VOLUME
     };
     
     private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection("jdbc:h2:~/.jtotus/local_database", "sa", "sa");
+        return DriverManager.getConnection("jdbc:h2:~/.jtotus/local_database;LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0",
+                "sa", "sa");
     }
 
     //TODO;create procedures
@@ -61,6 +64,8 @@ public class LocalJDBC implements InterfaceDataBase {
                     + "CLOSE         DECIMAL(18,4),"
                     + "HIGH          DECIMAL(18,4),"
                     + "LOW           DECIMAL(18,4),"
+//                    + "AVRG           DECIMAL(18,4),"
+//                    + "TRADES           DECIMAL(18,4),"
                     + "VOLUME        INT,"
                     + "PRIMARY KEY(ID));";
 
@@ -139,6 +144,14 @@ public class LocalJDBC implements InterfaceDataBase {
         this.fetcher = fetcher;
     }
 
+    public DataFetcher getFetcher() {
+        if (this.fetcher == null) {
+            this.fetcher = new DataFetcher();
+        }
+
+        return this.fetcher;
+    }
+
     public double[] fetchPeriod(String tableName, DateTime startDate, DateTime endDate, String type) {
         BigDecimal retValue = null;
         PreparedStatement pstm = null;
@@ -172,14 +185,15 @@ public class LocalJDBC implements InterfaceDataBase {
                     System.err.println("Database is corrupted!");
                     System.exit(-1);
                 } else if (retValue == null) {
-                    if (type.equals("CLOSE")) {
-                        retValue = fetcher.fetchClosingPrice(tableName, new DateTime(retDate.getTime()));
-                    } else if (type.equals("VOLUME")) {
-                        retValue = fetcher.fetchVolumeForDate(tableName, new DateTime(retDate.getTime()));
-                    }
+//                    if (type.equals("CLOSE")) {
+//                        retValue = fetcher.fetchClosingPrice(tableName, new DateTime(retDate.getTime()));
+//                    } else if (type.equals("VOLUME")) {
+//                        retValue = fetcher.fetchVolumeForDate(tableName, new DateTime(retDate.getTime()));
+//                    }
+                    retValue = getFetcher().fetchData(tableName, new DateTime(retDate.getTime()), type);
                     if (retValue == null) {
-                        System.err.println("Unable to find" + type + "from databases");
-                        System.exit(-1);
+                        System.err.println("Unable to find " + type + " from databases for " + tableName + " and date " + retDate);
+                        return null;
                     }
                 }
 
@@ -196,21 +210,24 @@ public class LocalJDBC implements InterfaceDataBase {
 
                     while (((compCal.getDayOfMonth() != dateCheck.getDayOfMonth())
                             || (compCal.getMonthOfYear() != dateCheck.getMonthOfYear())
-                            || (compCal.getYear() != dateCheck.getYear())) &&
-                            dateCheck.isBefore(compCal)) {
+                            || (compCal.getYear() != dateCheck.getYear()))
+                            && dateCheck.isBefore(compCal)) {
+
                         if (fetcher != null) {
-                            BigDecimal failOverValue = this.fetchData(tableName, dateCheck, type);
+                            BigDecimal failOverValue = getFetcher().fetchData(tableName, dateCheck, type);
                             if (failOverValue != null) {
                                 closingPrices.add(retValue.doubleValue());
                             }
 
                             if (iter.hasNext()) {
-                                System.err.printf("Warning : Miss matching dates for: %s - %s\n", retDate.toString(), dateCheck.toString());
+                                System.err.printf("Warning : Miss matching dates for: %s - %s\n",
+                                                  retDate.toString(), formatter.print(dateCheck));
                                 dateCheck = iter.nextInCalendar();
                                 continue;
                             }
                         } else {
-                            System.err.printf("Fatal missing fetcher : Miss matching dates: %s - %s\n", retDate.toString(), dateCheck.toString());
+                            System.err.printf("Fatal missing fetcher : Miss matching dates: %s - %s\n",
+                                              retDate.toString(), formatter.print(dateCheck));
                             return null;
                         }
                     }
@@ -230,7 +247,7 @@ public class LocalJDBC implements InterfaceDataBase {
             }
 
             while (iter.hasNext()) {
-                retValue = this.fetchData(tableName, iter.nextInCalendar(), type);
+                retValue = getFetcher().fetchData(tableName, iter.nextInCalendar(), type);
                 if (retValue != null) {
                     closingPrices.add(retValue.doubleValue());
                 }
@@ -268,7 +285,7 @@ public class LocalJDBC implements InterfaceDataBase {
         return this.fetchData(this.normTableName(stockName), date, "VOLUME");
     }
 
-    public void storeData(String type, String stockName, DateTime date, BigDecimal value) {
+    public void storeData(String stockName, DateTime date, BigDecimal value, String type) {
         PreparedStatement pstm = null;
         Connection connection = null;
         try {
@@ -370,13 +387,14 @@ public class LocalJDBC implements InterfaceDataBase {
                             || (compCal.getYear() != dateCheck.getYear())) &&
                             dateCheck.isBefore(compCal)) {
                         if (fetcher != null) {
-                            BigDecimal failOverValue = fetcher.fetchClosingPrice(tableName, dateCheck);
+                            BigDecimal failOverValue = getFetcher().fetchClosingPrice(tableName, dateCheck);
                             if (failOverValue != null) {
                                 retMap.put(formatter.print(dateCheck), retValue.doubleValue());
                             }
 
                             if (iter.hasNext()) {
-                                System.err.printf("Warning : Miss matching dates for: %s - %s\n", retDate.toString(), dateCheck.toString());
+                                System.err.printf("Warning : Miss matching dates for: %s - %s\n",
+                                        retDate.toString(), dateCheck.toString());
                                 dateCheck = iter.nextInCalendar();
                                 continue;
                             }
@@ -389,7 +407,7 @@ public class LocalJDBC implements InterfaceDataBase {
             }
 
             while (iter.hasNext()) {
-                retValue = fetcher.fetchClosingPrice(tableName, iter.nextInCalendar());
+                retValue = getFetcher().fetchClosingPrice(tableName, iter.nextInCalendar());
                 if (retValue != null) {
                     retMap.put(formatter.print(iter.getCurrentAsCalendar()), retValue.doubleValue());
                 }
@@ -429,11 +447,11 @@ public class LocalJDBC implements InterfaceDataBase {
     }
 
     public void storeClosingPrice(String stockName, DateTime date, BigDecimal value) {
-        this.storeData("CLOSE", stockName, date, value);
+        this.storeData(stockName, date, value, "CLOSE");
     }
 
     public void storeVolume(String stockName, DateTime date, BigDecimal value) {
-        this.storeData("VOLUME", stockName, date, value);
+        this.storeData(stockName, date, value, "VOLUME");
     }
 
     public long entryExists(Connection con, String stockName, DateTime date) {

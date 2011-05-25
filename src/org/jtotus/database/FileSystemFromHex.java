@@ -111,7 +111,26 @@ public BigDecimal fetchTrades(String stockName, DateTime calendar){
     return this.fetchValue(stockName, calendar, columnTrades);
 }
 
+    public BigDecimal fetchData(String stockName, DateTime date, String type) {
 
+        if (type.compareTo("HIGH") == 0) {
+            return this.fetchValue(stockName, date, columnHighestPrice);
+        } else if (type.compareTo("LOW") == 0) {
+            return this.fetchValue(stockName, date, columnLowestPrice);
+        } else if (type.compareTo("CLOSE") == 0) {
+            return this.fetchValue(stockName, date, columnClosingPrice);
+        } else if (type.compareTo("VOLUME") == 0) {
+            return this.fetchValue(stockName, date, columnTotalVolume);
+        } else if (type.compareTo("AVRG") == 0) {
+            return this.fetchValue(stockName, date, columnAvrPrice);
+        } else if (type.compareTo("TRADES") == 0) {
+            return this.fetchValue(stockName, date, columnTrades);
+        } else if (type.compareTo("TURNOVER") == 0) {
+            return this.fetchValue(stockName, date, columnTurnOver);
+        }
+        return null;
+    }
+    
 private BigDecimal fetchValue(String stockName, DateTime date, int row)
 {
     BigDecimal result = null;
@@ -142,11 +161,7 @@ private BigDecimal fetchValue(String stockName, DateTime date, int row)
     return result;
 }
 
-
-
-
-
-    public BigDecimal omxNordicFile(String fileName, DateTime calendar,int row) {
+    public BigDecimal omxNordicFile(String fileName, DateTime calendar, int row) {
         BigDecimal result = null;
 
         try {
@@ -160,7 +175,7 @@ private BigDecimal fetchValue(String stockName, DateTime date, int row)
             //HSSFRow row1 = worksheet.getRow(0);
 
             // Year-Mount-Data
-            SimpleDateFormat time =  new SimpleDateFormat(filePattern);
+            SimpleDateFormat time = new SimpleDateFormat(filePattern);
             time.setCalendar(calendar.toGregorianCalendar());
 
             //System.out.printf("Class :%s : %s\n",this.getClass().toString(), this.toString());
@@ -220,6 +235,10 @@ private BigDecimal fetchValue(String stockName, DateTime date, int row)
     }
 
     public void storeVolume(String stockName, DateTime date, BigDecimal value) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void storeData(String stockName, DateTime date, BigDecimal value, String type) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

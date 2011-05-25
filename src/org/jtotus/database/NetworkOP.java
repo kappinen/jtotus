@@ -48,17 +48,21 @@ public class NetworkOP implements InterfaceDataBase {
     public String patternString="yyyy-MM-dd";
 
 
-    public NetworkOP (){
+    public NetworkOP() {
         BasicConfigurator.configure();
     }
 
-   public BigDecimal fetchClosingPrice(String stockName, DateTime calendar) {
+    public BigDecimal fetchClosingPrice(String stockName, DateTime calendar) {
         return this.fetchData(stockName, calendar, 1);
     }
 
-   public BigDecimal fetchAveragePrice(String stockName, DateTime calendar){
+    public BigDecimal fetchAveragePrice(String stockName, DateTime calendar) {
         return this.fetchData(stockName, calendar, 4);
-   }
+    }
+
+    public BigDecimal fetchVolume(String stockName, DateTime calendar) {
+        return this.fetchData(stockName, calendar, 2);
+    }
 
   private String buildRequest(DateTime calendar, String stockName) {
     //&from_year=2002&from_month=01&from_day=02&to_year=2010&to_month=10&to_day=01
@@ -77,11 +81,20 @@ public class NetworkOP implements InterfaceDataBase {
     return request;
   }
 
+    public BigDecimal fetchData(String stockName, DateTime date, String type) {
+        if (type.compareTo("CLOSE") == 0) {
+            return this.fetchData(stockName, date, 1);
+        } else if (type.compareTo("VOLUME") == 0) {
+            return this.fetchData(stockName, date, 2);
+        } else if (type.compareTo("AVRG") == 0) {
+            return this.fetchData(stockName, date, 4);
+        }
+        return null;
+    }
 
   public BigDecimal fetchData(String stockName, DateTime calendar, int col) {
         BigDecimal result = null;
         URL url;
-
         
         help.debug("NetworkOP", "fetchClosingPrice(%s,%s)\n",stockName, calendar.toString());
         help.debug("NetworkOP",
@@ -139,16 +152,16 @@ public class NetworkOP implements InterfaceDataBase {
         return result;
     }
 
-    public BigDecimal fetchVolume(String stockName, DateTime calendar) {
-        
-        return this.fetchData(stockName, calendar, 3);
-    }
-
+    
     public void storeClosingPrice(String stockName, DateTime date, BigDecimal value) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void storeVolume(String stockName, DateTime date, BigDecimal value) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void storeData(String stockName, DateTime date, BigDecimal value, String type) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

@@ -23,6 +23,8 @@ import brokerwatcher.BrokerWatcher;
 import brokerwatcher.eventtypes.MarketData;
 import com.espertech.esper.client.EPRuntime;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.jtotus.common.DayisHoliday;
 import org.jtotus.common.Helper;
 
@@ -33,6 +35,7 @@ import org.jtotus.common.Helper;
 public class DataFetcher {
 
     private LinkedList<InterfaceDataBase> listOfResources = null;
+    private static final DateTimeFormatter formatter = DateTimeFormat.forPattern("dd-MM-yyyy");
     private Helper help = Helper.getInstance();
     private DayisHoliday holidays = null;
     private CacheServer cache = null;
@@ -55,8 +58,19 @@ public class DataFetcher {
 
     }
 
-    //TODO:generic fetcher with EnumFetcherCall
+    public BigDecimal fetchAveragePrice(String stockName, DateTime time) {
+        return fetchData(stockName, time, "AVRG");
+    }
+
+    public BigDecimal fetchVolumeForDate(String stockName, DateTime date) {
+        return fetchData(stockName, date, "VOLUME");
+    }
+
     public BigDecimal fetchClosingPrice(String stockName, DateTime date) {
+        return fetchData(stockName, date, "CLOSE");
+    }
+
+    public BigDecimal fetchData(String stockName, DateTime date, String type) {
         BigDecimal result = null;
 
         if (DayisHoliday.isHoliday(date)) {
@@ -64,97 +78,92 @@ public class DataFetcher {
         }
 
         //Check with cache first
-        result = cache.getValue(stockName, date);
+        result = cache.getValue(stockName + type, date);
         if (result != null) {
             //System.out.printf("FROM CACHE:%s %s %f\n",stockName, date.getTime().toString(), result.floatValue());
             return result;
         }
 
-        result = localJDBC.fetchClosingPrice(stockName, date);
+        result = localJDBC.fetchData(stockName, date, type);
         if (result == null) {
 
             for (InterfaceDataBase listOfResource : listOfResources) {
                 InterfaceDataBase res = listOfResource;
 
-                result = res.fetchClosingPrice(stockName, date);
+                result = res.fetchData(stockName, date, type);
                 if (result != null) {
-                    localJDBC.storeClosingPrice(stockName, date, result);
-                    cache.putValue(stockName, date, result);
+                    localJDBC.storeData(stockName, date, result, type);
+                    cache.putValue(stockName + type, date, result);
                     return result;
                 }
             }
         } else {
             //put to cache
-            cache.putValue(stockName, date, result);
+            cache.putValue(stockName + type, date, result);
         }
 
         return result;
     }
 
-    public BigDecimal fetchAveragePrice(String stockName, DateTime time) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public BigDecimal fetchVolumeForDate(String stockName, DateTime date) {
-        BigDecimal result = null;
-
-
-        if (DayisHoliday.isHoliday(date)) {
-            return result;
-        }
-
-        Iterator<InterfaceDataBase> resources = listOfResources.iterator();
-
-        result = localJDBC.fetchVolume(stockName, date);
-
-        if (result == null) {
-            help.debug("DataFetcher",
-                       "Volume is not found int in javadb stock:%s time:%s\n",
-                       stockName,
-                       date.toString());
-
-            while (resources.hasNext()) {
-                InterfaceDataBase res = resources.next();
-
-                result = res.fetchVolume(stockName, date);
-                if (result != null) {
-                    localJDBC.storeVolume(stockName, date, result);
-                    return result;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    public double[] fetchClosingPricePeriod(final String stockName, final DateTime startDate, final DateTime endDate) {
+    public double[] fetchClosingPricePeriod(final String stockName, 
+                                            final DateTime startDate,
+                                            final DateTime endDate) {
 
         if (debug) {
             System.out.printf("Fetching data for: %s\n", stockName);
         }
+
+        if (endDate.isBefore(startDate)) {
+            throw new RuntimeException("End day should be before start");
+        }
+
         localJDBC.setFetcher(this);
         return localJDBC.fetchPeriod(stockName,
-                                     startDate,
-                                     endDate,
-                                     "CLOSE");
+                startDate,
+                endDate,
+                "CLOSE");
     }
 
-    public double[] fetchVolumePeriod(final String stockName, final DateTime startDate, final DateTime endDate) {
+    public double[] fetchVolumePeriod(final String stockName, 
+                                      final DateTime startDate,
+                                      final DateTime endDate) {
 
         if (debug) {
             System.out.printf("Fetching data for: %s\n", stockName);
         }
+
+        if (endDate.isBefore(startDate)) {
+            throw new RuntimeException("End day should be before start");
+        }
+
         localJDBC.setFetcher(this);
         return localJDBC.fetchPeriod(stockName,
-                                     startDate,
-                                     endDate,
-                                     "VOLUME");
+                startDate,
+                endDate,
+                "VOLUME");
+    }
+
+    public double[] fetchPeriodByString(final String stockName, 
+                                        final String startDate,
+                                        final String endDate, String type) {
+
+        if (debug) {
+            System.out.printf("Fetching data for: %s\n", stockName);
+        }
+
+        DateTime end = formatter.parseDateTime(endDate);
+        DateTime start = formatter.parseDateTime(startDate);
+
+        localJDBC.setFetcher(this);
+        return localJDBC.fetchPeriod(stockName,
+                start,
+                end,
+                type);
     }
 
     public boolean sendMarketData(final String[] listOfStocks, final DateTime startDate, final DateTime endDate) {
 
-        final MarketData marketData = new MarketData()
-                .setAsClosingPrice();
+        final MarketData marketData = new MarketData().setAsClosingPrice();
 
         for (String stockName : listOfStocks) {
 //            final Thread thread = new Thread() {
@@ -167,9 +176,9 @@ public class DataFetcher {
             LocalJDBC locJDBC = factory.jdbcFactory();
             locJDBC.setFetcher(new DataFetcher());
             double[] data = locJDBC.fetchPeriod(stockName,
-                                                startDate,
-                                                endDate,
-                                                "CLOSE");
+                    startDate,
+                    endDate,
+                    "CLOSE");
 
             if (data == null) {
                 return false;
@@ -185,20 +194,18 @@ public class DataFetcher {
         if (debug) {
             System.out.printf("Sending market data : %d\n", marketData.data.size());
         }
-        EPRuntime runtime = BrokerWatcher.getMainEngine()
-                .getEPRuntime();
+        EPRuntime runtime = BrokerWatcher.getMainEngine().getEPRuntime();
         runtime.sendEvent(marketData);
 
 
         return true;
     }
 
-    public MarketData prepareMarketData(final String[] listOfStocks, final DateTime startDate, final DateTime endDate) {
+    public MarketData prepareMarketData(final String[] listOfStocks, 
+                                        final DateTime startDate,
+                                        final DateTime endDate) {
 
-        final MarketData marketData = new MarketData()
-                .setAsClosingPrice();
-
-        
+        final MarketData marketData = new MarketData().setAsClosingPrice();
 
         for (String stockName : listOfStocks) {
 //            final Thread thread = new Thread() {
@@ -211,9 +218,9 @@ public class DataFetcher {
             LocalJDBC locJDBC = factory.jdbcFactory();
             locJDBC.setFetcher(new DataFetcher());
             double[] data = locJDBC.fetchPeriod(stockName,
-                                                startDate,
-                                                endDate,
-                                                "CLOSE");
+                    startDate,
+                    endDate,
+                    "CLOSE");
 
             if (data == null) {
                 return null;
@@ -232,24 +239,23 @@ public class DataFetcher {
 
         return marketData;
     }
-
-    public static void main(String[] arv) {
-        LocalJDBCFactory factory = LocalJDBCFactory.getInstance();
-        LocalJDBC localJDBC = factory.jdbcFactory();
-        System.out.printf("Fetching data..\n");
-        DataFetcher fetcher = new DataFetcher();
-        localJDBC.setFetcher(fetcher);
-        localJDBC.setDebug(true);
-
-        DateTime endDate = new DateTime();
-        DateTime startDate = new DateTime().minusDays(25);
-//        localJDBC.fetchPeriod("Outokumpu Oyj", startDate, endDate);
-        String[] list;
-        list = new String[]{"Outokumpu Oyj", "Metso Oyj", "Nokia Oyj"};
-//        list = new String[]{"Outokumpu Oyj"};
-
-        fetcher.sendMarketData(list, startDate, endDate);
-
-
-    }
+//    public static void main(String[] arv) {
+//        LocalJDBCFactory factory = LocalJDBCFactory.getInstance();
+//        LocalJDBC localJDBC = factory.jdbcFactory();
+//        System.out.printf("Fetching data..\n");
+//        DataFetcher fetcher = new DataFetcher();
+//        localJDBC.setFetcher(fetcher);
+//        localJDBC.setDebug(true);
+//
+//        DateTime endDate = new DateTime();
+//        DateTime startDate = new DateTime().minusDays(25);
+////        localJDBC.fetchPeriod("Outokumpu Oyj", startDate, endDate);
+//        String[] list;
+//        list = new String[]{"Outokumpu Oyj", "Metso Oyj", "Nokia Oyj"};
+////        list = new String[]{"Outokumpu Oyj"};
+//
+//        fetcher.sendMarketData(list, startDate, endDate);
+//
+//
+//    }
 }
