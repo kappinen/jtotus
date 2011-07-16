@@ -18,8 +18,8 @@ package org.jtotus.database;
 
 import java.util.LinkedList;
 import java.math.BigDecimal;
-import brokerwatcher.BrokerWatcher;
-import brokerwatcher.eventtypes.MarketData;
+import org.jlucrum.realtime.BrokerWatcher;
+import org.jlucrum.realtime.eventtypes.MarketData;
 import com.espertech.esper.client.EPRuntime;
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -23,7 +23,6 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import java.lang.reflect.Field;
 import java.util.Calendar;
-import java.util.RandomAccess;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.joda.time.DateTime;
@@ -35,54 +34,49 @@ import org.joda.time.DateTime;
 public class ConfigLoader<T> {
 
     private XStream xstream = null;
-    private String configName = null;
-    private String configDir = "config" + File.separator;
+    private String configPathToFile = null; //config full name
+    private String patchToCofigDir = null;    //config dir name
     private boolean debug = false;
+    private final static String home = System.getProperty("user.home").toLowerCase();
     
 
-    public ConfigLoader(String config) {
-        configName = configDir + config;
-
-
-        if (config != null && configName.lastIndexOf(File.separator) != -1) {
-            File dir = new File(configName.substring(0, configName.lastIndexOf(File.separator)));
-
-            //FIXME:...
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-        }
+    public String getPathToConfigDir() {
         
+        if (this.patchToCofigDir == null) {
+            this.patchToCofigDir = home + File.separator + ".jtotus" +File.separator+ "config" + File.separator;
+        }
+
+        return patchToCofigDir;
+    }
+    
+
+    public ConfigLoader(String file) {
+        configPathToFile = getPathToConfigDir() + file;
+
         xstream = new XStream(new DomDriver());
     }
 
-    public boolean configDirExists() {
+    private boolean configDirExists(String fileName) {
 
-        File dir = new File(configDir);
-
-        if (!dir.exists() && !dir.mkdirs()) {
-            System.err.printf("directory %s does not exists\n", configDir);
-            return false;
+        if (fileName != null && fileName.lastIndexOf(File.separator) != -1) {
+            File dir = new File(fileName.substring(0, fileName.lastIndexOf(File.separator)));
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            dir = null;
         }
-
-        if (!dir.isDirectory()) {
-            System.err.printf("%s is not directory\n", configDir);
-            return false;
-        }
-
-        dir = null;
         return true;
     }
 
-    public boolean writeObj(Object obj, String path) {
+    public boolean writeObj(Object obj, String fileName) {
         RandomAccessFile file = null;
 
-        if (!this.configDirExists()) {
+        if (!this.configDirExists(fileName)) {
             return false;
         }
 
         try {
-            file =  new RandomAccessFile(path, "rw");
+            file = new RandomAccessFile(fileName, "rw");
             String xml = xstream.toXML(obj);
             file.writeUTF(xml);
         } catch (IOException ex) {
@@ -90,7 +84,7 @@ public class ConfigLoader<T> {
             return false;
         } finally {
             try {
-                 file.close();
+                file.close();
             } catch (IOException ex) {
                 Logger.getLogger(ConfigLoader.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -99,28 +93,27 @@ public class ConfigLoader<T> {
         return true;
     }
 
-    public T readObj(String path) {
+    public T readObj(String fileName) {
         RandomAccessFile file = null;
         T retObj = null;
 
-        if (!configDirExists()) {
+        if (!configDirExists(fileName)) {
             return null;
         }
 
         try {
-            file = new RandomAccessFile(path, "rw");
+            file = new RandomAccessFile(fileName, "rw");
             if (debug) {
-                System.out.printf("ConfigLoader reading:%s\n", path);
+                System.out.printf("ConfigLoader reading:%s\n", fileName);
             }
             retObj = (T) xstream.fromXML(file.readUTF());
 
         } catch (IOException ex) {
-            System.err.printf("Warning: failed to read config:%s : %s\n", configName, path);
-//            Logger.getLogger(ConfigLoader.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.printf("Warning: failed to read config:%s : %s -- %s\n", configPathToFile, fileName, getPathToConfigDir());
             return null;
         } finally {
             try {
-                if (file != null){
+                if (file != null) {
                     file.close();
                 }
             } catch (IOException e) {
@@ -129,8 +122,8 @@ public class ConfigLoader<T> {
         }
 
         if (retObj != null && retObj instanceof ConfPortfolio) {
-            ConfPortfolio config = (ConfPortfolio)retObj;
-            if (config.useCurentDayAsEndingDate){
+            ConfPortfolio config = (ConfPortfolio) retObj;
+            if (config.useCurentDayAsEndingDate) {
                 config.inputEndingDate = new DateTime();
             }
         }
@@ -139,11 +132,11 @@ public class ConfigLoader<T> {
     }
 
     public boolean storeConfig(T saveObj) {
-        return writeObj(saveObj, configName + ".xml");
+        return writeObj(saveObj, configPathToFile + ".xml");
     }
 
     public T getConfig() {
-        return readObj(configName + ".xml");
+        return readObj(configPathToFile + ".xml");
     }
 
     public void applyInputsToObject(Object obj) {
@@ -225,8 +218,6 @@ public class ConfigLoader<T> {
                 }
             }
         }
-
-
     }
 
 }

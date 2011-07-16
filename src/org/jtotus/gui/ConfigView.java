@@ -374,7 +374,7 @@ public class ConfigView extends javax.swing.JDialog {
 
             String currentFile = confLabel.getText();
 
-            ConfigLoader<Object> loader = new ConfigLoader<Object>(null);
+            ConfigLoader<Object> loader = new ConfigLoader<Object>("gui");
             Object config = loader.readObj(currentFile);
 
             Field [] fields = config.getClass().getDeclaredFields();

@@ -42,6 +42,7 @@ public class LocalJDBC implements InterfaceDataBase {
     };
     
     private Connection getConnection() throws SQLException {
+        //FIXME: login & password from config
         return DriverManager.getConnection("jdbc:h2:~/.jtotus/local_database;LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0",
                 "sa", "sa");
     }
