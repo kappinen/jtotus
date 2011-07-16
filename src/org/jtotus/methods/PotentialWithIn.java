@@ -17,7 +17,7 @@
 
 package org.jtotus.methods;
 
-import brokerwatcher.eventtypes.MarketData;
+import org.jlucrum.realtime.eventtypes.MarketData;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.math.BigDecimal;

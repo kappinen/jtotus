@@ -15,28 +15,36 @@
     along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+package org.jlucrum.realtime.indicators;
 
-package org.jtotus.methods;
-
-import org.jlucrum.realtime.eventtypes.MarketData;
-import java.util.concurrent.Callable;
-
-import com.espertech.esper.client.UpdateListener;
-import org.jtotus.common.MethodResults;
-
+import java.util.LinkedList;
 
 /**
  *
  * @author Evgeni Kappinen
  */
-public interface MethodEntry extends Runnable, Callable<MethodResults>, UpdateListener {
-    
-    public String getMethName();
+public class StockIndicator <V>{
+    LinkedList<V> ticks = null;
 
-    //If Method supports return value this
-    // method will return true
-    public boolean isCallable();
-    public MethodResults runCalculation();
-    public MethodResults runCalculation(MarketData data);
-    public void setMarketData(MarketData data);
+    public StockIndicator() {
+        ticks = new LinkedList<V>();
+    }
+
+
+    public V getTick(int index) {
+        if (index >ticks.size()) {
+            return null;
+        }
+        return ticks.get(index);
+    }
+
+    public void pushTick(V tick) {
+        ticks.addLast(tick);
+    }
+
+
+    public int getSize() {
+        return ticks.size();
+    }
+    
 }

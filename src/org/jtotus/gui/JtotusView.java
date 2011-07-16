@@ -21,8 +21,8 @@
 package org.jtotus.gui;
 
 
-import brokerwatcher.generators.TickInterface;
-import brokerwatcher.training.TrainManager;
+import org.jlucrum.realtime.generators.TickInterface;
+import org.jlucrum.realtime.training.TrainManager;
 import org.jdesktop.application.*;
 import org.jtotus.engine.Engine;
 import org.jtotus.gui.passwords.JtotusSetPasswordsGUI;

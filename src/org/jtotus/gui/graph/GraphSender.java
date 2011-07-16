@@ -19,8 +19,8 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.gui.graph;
 
-import brokerwatcher.BrokerWatcher;
-import brokerwatcher.generators.EsperEventGenerator;
+import org.jlucrum.realtime.BrokerWatcher;
+import org.jlucrum.realtime.generators.EsperEventGenerator;
 import com.espertech.esper.client.EPRuntime;
 import java.util.ArrayList;
 import java.util.Date;

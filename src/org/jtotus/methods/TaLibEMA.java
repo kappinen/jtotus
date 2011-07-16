@@ -43,7 +43,7 @@ Vaihtoehtoisesti:
  */
 package org.jtotus.methods;
 
-import brokerwatcher.eventtypes.MarketData;
+import org.jlucrum.realtime.eventtypes.MarketData;
 import org.jtotus.common.MethodResults;
 import com.tictactec.ta.lib.Core;
 import com.tictactec.ta.lib.MInteger;

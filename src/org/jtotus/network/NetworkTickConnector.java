@@ -5,7 +5,7 @@
 
 package org.jtotus.network;
 
-import brokerwatcher.eventtypes.StockTick;
+import org.jlucrum.realtime.eventtypes.StockTick;
 
 /**
  *

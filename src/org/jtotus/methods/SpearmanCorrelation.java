@@ -17,8 +17,8 @@
 
 package org.jtotus.methods;
 
-import brokerwatcher.eventtypes.MarketData;
-import brokerwatcher.indicators.SimpleTechnicalIndicators;
+import org.jlucrum.realtime.eventtypes.MarketData;
+import org.jlucrum.realtime.indicators.SimpleTechnicalIndicators;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

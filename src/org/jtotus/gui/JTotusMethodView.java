@@ -40,7 +40,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 
-import brokerwatcher.BrokerWatcher;
+import org.jlucrum.realtime.BrokerWatcher;
 import com.espertech.esper.client.*;
 import org.jtotus.common.Helper;
 import org.jtotus.common.MethodResults;

@@ -69,11 +69,11 @@ public class DynamicCharting extends Chart2D implements UpdateListener{
         
         this.addTrace(trace);
         this.setVisible(true);
-        provider = brokerwatcher.BrokerWatcher.getMainEngine();
+        provider = org.jlucrum.realtime.BrokerWatcher.getMainEngine();
     }
 
     public void registerForEvents(String epStatment) {
-        brokerwatcher.BrokerWatcher.addStatement(provider, epStatment, this);
+        org.jlucrum.realtime.BrokerWatcher.addStatement(provider, epStatment, this);
     }
 
     public void update(EventBean[] ebs, EventBean[] ebs1) {

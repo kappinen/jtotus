@@ -27,7 +27,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import brokerwatcher.eventtypes.StockTick;
+import org.jlucrum.realtime.eventtypes.StockTick;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import javax.script.Bindings;

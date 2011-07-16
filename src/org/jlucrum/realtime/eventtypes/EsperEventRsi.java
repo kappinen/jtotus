@@ -15,28 +15,35 @@
     along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-package org.jtotus.methods;
-
-import org.jlucrum.realtime.eventtypes.MarketData;
-import java.util.concurrent.Callable;
-
-import com.espertech.esper.client.UpdateListener;
-import org.jtotus.common.MethodResults;
-
+package org.jlucrum.realtime.eventtypes;
 
 /**
  *
  * @author Evgeni Kappinen
  */
-public interface MethodEntry extends Runnable, Callable<MethodResults>, UpdateListener {
+public class EsperEventRsi {
+    private String stockName = null;
+    private double rsi = 0.0d;
     
-    public String getMethName();
+    public double getRsi() {
+        return rsi;
+    }
 
-    //If Method supports return value this
-    // method will return true
-    public boolean isCallable();
-    public MethodResults runCalculation();
-    public MethodResults runCalculation(MarketData data);
-    public void setMarketData(MarketData data);
+    public void setRsi(double rsi) {
+        this.rsi = rsi;
+    }
+
+    public String getStockName() {
+        return stockName;
+    }
+
+    public void setStockName(String stockName) {
+        this.stockName = stockName;
+    }
+
+    @Override
+    public String toString() {
+        return "Stockname:" + stockName + " Rsi:" + rsi;
+    }
+    
 }

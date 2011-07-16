@@ -30,7 +30,7 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.threads;
 
-import brokerwatcher.BrokerWatcher;
+import org.jlucrum.realtime.BrokerWatcher;
 import com.espertech.esper.client.EPAdministrator;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPStatement;

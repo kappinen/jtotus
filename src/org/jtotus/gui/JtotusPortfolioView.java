@@ -16,9 +16,9 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.gui;
 
-import brokerwatcher.BrokerWatcher;
-import brokerwatcher.eventtypes.IndicatorData;
-import brokerwatcher.eventtypes.StockTick;
+import org.jlucrum.realtime.BrokerWatcher;
+import org.jlucrum.realtime.eventtypes.IndicatorData;
+import org.jlucrum.realtime.eventtypes.StockTick;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventBean;

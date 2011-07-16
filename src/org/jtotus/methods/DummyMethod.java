@@ -18,7 +18,7 @@
 
 package org.jtotus.methods;
 
-import brokerwatcher.eventtypes.MarketData;
+import org.jlucrum.realtime.eventtypes.MarketData;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
