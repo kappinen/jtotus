@@ -99,6 +99,66 @@ public class AnalyticsTester {
         }
     }
 
+    public static void testVolume() {
+        DateTime time = new DateTime().minusDays(100);
+        DateTime timeEnd = new DateTime();
+        String b = "Volume";
+        DataFetcher fetcher = new DataFetcher();
+        HashMap<String, Double> abCorr = new HashMap<String, Double>();
+        HashMap<String, Double> abLags = new HashMap<String, Double>();
+        HashMap<String, HashSet<String>> abLink = new HashMap<String, HashSet<String>>();
+
+        StockNames names = new StockNames();
+        for (String a : names.getNames()) {
+            double[] close = fetcher.fetchClosingPricePeriod(a, time, timeEnd);
+            double[] volume = fetcher.fetchVolumePeriod(a, time, timeEnd);
+
+            double[] res = SimpleTechnicalIndicators.crossCorrelation(close, volume, a, b);
+            if (res[0] > 0.8f) {
+                HashSet<String> links = null;
+                if (abLink.containsKey(a)) {
+                    links = abLink.get(a);
+                } else {
+                    links = new HashSet<String>();
+                }
+                links.add(b);
+                abLink.put(a, links);
+            }
+
+            if (abCorr.containsKey(a + "-" + b)) {
+                Double ret = abCorr.get(a + "-" + b);
+                if (ret < res[0]) {
+                    abCorr.put(a + "-" + b, res[0]);
+                    abLags.put(a + "-" + b, res[1]);
+                }
+            } else if (abCorr.containsKey(b + "-" + a)) {
+                Double ret = abCorr.get(b + "-" + a);
+                if (ret < res[0]) {
+                    abCorr.put(b + "-" + a, res[0]);
+                    abLags.put(b + "-" + a, res[1]);
+                }
+            } else {
+                abCorr.put(a + "-" + b, res[0]);
+                abLags.put(a + "-" + b, res[1]);
+            }
+        }
+        System.out.println("StockMarket Links:");
+        for (Entry<String, HashSet<String>> entry : abLink.entrySet()) {
+            System.out.printf("%s has (%d): ", entry.getKey(), entry.getValue().size());
+            for (String depStocks : entry.getValue()) {
+                System.out.printf(" %s", depStocks);
+            }
+            System.out.printf("\n");
+            System.out.flush();
+        }
+
+        System.out.println("StockMarket cross-correlations:");
+        for (Entry<String, Double> entry : abCorr.entrySet()) {
+            Double lag = abLags.get(entry.getKey());
+            System.out.printf("%s - %f - lag: %f\n", entry.getKey(), entry.getValue(), lag);
+        }
+    }
+    
     public static void test2() {
         try {
             ConfPortfolio config = ConfPortfolio.getPortfolioConfig();
@@ -122,9 +182,10 @@ public class AnalyticsTester {
 //                    .asDouble();
 //            double vo1 = SimpleTechnicalIndicators.execute("a<-%d; b<-%d; ab <- ccf(diff(a),diff(b)); max(ab$acf)", values2[0], values2[1])
 //                    .asDouble();
-            double vo = SimpleTechnicalIndicators.execute("a<-%d; b<-%d; ab <- ccf(diff(a),diff(b)); max(ab$acf)", svalues, svvalues).asDouble();
-                    
-            
+            double vo = SimpleTechnicalIndicators.execute("a<-%d; b<-%d; ab <- ccf(diff(a), diff(b)); max(ab$acf)", svalues, svvalues)
+                    .asDouble();
+
+
             System.out.printf("Estimator:%f and \n", vo);
 //            SimpleTechnicalIndicators.plotAB(values[0], values[1]);
         }
@@ -134,7 +195,5 @@ public class AnalyticsTester {
         } catch (REXPMismatchException ex) {
             Logger.getLogger(AnalyticsTester.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        
     }
 }

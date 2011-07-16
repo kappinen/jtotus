@@ -16,17 +16,22 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.database;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.math.BigDecimal;
 import brokerwatcher.BrokerWatcher;
 import brokerwatcher.eventtypes.MarketData;
 import com.espertech.esper.client.EPRuntime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+
+import org.apache.commons.lang.ArrayUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.jtotus.common.DateIterator;
 import org.jtotus.common.DayisHoliday;
-import org.jtotus.common.Helper;
 
 /**
  *
@@ -36,7 +41,6 @@ public class DataFetcher {
 
     private LinkedList<InterfaceDataBase> listOfResources = null;
     private static final DateTimeFormatter formatter = DateTimeFormat.forPattern("dd-MM-yyyy");
-    private Helper help = Helper.getInstance();
     private DayisHoliday holidays = null;
     private CacheServer cache = null;
     private LocalJDBC localJDBC = null;
@@ -122,6 +126,76 @@ public class DataFetcher {
                 startDate,
                 endDate,
                 "CLOSE");
+    }
+    
+    public double[][] fetchStockData(final String startDate,
+                                     final String endDate,
+                                     final String... stockNamesAndTypes) {
+        int count = 0;
+
+        ArrayList<String[]> namesAndTypes = new ArrayList<String[]>();
+        ArrayList<ArrayList<Double>> stockData = new ArrayList<ArrayList<Double>>(stockNamesAndTypes.length);
+
+        for(int i=0; i < stockNamesAndTypes.length; i++) {
+            stockData.add(new ArrayList<Double>());
+        }
+        localJDBC.setFetcher(this);
+
+        if (debug) {
+            System.out.printf("Fetching data for: %s\n", stockNamesAndTypes.toString());
+        }
+        System.out.printf("Testing - 1\n");
+        for (int i = 0; i < stockNamesAndTypes.length; i++) {
+            String[] nameAndType = stockNamesAndTypes[i].split(",");
+            if (nameAndType.length != 2) {
+                return null;
+            } else {
+                System.out.printf("puting %s and %s\n", nameAndType[0], nameAndType[1]);
+                namesAndTypes.add(nameAndType);
+            }
+        }
+
+        DateTime end = formatter.parseDateTime(endDate);
+        DateTime start = formatter.parseDateTime(startDate);
+        if (end.isBefore(start)) {
+            throw new RuntimeException("End day should be before start");
+        }
+
+        DateIterator iter = new DateIterator(start, end);
+        ArrayList<BigDecimal> dayData = new ArrayList<BigDecimal>();
+        while (iter.hasNext()) {
+            dayData.clear();
+            DateTime nextDay = iter.nextInCalendar();
+
+            for (String[] entry : namesAndTypes) {
+                if (debug) {
+                    System.out.printf("Fetching %s and %s\n", entry[0], entry[1]);
+                }
+                //System.out.printf("Fetching %s and %s\n", entry[0], entry[1]);
+                BigDecimal data = this.fetchData(entry[0], nextDay, entry[1]);
+                if (data == null) {
+                    break;
+                }
+                dayData.add(data);
+            }
+
+            if (dayData.size() == stockNamesAndTypes.length) {
+                count++;
+                for (int i = 0; i < dayData.size(); i++) {
+                    stockData.get(i).add(dayData.get(i).doubleValue());
+                }
+            } else {
+                System.out.printf("Couldn't find data for : %s -> %d == %d\n", nextDay.toString(), dayData.size(), stockNamesAndTypes.length);
+            }
+        }
+        System.out.printf("Testing - 1 : count:%d names:%d\n", count, stockNamesAndTypes.length);
+        double retMatrix[][] = new double[stockNamesAndTypes.length][count];
+        for (int i = 0; i < stockData.size(); i++) {
+            System.out.printf("Testing - 122 : %d\n", i);
+            retMatrix[i] = ArrayUtils.toPrimitive(stockData.get(i).toArray(new Double[count]));
+        }
+
+        return retMatrix;
     }
 
     public double[] fetchVolumePeriod(final String stockName, 
@@ -239,7 +313,12 @@ public class DataFetcher {
 
         return marketData;
     }
-//    public static void main(String[] arv) {
+    public static void main(String[] arv) {
+        DataFetcher fetcher = new DataFetcher();
+        double mat [][] = fetcher.fetchStockData("01-01-2009", "01-01-2010", "Metso Oyj,CLOSE", "Metso Oyj,VOLUME");
+
+        System.out.printf("Done! : %d\n", mat.length);
+    }
 //        LocalJDBCFactory factory = LocalJDBCFactory.getInstance();
 //        LocalJDBC localJDBC = factory.jdbcFactory();
 //        System.out.printf("Fetching data..\n");

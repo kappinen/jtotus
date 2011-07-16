@@ -21,7 +21,6 @@ import java.sql.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.text.DateFormatter;
 import org.apache.commons.lang.ArrayUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -33,10 +32,6 @@ import org.jtotus.common.DateIterator;
  */
 public class LocalJDBC implements InterfaceDataBase {
     private static final DateTimeFormatter formatter = DateTimeFormat.forPattern("dd-MM-yyyy");
-    private PreparedStatement fetchClosePriceStatement = null;
-    private PreparedStatement fetchVolumeStatement = null;
-    private PreparedStatement insertClosePriceStatement = null;
-    private PreparedStatement insertVolumeStatement = null;
     private boolean debug = false;
     private DataFetcher fetcher = null;
 

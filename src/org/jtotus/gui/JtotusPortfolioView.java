@@ -367,7 +367,6 @@ public class JtotusPortfolioView extends JTabbedPane implements UpdateListener {
     private void drawJFreeChart(GraphPacket packet) {
                 JInternalFrame interFrame = new JInternalFrame();
 
-                System.out.printf("---------> DRWAING !\n");
                 interFrame.setClosable(true);
                 interFrame.setIconifiable(true);
                 interFrame.setMaximizable(true);
