@@ -1,6 +1,21 @@
 rluc.preload("/home/house/NetBeansProjects/JLucrum/dist/lib",
               "/home/house/NetBeansProjects/JLucrum/build/classes",
-              "~/Dropbox/jlucrum/rengine");
+              "~/Dropbox/jlucrum/rexperimental/");
+
+
+DataFetcher <- J("org.jtotus.database.DataFetcher");
+fetcher = new(DataFetcher);
+
+
+metsov <- fetcher$fetchPeriodByString("Metso Oyj", "01-01-2008", "30-6-2011", "VOLUME");
+
+metsoc <- fetcher$fetchPeriodByString("Metso Oyj", "01-01-2008", "30-6-2011", "CLOSE");
+len = length(metsoc) - 3;
+mets <- metsoc[0:len];
+
+plot(metsoc, type="l")
+metsoc.diff <- diff(metsoc);
+metsov.diff <- diff(metsov);
 
 
 
@@ -13,8 +28,6 @@ rluc.preload("/home/house/NetBeansProjects/JLucrum/dist/lib",
 
 
 
-
-plot(test2)
 
 manipulate(
   # plot expression
@@ -33,11 +46,13 @@ test3 <- rnorm(1000);
 plot(test2,test3)
 plot(density(test2))
 
-library(quantmod)
-getSymbols( "EURUSD=X", from="2000-01-01" )
-getSymbols("EXUSEU",src="FRED")
+
+EXUSEU <- getSymbols("EXUSEU",src="FRED", from="2000-01-01")
+
 EURUSD<-getPrice(to.monthly(getSymbols("EURUSD=X",auto.assign=FALSE),indexAt='lastof',drop.time=TRUE))
-Cl(EURUSD)
+EURUSD<-getPrice(to.monthly(getSymbols("EXUSEU",src="FRED", from="2000-01-01"),indexAt='lastof',drop.time=TRUE))
+Cl(EXUSEU)
+
 getSymbols("XPT/USD",src="Oanda")
 GSPC.rets = diff(log(Cl(GSPC)))
 
@@ -51,10 +66,6 @@ plot(EXUSEU);
 
 
 
-metsoc <- fetcher$fetchPeriodByString("Metso Oyj", "01-01-2008", "30-6-2011", "CLOSE");
-metsov <- fetcher$fetchPeriodByString("Metso Oyj", "01-01-2008", "30-6-2011", "VOLUME");
-metsoc.diff <- diff(metsoc);
-metsov.diff <- diff(metsov);
 
 #
 #
@@ -63,17 +74,8 @@ metsov.diff <- diff(metsov);
 #plot(ukgas[53:106] - stl(ukgas, s.window="per")$time.series[, "trend"][53:106], type="l", col="blue")
 #lines(ukgas[0:53] - stl(ukgas, s.window="per")$time.series[, "trend"][0:53], col="red")
  
-
-
-
-
-
-
-
-.jinit(classpath="/home/house/NetBeansProjects/jtotus/build/classes")
-.jaddClassPath("/home/house/jtotuslibs/joda-time-1.6.2.jar")
-DataFetcher <- J("org.jtotus.database.DataFetcher");
-fetcher = new(DataFetcher);
+# http://www.bloomberg.com/apps/quote?ticker=GSPG10YR:IND
+# http://www.bloomberg.com/apps/quote?ticker=GBTPGR30:IND
 
 
 
