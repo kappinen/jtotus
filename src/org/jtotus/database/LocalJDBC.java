@@ -181,11 +181,6 @@ public class LocalJDBC implements InterfaceDataBase {
                     System.err.println("Database is corrupted!");
                     System.exit(-1);
                 } else if (retValue == null) {
-//                    if (type.equals("CLOSE")) {
-//                        retValue = fetcher.fetchClosingPrice(tableName, new DateTime(retDate.getTime()));
-//                    } else if (type.equals("VOLUME")) {
-//                        retValue = fetcher.fetchVolumeForDate(tableName, new DateTime(retDate.getTime()));
-//                    }
                     retValue = getFetcher().fetchData(tableName, new DateTime(retDate.getTime()), type);
                     if (retValue == null) {
                         System.err.println("Unable to find " + type + " from databases for " + tableName + " and date " + retDate);
@@ -383,7 +378,7 @@ public class LocalJDBC implements InterfaceDataBase {
                             || (compCal.getYear() != dateCheck.getYear())) &&
                             dateCheck.isBefore(compCal)) {
                         if (fetcher != null) {
-                            BigDecimal failOverValue = getFetcher().fetchClosingPrice(tableName, dateCheck);
+                            BigDecimal failOverValue = getFetcher().fetchData(tableName, dateCheck, "CLOSE");
                             if (failOverValue != null) {
                                 retMap.put(formatter.print(dateCheck), retValue.doubleValue());
                             }
@@ -403,7 +398,7 @@ public class LocalJDBC implements InterfaceDataBase {
             }
 
             while (iter.hasNext()) {
-                retValue = getFetcher().fetchClosingPrice(tableName, iter.nextInCalendar());
+                retValue = getFetcher().fetchData(tableName, iter.nextInCalendar(), "CLOSE");
                 if (retValue != null) {
                     retMap.put(formatter.print(iter.getCurrentAsCalendar()), retValue.doubleValue());
                 }

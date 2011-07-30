@@ -149,7 +149,7 @@ public class TrainManager {
                 
                 DateTimeFormatter formatter = DateTimeFormat.forPattern("dd-MM-yyyy");
                 System.out.printf("Train manager %s\n", formatter.print(currentDate));
-                BigDecimal price = fetcher.fetchClosingPrice(signal.getStockName(), currentDate);
+                BigDecimal price = fetcher.fetchData(signal.getStockName(), currentDate, "CLOSE");
 
                 if (price == null) {
                     continue;

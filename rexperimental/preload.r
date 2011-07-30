@@ -15,7 +15,7 @@ library(gtools)
 require(ggplot2)
 #library(fGarch)
 
-.jinit(classpath=luc.pathToClasses)
+.jinit(classpath=luc.pathToClasses, force.init=T)
 
 
 command <- paste("ls ", luc.pathToLibs, sep="");

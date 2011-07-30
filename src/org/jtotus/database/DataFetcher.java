@@ -21,16 +21,9 @@ import java.math.BigDecimal;
 import org.jlucrum.realtime.BrokerWatcher;
 import org.jlucrum.realtime.eventtypes.MarketData;
 import com.espertech.esper.client.EPRuntime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-
-import org.apache.commons.lang.ArrayUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.jtotus.common.DateIterator;
 import org.jtotus.common.DayisHoliday;
 
 /**
@@ -41,8 +34,7 @@ public class DataFetcher {
 
     private LinkedList<InterfaceDataBase> listOfResources = null;
     private static final DateTimeFormatter formatter = DateTimeFormat.forPattern("dd-MM-yyyy");
-    private DayisHoliday holidays = null;
-    private CacheServer cache = null;
+    private Cache cache = null;
     private LocalJDBC localJDBC = null;
     private boolean debug = false;
 
@@ -53,8 +45,9 @@ public class DataFetcher {
         listOfResources.add(new FileSystemFromHex());
         listOfResources.add(new NetworkOP());
 
-        holidays = new DayisHoliday();
-        cache = CacheServer.getInstance();
+        CacheFactory cFactory = CacheFactory.getInstance();
+        cache = cFactory.getCache();
+        
         LocalJDBCFactory factory = LocalJDBCFactory.getInstance();
         localJDBC = factory.jdbcFactory();
 
@@ -62,17 +55,18 @@ public class DataFetcher {
 
     }
 
-    public BigDecimal fetchAveragePrice(String stockName, DateTime time) {
-        return fetchData(stockName, time, "AVRG");
+    public boolean isDebug() {
+        return debug;
     }
 
-    public BigDecimal fetchVolumeForDate(String stockName, DateTime date) {
-        return fetchData(stockName, date, "VOLUME");
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
-    public BigDecimal fetchClosingPrice(String stockName, DateTime date) {
-        return fetchData(stockName, date, "CLOSE");
+    public void setDebug(String debug) {
+        this.debug = Boolean.parseBoolean(debug);
     }
+
 
     public BigDecimal fetchData(String stockName, DateTime date, String type) {
         BigDecimal result = null;
@@ -123,81 +117,11 @@ public class DataFetcher {
 
         localJDBC.setFetcher(this);
         return localJDBC.fetchPeriod(stockName,
-                startDate,
-                endDate,
-                "CLOSE");
+                                     startDate,
+                                     endDate,
+                                     "CLOSE");
     }
     
-    public double[][] fetchStockData(final String startDate,
-                                     final String endDate,
-                                     final String... stockNamesAndTypes) {
-        int count = 0;
-
-        ArrayList<String[]> namesAndTypes = new ArrayList<String[]>();
-        ArrayList<ArrayList<Double>> stockData = new ArrayList<ArrayList<Double>>(stockNamesAndTypes.length);
-
-        for(int i=0; i < stockNamesAndTypes.length; i++) {
-            stockData.add(new ArrayList<Double>());
-        }
-        localJDBC.setFetcher(this);
-
-        if (debug) {
-            System.out.printf("Fetching data for: %s\n", stockNamesAndTypes.toString());
-        }
-        System.out.printf("Testing - 1\n");
-        for (int i = 0; i < stockNamesAndTypes.length; i++) {
-            String[] nameAndType = stockNamesAndTypes[i].split(",");
-            if (nameAndType.length != 2) {
-                return null;
-            } else {
-                System.out.printf("puting %s and %s\n", nameAndType[0], nameAndType[1]);
-                namesAndTypes.add(nameAndType);
-            }
-        }
-
-        DateTime end = formatter.parseDateTime(endDate);
-        DateTime start = formatter.parseDateTime(startDate);
-        if (end.isBefore(start)) {
-            throw new RuntimeException("End day should be before start");
-        }
-
-        DateIterator iter = new DateIterator(start, end);
-        ArrayList<BigDecimal> dayData = new ArrayList<BigDecimal>();
-        while (iter.hasNext()) {
-            dayData.clear();
-            DateTime nextDay = iter.nextInCalendar();
-
-            for (String[] entry : namesAndTypes) {
-                if (debug) {
-                    System.out.printf("Fetching %s and %s\n", entry[0], entry[1]);
-                }
-                //System.out.printf("Fetching %s and %s\n", entry[0], entry[1]);
-                BigDecimal data = this.fetchData(entry[0], nextDay, entry[1]);
-                if (data == null) {
-                    break;
-                }
-                dayData.add(data);
-            }
-
-            if (dayData.size() == stockNamesAndTypes.length) {
-                count++;
-                for (int i = 0; i < dayData.size(); i++) {
-                    stockData.get(i).add(dayData.get(i).doubleValue());
-                }
-            } else {
-                System.out.printf("Couldn't find data for : %s -> %d == %d\n", nextDay.toString(), dayData.size(), stockNamesAndTypes.length);
-            }
-        }
-        System.out.printf("Testing - 1 : count:%d names:%d\n", count, stockNamesAndTypes.length);
-        double retMatrix[][] = new double[stockNamesAndTypes.length][count];
-        for (int i = 0; i < stockData.size(); i++) {
-            System.out.printf("Testing - 122 : %d\n", i);
-            retMatrix[i] = ArrayUtils.toPrimitive(stockData.get(i).toArray(new Double[count]));
-        }
-
-        return retMatrix;
-    }
-
     public double[] fetchVolumePeriod(final String stockName, 
                                       final DateTime startDate,
                                       final DateTime endDate) {
@@ -225,14 +149,14 @@ public class DataFetcher {
             System.out.printf("Fetching data for: %s\n", stockName);
         }
 
-        DateTime end = formatter.parseDateTime(endDate);
         DateTime start = formatter.parseDateTime(startDate);
-
+        DateTime end = formatter.parseDateTime(endDate);
+        
         localJDBC.setFetcher(this);
         return localJDBC.fetchPeriod(stockName,
-                start,
-                end,
-                type);
+                                    start,
+                                    end,
+                                    type);
     }
 
     public boolean sendMarketData(final String[] listOfStocks, final DateTime startDate, final DateTime endDate) {
@@ -270,7 +194,6 @@ public class DataFetcher {
         }
         EPRuntime runtime = BrokerWatcher.getMainEngine().getEPRuntime();
         runtime.sendEvent(marketData);
-
 
         return true;
     }
@@ -313,12 +236,8 @@ public class DataFetcher {
 
         return marketData;
     }
-    public static void main(String[] arv) {
-        DataFetcher fetcher = new DataFetcher();
-        double mat [][] = fetcher.fetchStockData("01-01-2009", "01-01-2010", "Metso Oyj,CLOSE", "Metso Oyj,VOLUME");
-
-        System.out.printf("Done! : %d\n", mat.length);
-    }
+//    public static void main(String[] arv) {
+//    }
 //        LocalJDBCFactory factory = LocalJDBCFactory.getInstance();
 //        LocalJDBC localJDBC = factory.jdbcFactory();
 //        System.out.printf("Fetching data..\n");

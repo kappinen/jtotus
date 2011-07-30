@@ -84,7 +84,7 @@ public class SimpleIndicatorsOnlyStrategy implements DecisionStrategy {
         DateTimeFormatter formatter = DateTimeFormat.forPattern("dd-MM-yyyy");
         System.out.printf("price to buy for date %s '%s'\n", formatter.print(dateToFetch), stockToBuy);
         //fixme:ensure that day corresponds to processing day!
-        double price = fetcher.fetchClosingPrice(stockToBuy, dateToFetch).doubleValue();
+        double price = fetcher.fetchData(stockToBuy, dateToFetch, "CLOSE").doubleValue();
 
         final MarketSignal signal = new MarketSignal();
         signal.setStockName(stockToBuy);

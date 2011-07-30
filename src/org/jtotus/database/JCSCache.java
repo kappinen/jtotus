@@ -17,7 +17,6 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
 package org.jtotus.database;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,26 +30,17 @@ import org.joda.time.format.DateTimeFormatter;
  *
  * @author Evgeni Kappinen
  */
-public class CacheServer {
+public class JCSCache implements Cache {
 
     private HashMap<String, JCS> cacheRegions = null;
-    private static CacheServer cache = null;
+    
 
-    protected CacheServer() {
+    public JCSCache() {
         //FIXME:maker proper configuration file and replace Helper.debug()
         org.apache.log4j.Logger logger = org.apache.log4j.LogManager.getRootLogger();
         logger.setLevel(org.apache.log4j.Level.ERROR);
-
-//        System.out.printf("Creating hAHSMAP!!!!!\n");
         cacheRegions = new HashMap<String, JCS>();
 
-    }
-
-    public synchronized static CacheServer getInstance() {
-        if (cache == null) {
-            cache = new CacheServer();
-        }
-        return cache;
     }
 
     private synchronized boolean createRegion(String stockName) {
@@ -58,15 +48,13 @@ public class CacheServer {
 
 
             if (cacheRegions.containsKey(stockName) == false) {
-                //   System.out.printf("Creating region:%s\n",stockName);
-                //TODO:JCS.setConfigFilename(stockName)
                 JCS cacheRegion = JCS.getInstance(stockName);
                 cacheRegion.clear();
                 cacheRegions.put(stockName, cacheRegion);
             }
 
         } catch (CacheException ex) {
-            Logger.getLogger(CacheServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(JCSCache.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
         return true;
@@ -91,7 +79,7 @@ public class CacheServer {
                 System.err.printf("Unable to find region:%s key:%s\n", stockName, this.getKeyValue(date));
             }
         } catch (CacheException ex) {
-            Logger.getLogger(CacheServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(JCSCache.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }

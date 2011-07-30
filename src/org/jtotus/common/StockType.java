@@ -98,7 +98,7 @@ public class StockType implements Iterator{
         BigDecimal retValue = null;
         help.debug("StockType", "Fetching:%s: Time:" + cal.toDate() + "\n" , stockName);
 
-        while((retValue = fetcher.fetchClosingPrice(stockName, cal)) == null) {
+        while((retValue = fetcher.fetchData(stockName, cal, "CLOSE")) == null) {
             //TODO:check end
             cal = cal.minusDays(1);
         }
@@ -110,7 +110,7 @@ public class StockType implements Iterator{
 
         help.debug("StockType", "Fetching:%s: Time:%s\n", stockName, calendar.toString());
 
-        return fetcher.fetchClosingPrice(stockName, calendar);
+        return fetcher.fetchData(stockName, calendar, "CLOSE");
     }
 
     public BigDecimal fetchClosingPrice(Date time){
@@ -123,7 +123,7 @@ public class StockType implements Iterator{
 
         help.debug("StockType", "Fetching:%s: Time:" + time + "\n" , stockName);
 
-        return fetcher.fetchClosingPrice(stockName, cal);
+        return fetcher.fetchData(stockName, cal, "CLOSE");
     }
 
     public double []fetchClosingPricePeriod(final String stockName, final DateTime startDate, final DateTime endDate) {
@@ -134,25 +134,8 @@ public class StockType implements Iterator{
         BigDecimal tmp = null;
 
         DateTime cal = new DateTime().minusDays(count);
-        tmp = fetcher.fetchClosingPrice(stockName, cal);
+        tmp = fetcher.fetchData(stockName, cal, "CLOSE");
         return tmp;
     }
 
-    public BigDecimal fetchCurrentVolume(){
-       DateTime cal = new DateTime();
-       BigDecimal retVolume = null;
-
-        help.debug("StockType", "Fetching:%s: Time:" + cal.toDate() + "\n" , stockName);
-        while((retVolume=fetcher.fetchVolumeForDate(stockName, cal)) == null) {
-            //TODO:check end
-            cal = cal.minusDays(1);
-        }
-
-        return retVolume;
-    }
-
-    public BigDecimal fetchVolume(DateTime calendar){
-
-        return fetcher.fetchVolumeForDate(stockName, calendar);
-    }
 }
