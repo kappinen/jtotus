@@ -142,21 +142,45 @@ public class DataFetcher {
     }
 
     public double[] fetchPeriodByString(final String stockName, 
-                                        final String startDate,
-                                        final String endDate, String type) {
+                                        final String fromDate,
+                                        final String toDate, String type) {
 
         if (debug) {
             System.out.printf("Fetching data for: %s\n", stockName);
         }
 
-        DateTime start = formatter.parseDateTime(startDate);
-        DateTime end = formatter.parseDateTime(endDate);
+        DateTime start = formatter.parseDateTime(fromDate);
+        DateTime end = formatter.parseDateTime(toDate);
         
         localJDBC.setFetcher(this);
         return localJDBC.fetchPeriod(stockName,
                                     start,
                                     end,
                                     type);
+    }
+
+    public double[] fetchPeriod(final String stockName, 
+                                final String fromDate,
+                                final String toDate, String type) {
+
+        double[] retValue = null;
+        
+        if (debug) {
+            System.out.printf("Fetching2 data for: %s\n", stockName);
+        }
+
+        DateTime from = formatter.parseDateTime(fromDate);
+        DateTime to = formatter.parseDateTime(toDate);
+        
+        localJDBC.setFetcher(this);
+        for (InterfaceDataBase listOfResource : listOfResources) {
+            retValue = listOfResource.fetchDataPeriod(stockName, from, to, type);
+            if (retValue != null) {
+                return retValue;
+            }
+        }
+
+        return retValue;
     }
 
     public boolean sendMarketData(final String[] listOfStocks, final DateTime startDate, final DateTime endDate) {
@@ -236,8 +260,25 @@ public class DataFetcher {
 
         return marketData;
     }
-//    public static void main(String[] arv) {
-//    }
+    public static void main(String[] arv) {
+        DataFetcher data = new DataFetcher();
+        
+        //double []vo = data.fetchPeriod("Pohjola Bank A", "01-01-2009","30-07-2011", "VOLUME");
+        double []vo = data.fetchPeriod("Pohjola Bank A", "01-01-2009","30-07-2011", "CLOSE");
+
+        System.out.printf("The size is : %d\n", vo.length);
+        for( int i =0; i < vo.length;i++) {
+            System.out.printf("%f, ",vo[i]);
+            if (i % 10 == 0) { 
+                System.out.printf("\n"); 
+            }
+        }
+        
+        
+        
+        
+        
+    }
 //        LocalJDBCFactory factory = LocalJDBCFactory.getInstance();
 //        LocalJDBC localJDBC = factory.jdbcFactory();
 //        System.out.printf("Fetching data..\n");

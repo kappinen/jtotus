@@ -25,7 +25,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.HashMap;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -202,6 +201,11 @@ public class NetworkGoogle implements InterfaceDataBase {
     }
 
     public void storeData(String stockName, DateTime date, BigDecimal value, String type) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public double[] fetchDataPeriod(String stockName, DateTime fromDate, DateTime toDate, String type) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

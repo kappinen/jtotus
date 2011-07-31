@@ -30,11 +30,12 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.math.BigDecimal;
-import org.jtotus.common.Helper;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Cell;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 
 /**
@@ -45,7 +46,7 @@ public class FileSystemFromHex implements InterfaceDataBase {
 
     String pathToDataBaseDir = "OMXNordic/";
     String filePattern = "yyyy-MM-dd";
-    Helper help = null;
+    private final DateTimeFormatter dateFormatter = DateTimeFormat.forPattern(filePattern);
 
 
     private int columnHighestPrice = 1;
@@ -59,11 +60,6 @@ public class FileSystemFromHex implements InterfaceDataBase {
 
     //TODO:find column* values by reading first line in file,
     // if contains string which indicates value type change value.
-
-    public FileSystemFromHex(){
-        help = Helper.getInstance();
-    }
-
 
     private FileFilter filterForDir()
     {
@@ -150,14 +146,16 @@ private BigDecimal fetchValue(String stockName, DateTime date, int row)
         String nameOfFile = listOfFiles[i].getName();
 
         if (nameOfFile.indexOf(stockName) != -1) {
-            help.debug("FileSystemFromHex","Found File:%s\n", nameOfFile);
+            System.out.printf("FileSystemFromHex","Found File:%s\n", nameOfFile);
             result = this.omxNordicFile(nameOfFile, date, row);
             if (result != null) {
                return result;
             }
         }
     }
-    help.debug("FileSystemFromHex", "Not found value for:%s\n", stockName);
+    
+    System.out.printf("FileSystemFromHex", "Not found value for:%s\n", stockName);
+    
     return result;
 }
 
@@ -174,12 +172,8 @@ private BigDecimal fetchValue(String stockName, DateTime date, int row)
             HSSFSheet worksheet = workbook.getSheetAt(0);
             //HSSFRow row1 = worksheet.getRow(0);
 
-            // Year-Mount-Data
-            SimpleDateFormat time = new SimpleDateFormat(filePattern);
-            time.setCalendar(calendar.toGregorianCalendar());
-
-            //System.out.printf("Class :%s : %s\n",this.getClass().toString(), this.toString());
-            String correctTime = help.dateToString(time);
+            
+            String correctTime = dateFormatter.print(calendar);
             Iterator rowIter = worksheet.rowIterator();
 
             while(rowIter.hasNext())
@@ -210,7 +204,7 @@ private BigDecimal fetchValue(String stockName, DateTime date, int row)
                         return null;
                     
                     float floatTemp = (float)closingPrice.getNumericCellValue();
-                    help.debug("FileSystemFromHex",
+                    System.out.printf("FileSystemFromHex",
                             "Closing price at:%d f:%.4f Time:%s\n",
                             cell.getRowIndex(), floatTemp, correctTime);
                     
@@ -242,4 +236,8 @@ private BigDecimal fetchValue(String stockName, DateTime date, int row)
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public double[] fetchDataPeriod(String stockName, DateTime fromDate, DateTime toDate, String type) {
+        return null;
+    }
 }

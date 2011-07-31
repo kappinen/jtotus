@@ -40,5 +40,7 @@ public interface InterfaceDataBase {
     public void storeVolume(String stockName, DateTime date, BigDecimal value);
 
     public void storeData(String stockName, DateTime date, BigDecimal value, String type);
+
+    public double[] fetchDataPeriod(String stockName, DateTime fromDate, DateTime toDate, String type);
     
 }

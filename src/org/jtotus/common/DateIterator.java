@@ -27,52 +27,52 @@ import org.joda.time.DateTime;
 public class DateIterator implements Iterator<Date>, Iterable<Date> {
 
     private int step = 1;
-    private DateTime end = new DateTime();
-    private DateTime start = new DateTime();
-    private DateTime current = new DateTime();
+    private DateTime toDate;
+    private DateTime fromDate;
+    private DateTime current;
 
-    // Starts with past date(start) and going towards ending date
+    // Starts with past date(fromDate) and going towards ending date
     public DateIterator(Date tmpStart, Date tmpEnd) {
-        end = new DateTime(tmpEnd);
-        start = new DateTime(tmpStart).plusDays(1);
+        fromDate = new DateTime(tmpEnd).plusDays(1);
+        toDate = new DateTime(tmpStart);
 
-        if (end.compareTo(start) < 0) {
+        if (toDate.compareTo(fromDate) < 0) {
             System.err.printf("Warning startin date is afte ending date! Reversing dates("
-                    + start.toDate() + ":" + end.toDate() + "\n");
-            DateTime tmp = start.toDateTime();
-            start = end;
-            end = tmp;
+                    + fromDate.toDate() + ":" + toDate.toDate() + "\n");
+            DateTime tmp = fromDate.toDateTime();
+            fromDate = toDate;
+            toDate = tmp;
             System.err.printf("New time startin date is afte ending date! Reversing dates("
-                    + start.toDate() + ":" + end.toDate() + "\n");
+                    + fromDate.toDate() + ":" + toDate.toDate() + "\n");
         }
 
 //        DateTimeFormatter formater = DateTimeFormat.forPattern("dd-MM-yyyy");
-//        System.err.printf("Assigned start2:%s, end:%s\n", formater.print(start), formater.print(end));
+//        System.err.printf("Assigned start2:%s, toDate:%s\n", formater.print(fromDate), formater.print(toDate));
 
-        current = start.toDateTime();
+        current = fromDate.toDateTime();
     }
 
-    // Starts with past date(start) and going towards ending date
-    public DateIterator(DateTime tmpStart, DateTime tmpEnd) {
-        end = tmpEnd.toDateTime();
-        start = tmpStart.toDateTime().minusDays(1);
+    // Starts with past date(fromDate) and going towards ending date
+    public DateIterator(DateTime startDate, DateTime endDate) {
+        fromDate = startDate.toDateTime();
+        toDate = endDate.toDateTime();
 
-        if (end.compareTo(start) < 0) {
+        if (!toDate.isAfter(fromDate)) {
             System.err.printf("Warning startin date is afte ending date! Reversing dates("
-                    + start.toDate() + ":" + end.toDate() + "\n");
-            DateTime tmp = start.toDateTime();
-            start = end;
-            end = tmp;
+                    + fromDate.toDate() + ":" + toDate.toDate() + "\n");
+            DateTime tmp = fromDate.toDateTime();
+            fromDate = toDate;
+            toDate = tmp;
 
             System.err.printf("New time startin date is afte ending date! Reversing dates("
-                    + start.toDate() + ":" + end.toDate() + "\n");
+                    + fromDate.toDate() + ":" + toDate.toDate() + "\n");
         }
 
-        current = start.toDateTime();
+        current = fromDate.toDateTime();
     }
 
     public DateIterator(Date start) {
-        end = new DateTime().minusDays(1);
+        toDate = new DateTime();
         current = new DateTime(start.getTime());
     }
 
@@ -88,8 +88,8 @@ public class DateIterator implements Iterator<Date>, Iterable<Date> {
             rangeCheck = rangeCheck.plusDays(1);
         }
 
-        //return rangeCheck.before(end);
-        return rangeCheck.compareTo(end) < 0;
+        System.out.printf("nextInCalendar:%s \n", current.toString());
+        return rangeCheck.isBefore(toDate);
     }
 
     public DateTime nextInCalendar() {
@@ -100,6 +100,7 @@ public class DateIterator implements Iterator<Date>, Iterable<Date> {
             current = current.plusDays(1);
         }
 
+        System.out.printf("nextInCalendar:%s \n", current.toString());
         return current.toDateTime();
     }
 
@@ -112,17 +113,14 @@ public class DateIterator implements Iterator<Date>, Iterable<Date> {
     }
 
     public void reset() {
-        //current.setTime(start.getTime());
-        current = start.toDateTime();
+        current = fromDate.toDateTime();
     }
 
     public Date getCurrent() {
-        //return current.getTime();
         return current.toDate();
     }
     
     public DateTime getCurrentAsCalendar() {
-        //return current.getTime();
         return current.toDateTime();
     }
 
@@ -133,8 +131,7 @@ public class DateIterator implements Iterator<Date>, Iterable<Date> {
     }
 
     public Iterator<Date> iterator() {
-        //current.setTime(start.getTime());
-        current = start.toDateTime();
+        current = fromDate.toDateTime();
         return this;
     }
 }

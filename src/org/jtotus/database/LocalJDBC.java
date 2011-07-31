@@ -32,9 +32,13 @@ import org.jtotus.common.DateIterator;
  */
 public class LocalJDBC implements InterfaceDataBase {
     private static final DateTimeFormatter formatter = DateTimeFormat.forPattern("dd-MM-yyyy");
-    private boolean debug = false;
+    private boolean debug = true;
     private DataFetcher fetcher = null;
 
+    @Override
+    public double[] fetchDataPeriod(String stockName, DateTime fromDate, DateTime toDate, String type) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 
     public static enum DataTypes {
         CLOSE,
@@ -101,7 +105,7 @@ public class LocalJDBC implements InterfaceDataBase {
             pstm.setDate(1, sqlDate);
 
             if (debug) {
-                System.out.printf("Fetching:'%s' from'%s' Time"+date.toDate()+"Stm:%s\n", column,tableName, statement);
+                System.out.printf("Fetching:'%s' from'%s' Time" + date.toDate() + " Stm:%s\n", column, tableName, statement);
             }
             
             results = pstm.executeQuery();
@@ -161,35 +165,31 @@ public class LocalJDBC implements InterfaceDataBase {
             // this.createTable(connection, this.normTableName(tableName));
 
             connection = this.getConnection();
-            pstm = connection.prepareStatement(query);
-
+            pstm = connection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            
             java.sql.Date startSqlDate = new java.sql.Date(startDate.getMillis());
             pstm.setDate(1, startSqlDate);
 
             java.sql.Date endSqlDate = new java.sql.Date(endDate.getMillis());
             pstm.setDate(2, endSqlDate);
-
-            DateIterator iter = new DateIterator(startDate, endDate);
+            
+            DateIterator dateIter = new DateIterator(startDate, endDate);
+            
             results = pstm.executeQuery();
             DateTime dateCheck;
+            
+            if (debug) {    
+                System.out.printf("start data %s end date: %s\n", startSqlDate.toString(), endSqlDate.toString());
+            }
 
-            while (results.next()) {
-                retValue = results.getBigDecimal(1);
-                retDate = results.getDate(2);
+            
+            
+            while (dateIter.hasNext()) {
+                dateCheck = dateIter.nextInCalendar();
 
-                if (retDate == null) {
-                    System.err.println("Database is corrupted!");
-                    System.exit(-1);
-                } else if (retValue == null) {
-                    retValue = getFetcher().fetchData(tableName, new DateTime(retDate.getTime()), type);
-                    if (retValue == null) {
-                        System.err.println("Unable to find " + type + " from databases for " + tableName + " and date " + retDate);
-                        return null;
-                    }
-                }
-
-                if (iter.hasNext()) {
-                    dateCheck = iter.nextInCalendar();
+                if (results.next()) {
+                    retValue = results.getBigDecimal(1);
+                    retDate = results.getDate(2);
 
                     DateTime compCal = new DateTime(retDate.getTime());
                     if (compCal.getDayOfMonth() == dateCheck.getDayOfMonth()
@@ -197,54 +197,17 @@ public class LocalJDBC implements InterfaceDataBase {
                             && compCal.getYear() == dateCheck.getYear()) {
                         closingPrices.add(retValue.doubleValue());
                         continue;
-                    }
-
-                    while (((compCal.getDayOfMonth() != dateCheck.getDayOfMonth())
-                            || (compCal.getMonthOfYear() != dateCheck.getMonthOfYear())
-                            || (compCal.getYear() != dateCheck.getYear()))
-                            && dateCheck.isBefore(compCal)) {
-
-                        if (fetcher != null) {
-                            BigDecimal failOverValue = getFetcher().fetchData(tableName, dateCheck, type);
-                            if (failOverValue != null) {
-                                closingPrices.add(retValue.doubleValue());
-                            }
-
-                            if (iter.hasNext()) {
-                                System.err.printf("Warning : Miss matching dates for: %s - %s\n",
-                                                  retDate.toString(), formatter.print(dateCheck));
-                                dateCheck = iter.nextInCalendar();
-                                continue;
-                            }
-                        } else {
-                            System.err.printf("Fatal missing fetcher : Miss matching dates: %s - %s\n",
-                                              retDate.toString(), formatter.print(dateCheck));
-                            return null;
-                        }
-                    }
-
-                }
-
-                if (debug) {
-                    if (retValue != null) {
-                        System.out.printf("Fetched:\'%s\' from \'%s\' : value:%f date:%s\n",
-                                "Closing Price", tableName, retValue.doubleValue(), retDate.toString());
                     } else {
-                        System.out.printf("Fetched:\'%s\' from \'%s\' : value:%s date:%s\n",
-                                "Closing Price", tableName, "is null", retDate.toString());
+                        results.previous();
                     }
                 }
-
-            }
-
-            while (iter.hasNext()) {
-                retValue = getFetcher().fetchData(tableName, iter.nextInCalendar(), type);
-                if (retValue != null) {
-                    closingPrices.add(retValue.doubleValue());
+                
+                BigDecimal failOverValue = getFetcher().fetchData(tableName, dateCheck, type);
+                if (failOverValue != null) {
+                    closingPrices.add(failOverValue.doubleValue());
                 }
             }
-
-
+            
 
         } catch (SQLException ex) {
             System.err.printf("LocalJDBC Unable to find date for:'%s' from'%s' Time" + startDate.toDate() + "\n", "Cosing Price", tableName);
@@ -272,7 +235,6 @@ public class LocalJDBC implements InterfaceDataBase {
 
 
     public BigDecimal fetchVolume(String stockName, DateTime date) {
-
         return this.fetchData(this.normTableName(stockName), date, "VOLUME");
     }
 
