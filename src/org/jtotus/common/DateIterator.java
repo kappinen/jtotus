@@ -30,6 +30,7 @@ public class DateIterator implements Iterator<Date>, Iterable<Date> {
     private DateTime toDate;
     private DateTime fromDate;
     private DateTime current;
+    private boolean debug = false;
 
     // Starts with past date(fromDate) and going towards ending date
     public DateIterator(Date tmpStart, Date tmpEnd) {
@@ -87,8 +88,7 @@ public class DateIterator implements Iterator<Date>, Iterable<Date> {
         while (DayisHoliday.isHoliday(rangeCheck)) {
             rangeCheck = rangeCheck.plusDays(1);
         }
-
-        System.out.printf("nextInCalendar:%s \n", current.toString());
+        
         return rangeCheck.isBefore(toDate);
     }
 
@@ -100,7 +100,10 @@ public class DateIterator implements Iterator<Date>, Iterable<Date> {
             current = current.plusDays(1);
         }
 
-        System.out.printf("nextInCalendar:%s \n", current.toString());
+        if (debug) {
+            System.out.printf("nextInCalendar:%s \n", current.toString());
+        }
+        
         return current.toDateTime();
     }
 

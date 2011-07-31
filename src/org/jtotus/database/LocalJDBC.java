@@ -32,7 +32,7 @@ import org.jtotus.common.DateIterator;
  */
 public class LocalJDBC implements InterfaceDataBase {
     private static final DateTimeFormatter formatter = DateTimeFormat.forPattern("dd-MM-yyyy");
-    private boolean debug = true;
+    private boolean debug = false;
     private DataFetcher fetcher = null;
 
     @Override

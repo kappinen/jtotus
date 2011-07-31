@@ -80,56 +80,8 @@ public class Helper {
                 System.out.printf(pattern, arguments)   ;
                 break;
             }
-
-//            Pattern stringPattern = Pattern.compile(filter);
-//            Matcher matcher = stringPattern.matcher(list[i]);
-//           if( matcher.find()) {
-//               System.out.printf("[%s] ",filter);
-//                System.out.printf(pattern, arguments);
-//            }
-
        }
-
-
-//
-
     }
-
-    public synchronized SimpleDateFormat getTimeNow(){
-        Calendar cal = Calendar.getInstance();
-        SimpleDateFormat date = new SimpleDateFormat("dd-MM-yyyy");
-        
-        //return date.format(cal.getTime());
-        date.setCalendar(cal);
-        return date;
-    }
-
-
-
-    public synchronized SimpleDateFormat dateReduction(SimpleDateFormat date, int count){
-
-
-        Calendar cal = date.getCalendar();
-        cal.add(Calendar.DAY_OF_MONTH, count*-1);
-
-        date.setCalendar(cal);
-        debug(this.getClass().toString(),"TimeReduction:%s\n", date.format(cal.getTime()));
-
-        return date;
-    }
-
-    public int stringToInt(String temp) {
-        return Integer.parseInt(temp);
-
-    }
-
-
-    public String dateToString(SimpleDateFormat time) {
-        Calendar cal = time.getCalendar();
-        
-        return time.format(cal.getTime());
-    }
-
 
 
     public synchronized void printCrtDir() {

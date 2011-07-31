@@ -1,14 +1,5 @@
-#Load rJava
-setwd("~/Dropbox/jlucrum/rexperimental/")
-source("preload.r")
-
-rluc.preload("/home/house/NetBeansProjects/JLucrum/dist/lib",
-              "/home/house/NetBeansProjects/JLucrum/build/classes",
-              "~/Dropbox/jlucrum/rexperimental/");
-
-
 #Reference: http://www.r-bloggers.com/arma-models-for-trading-part-ii/
-jluc.bestarima <- function(x.ts, perm=c(0,0,0,3,3,3), method="ML", trace=F) {
+jluc.bestarima <- function(x.ts, perm=c(0,0,0,3,3,3), method="ML", trace=F, xreg=NULL) {
   best.aic <- 1e9
   n <- length(x.ts)
 
@@ -23,7 +14,7 @@ jluc.bestarima <- function(x.ts, perm=c(0,0,0,3,3,3), method="ML", trace=F) {
          next
       }
 
-      fit = tryCatch( arima(x.ts, order=c(p,d,q), method=method),
+      fit = tryCatch( arima(x.ts, order=c(p,d,q), method=method, xreg=xreg),
                       error=function( err ) FALSE,
                       warning=function( warn ) FALSE )
 
@@ -48,7 +39,6 @@ jluc.bestarima <- function(x.ts, perm=c(0,0,0,3,3,3), method="ML", trace=F) {
         if (trace) {
           print(paste(p,d,q, "none"))  
         }
-        
       }   
   }
 
@@ -56,13 +46,72 @@ jluc.bestarima <- function(x.ts, perm=c(0,0,0,3,3,3), method="ML", trace=F) {
   return(arima(x.ts, order=best.model, method=method))
 }
 
-DataFetcher <- J("org.jtotus.database.DataFetcher");
-fetcher = new(DataFetcher);
+#testModel
+jlu.testModel <- function(fitData=NULL, window=100, print=F, xreg=NULL, plot=T) {
+  allPred <- c()
+  extReg <- NULL
 
-metsoc <- fetcher$fetchPeriodByString("Metso Oyj", "01-01-2010", "01-06-2011", "CLOSE")
-mets.ts <- ts(metsoc, frequency=1)
+  if(!is.ts(fitData)) {
+    fitData <- as.ts(data=fitData)
+  }
+
+  totalLen <- length(fitData) - 1
+
+  print(paste("len is :", totalLen, " and window:", window))
+
+  for ( i in window:totalLen) {
+    dataForFit <- fitData[I(i-window):i]
+    if (!is.null(xreg)) {
+      extReg <- xreg[I(i-window):i];
+    }
+
+    fitData.arima <- jluc.bestarima(dataForFit, perm=c(0,0,0,2,2,2), method='ML', xreg=extReg)
+    #fitData.arima <- jluc.bestarima(dataForFit, perm=c(0,0,0,2,2,2), method='ML', xreg=volData)
+    fitData.pred <- predict(fitData.arima, n.ahead=1)
+    predictionValue <- as.double(fitData.pred$pred)  
+
+    if (print) {
+      print(paste("Market Value:", fitData[I(i+1)], " Headed" , fitData[I(i+1)] - fitData[i]))
+      print(paste("Predicted Value:", predictionValue, " Headed" , predictionValue - fitData[i]))
+      print(paste("diff(market-pred)", fitData[I(i+1)] - predictionValue))
+    }
+
+    #predictionValue - fitData[i];
+    
+    allPred <- rbind(allPred, predictionValue)
+  }
+
+  #plot against market data
+  if (plot) {
+    plot(diff(fitData[window:totalLen]), type="l")
+    lines(diff(allPred), col="red")  
+  }
   
-mets.ar <- jluc.bestarima(mets.ts, perm=c(0,0,0,2,2,2), method='CSS')
-mets.perd <- predict(mets.ar, n.ahead=3)
-plot(mets.ts, type="l")
-lines(mets.perd$pred, col="blue")
+  
+  
+  print(paste("Matching len", length(allPred), " to ", length(fitData[window:totalLen])))
+  diffAll <- fitData[window:totalLen] - allPred
+  print(paste("Total diff:", I(sum(abs(diffAll)) / length(diffAll)) , " length:", length(diffAll)))
+}
+
+#testStocks
+jlu.testStocks <- function(names=NULL, from=as.Date("2011-01-01"), to=Sys.Date(), window=100, print=F, src="jtotus") {
+  xreg <- NULL
+  print(paste("from:", format(from), " to:", format(to)))
+  for(name in names) {
+    if (src == "jtotus") {
+      startDate <- format(from, '%d-%m-%Y')
+      endDate <- format(to, '%d-%m-%Y')
+      #stockData <- fetcher$fetchPeriodByString(name, endDate,startDate, "CLOSE")
+      fetcher$fetchPeriod(name, startDate, endDate, "CLOSE")
+    } else {
+      name.data <- getSymbols(name, from=format(from), to=format(to))
+      stockData <- Cl(get(name))
+      #xreg <- diff(as.ts(Vo(get(name))))
+    }
+    fitData <- as.ts(stockData)
+    
+    jlu.testModel(fitData, window=window, print=F, xreg=xreg)
+  }
+}
+
