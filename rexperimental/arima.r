@@ -42,12 +42,13 @@ jluc.bestarima <- function(x.ts, perm=c(0,0,0,3,3,3), method="ML", trace=F, xreg
       }   
   }
 
-  print(paste("Best:",list(best.model), best.aic, method, sep=","))
+  #print(paste("Best:",list(best.model), best.aic, method, sep=","))
   return(arima(x.ts, order=best.model, method=method))
 }
 
+
 #testModel
-jlu.testModel <- function(fitData=NULL, window=100, print=F, xreg=NULL, plot=T) {
+jlu.testModel <- function(fitData=NULL, window=100, print=F, xreg=NULL, plot=T, title="Test") {
   allPred <- c()
   extReg <- NULL
 
@@ -57,7 +58,10 @@ jlu.testModel <- function(fitData=NULL, window=100, print=F, xreg=NULL, plot=T) 
 
   totalLen <- length(fitData) - 1
 
-  print(paste("len is :", totalLen, " and window:", window))
+  if (print) {
+    print(paste("len is :", totalLen, " and window:", window))  
+  }
+  
 
   for ( i in window:totalLen) {
     dataForFit <- fitData[I(i-window):i]
@@ -78,20 +82,27 @@ jlu.testModel <- function(fitData=NULL, window=100, print=F, xreg=NULL, plot=T) 
 
     #predictionValue - fitData[i];
     
-    allPred <- rbind(allPred, predictionValue)
+    allPred <- rbind(allPred, predictionValue, deparse.level=0)
   }
 
   #plot against market data
   if (plot) {
-    plot(diff(fitData[window:totalLen]), type="l")
+    plot(diff(fitData[window:totalLen]), type="l", main=title)
     lines(diff(allPred), col="red")  
   }
   
-  
-  
-  print(paste("Matching len", length(allPred), " to ", length(fitData[window:totalLen])))
-  diffAll <- fitData[window:totalLen] - allPred
+  diffAll <- fitData[window:totalLen] - allPred[ , 1]
   print(paste("Total diff:", I(sum(abs(diffAll)) / length(diffAll)) , " length:", length(diffAll)))
+  
+  #Predicting next value
+  predLend <- length(fitData)
+  dataForFit <- fitData[I(predLend-window):predLend]
+
+  fitData.arima <- jluc.bestarima(dataForFit, perm=c(0,0,0,2,2,2), method='ML', xreg=extReg)
+  fitData.pred <- predict(fitData.arima, n.ahead=1)
+  predictedValue <- as.double(fitData.pred$pred)
+
+  return(predictedValue);
 }
 
 #testStocks
@@ -103,7 +114,7 @@ jlu.testStocks <- function(names=NULL, from=as.Date("2011-01-01"), to=Sys.Date()
       startDate <- format(from, '%d-%m-%Y')
       endDate <- format(to, '%d-%m-%Y')
       #stockData <- fetcher$fetchPeriodByString(name, endDate,startDate, "CLOSE")
-      fetcher$fetchPeriod(name, startDate, endDate, "CLOSE")
+      stockData <- fetcher$fetchPeriod(name, startDate, endDate, "CLOSE")
     } else {
       name.data <- getSymbols(name, from=format(from), to=format(to))
       stockData <- Cl(get(name))
@@ -111,7 +122,9 @@ jlu.testStocks <- function(names=NULL, from=as.Date("2011-01-01"), to=Sys.Date()
     }
     fitData <- as.ts(stockData)
     
-    jlu.testModel(fitData, window=window, print=F, xreg=xreg)
+    predictedValue <- jlu.testModel(fitData, window=window, print=F, xreg=xreg, title=name)
+    
+    print(paste(name, " predicted:", predictedValue, " Current", last(fitData), "Diff:", predictedValue- last(fitData)))
   }
 }
 

@@ -151,7 +151,10 @@ public class NetworkOP implements InterfaceDataBase {
                     data = elem.text();
                     String fdata = data.replace(',', '.');
 
-                    System.out.printf("Fetched value from OP bank ->:%s for date:%s\n", fdata, datePattern);
+                    if (debug) {
+                        System.out.printf("Fetched value from OP bank ->:%s for date:%s\n", fdata, datePattern);
+                    }
+
                     return BigDecimal.valueOf(Double.valueOf(fdata).doubleValue());
                 }
             }
@@ -210,7 +213,10 @@ public class NetworkOP implements InterfaceDataBase {
                         data = elem.text();
                         String fdata = data.replace(',', '.');
 
-                        System.out.printf("Fetched value from OP bank ->:%s for date:%s\n", fdata, datePattern);
+                        if (debug) {
+                            System.out.printf("Fetched value from OP bank ->:%s for date:%s\n", fdata, datePattern);
+                        }
+
                         values.add(Double.valueOf(fdata));
                         break;
                     }

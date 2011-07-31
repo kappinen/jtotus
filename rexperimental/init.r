@@ -45,11 +45,24 @@ plot(density(test2))
 #usd/euro
 EXUSEU <- getSymbols("EXUSEU",src="FRED", from="2000-01-01")
 #gold XAU, silver XAG
-getMetals("XAU", from=Sys.Date()-50)
+getMetals("XAU", from=Sys.Date()-50, env=mystocks)
 getMetals("XAG", from=Sys.Date()-50)
 
+getSymbols("OIL", from=Sys.Date()-50, env=mystocks)
+
+length(XAUUSD)
+length(OIL)
+
 plot(XAUUSD)
+length(OIL$OIL.Open)
+
+
 getSymbols("MCOILBRENTEU", src="FRED", from="2011-01-01")
+
+
+mystocks <- new.env(hash=TRUE)
+do.call(cbind,eapply(mystocks, Cl))
+
 chartSeries(MCOILBRENTEU, theme="white")
 addBBands()
 
@@ -65,12 +78,7 @@ EURUSD<-getPrice(to.monthly(getSymbols("EURUSD=X",auto.assign=FALSE),indexAt='la
 EURUSD<-getPrice(to.monthly(getSymbols("EXUSEU",src="FRED", from="2000-01-01"),indexAt='lastof',drop.time=TRUE))
 Cl(EXUSEU)
 GSPC.rets = diff(log(Cl(GSPC)))
-
-
-
-
-
-
+#http://stackoverflow.com/questions/5574595/r-quantmod-getsymbols-and-use-of-lapply-cl-and-merge-to-extract-only-closing
 
 
 #! A-shares have no voting rights !
@@ -110,9 +118,7 @@ x=data.frame(d=index(Cl(SPY)),return=as.numeric(Delt(Cl(SPY))))
 ggplot(x,aes(return))+stat_density(colour="steelblue", size=2, fill=NA)+xlab(label='Daily returns')
 
 require(zoo)
-?rapply
-
-
+rapply
 #hashmap like ->
 > x <- rnorm(4)
 > names(x) <- c("a", "b", "c", "d")

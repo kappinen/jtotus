@@ -26,7 +26,7 @@ for (file in list.of.files) {
   .jaddClassPath(paste(luc.pathToLibs,file, sep="/"))
 }  
 
-stockNames <<- c("Cargotec Oyj", "Elisa Oyj", "Fortum Oyj", 
+jluc.stockNames <<- c("Cargotec Oyj", "Elisa Oyj", 
 "Fortum Oyj", "Kemira Oyj", "KONE Oyj", 
 "Konecranes Oyj", "Metso Oyj", "Neste Oil", 
 "Nokia Oyj", "Nokian Renkaat Oyj", "Nordea Bank AB", 
