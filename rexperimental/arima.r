@@ -62,38 +62,39 @@ jlu.testModel <- function(fitData=NULL, window=100, print=F, xreg=NULL, plot=T, 
     print(paste("len is :", totalLen, " and window:", window))  
   }
   
-
-  for ( i in window:totalLen) {
-    dataForFit <- fitData[I(i-window):i]
-    if (!is.null(xreg)) {
-      extReg <- xreg[I(i-window):i];
-    }
-
-    fitData.arima <- jluc.bestarima(dataForFit, perm=c(0,0,0,2,2,2), method='ML', xreg=extReg)
-    #fitData.arima <- jluc.bestarima(dataForFit, perm=c(0,0,0,2,2,2), method='ML', xreg=volData)
-    fitData.pred <- predict(fitData.arima, n.ahead=1)
-    predictionValue <- as.double(fitData.pred$pred)  
-
-    if (print) {
-      print(paste("Market Value:", fitData[I(i+1)], " Headed" , fitData[I(i+1)] - fitData[i]))
-      print(paste("Predicted Value:", predictionValue, " Headed" , predictionValue - fitData[i]))
-      print(paste("diff(market-pred)", fitData[I(i+1)] - predictionValue))
-    }
-
-    #predictionValue - fitData[i];
-    
-    allPred <- rbind(allPred, predictionValue, deparse.level=0)
-  }
-
   #plot against market data
   if (plot) {
-    plot(diff(fitData[window:totalLen]), type="l", main=title)
-    lines(diff(allPred), col="red")  
+      for ( i in window:totalLen) {
+        dataForFit <- fitData[I(i-window):i]
+        if (!is.null(xreg)) {
+          extReg <- xreg[I(i-window):i];
+          #extReg <- xreg[I(i-window):i, ];
+        }
+
+        fitData.arima <- jluc.bestarima(dataForFit, perm=c(0,0,0,2,2,2), method='ML', xreg=extReg)
+        #fitData.arima <- jluc.bestarima(dataForFit, perm=c(0,0,0,2,2,2), method='ML', xreg=volData)
+        fitData.pred <- predict(fitData.arima, n.ahead=1)
+        predictionValue <- as.double(fitData.pred$pred)
+
+        
+        if (print) {
+          print(paste("Market Value:", fitData[I(i+1)], " Headed" , fitData[I(i+1)] - fitData[i]))
+          print(paste("Predicted Value:", predictionValue, " Headed" , predictionValue - fitData[i]))
+          print(paste("diff(market-pred)", fitData[I(i+1)] - predictionValue))
+        }
+
+        #predictionValue - fitData[i];
+
+        allPred <- rbind(allPred, predictionValue, deparse.level=0)
+    }
+    
+    #plot(diff(fitData[I(window + 1):I(totalLen + 1)]), type="l", main=title)
+    #lines(diff(allPred), col="red")  
+      residual = fitData[I(window + 1):I(totalLen + 1)] - allPred[ , 1]
+      plot(residual, type="l", main=paste(title, " residual"))
+      print(paste("Total diff:", I(sum(abs(residual)) / length(residual)) , " length:", length(residual)))
   }
-  
-  diffAll <- fitData[window:totalLen] - allPred[ , 1]
-  print(paste("Total diff:", I(sum(abs(diffAll)) / length(diffAll)) , " length:", length(diffAll)))
-  
+
   #Predicting next value
   predLend <- length(fitData)
   dataForFit <- fitData[I(predLend-window):predLend]
@@ -106,8 +107,7 @@ jlu.testModel <- function(fitData=NULL, window=100, print=F, xreg=NULL, plot=T, 
 }
 
 #testStocks
-jlu.testStocks <- function(names=NULL, from=as.Date("2011-01-01"), to=Sys.Date(), window=100, print=F, src="jtotus") {
-  xreg <- NULL
+jlu.testStocks <- function(names=NULL, from=as.Date("2011-01-01"), to=Sys.Date(), window=100, print=F, src="jtotus", xreg=NULL) {
   print(paste("from:", format(from), " to:", format(to)))
   for(name in names) {
     if (src == "jtotus") {
@@ -118,11 +118,14 @@ jlu.testStocks <- function(names=NULL, from=as.Date("2011-01-01"), to=Sys.Date()
     } else {
       name.data <- getSymbols(name, from=format(from), to=format(to))
       stockData <- Cl(get(name))
-      #xreg <- diff(as.ts(Vo(get(name))))
+      #xreg <- as.ts(diff(log(Lo(get(name)))))
+      #xreg2 <- as.ts(diff(log(Lo(get(name)))))
+      #xreg <- cbind(xreg1, xreg2)
+      #xreg <- as.ts(Hi(get(name)))
     }
     fitData <- as.ts(stockData)
     
-    predictedValue <- jlu.testModel(fitData, window=window, print=F, xreg=xreg, title=name)
+    predictedValue <- jlu.testModel(fitData, window=window, print=print, xreg=xreg, title=name)
     
     print(paste(name, " predicted:", predictedValue, " Current", last(fitData), "Diff:", predictedValue- last(fitData)))
   }
