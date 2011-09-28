@@ -22,9 +22,6 @@ metsoc.diff <- diff(metsoc);
 metsov.diff <- diff(metsov);
 
 
-
-
-
 manipulate(
   # plot expression
   plot(rnorm(10000), xlim = c(y.max, x.max), ylim = c(y.min,x.min),type = type, ann = label),
@@ -80,7 +77,6 @@ Cl(EXUSEU)
 GSPC.rets = diff(log(Cl(GSPC)))
 #http://stackoverflow.com/questions/5574595/r-quantmod-getsymbols-and-use-of-lapply-cl-and-merge-to-extract-only-closing
 
-
 #! A-shares have no voting rights !
 
 #
@@ -122,12 +118,9 @@ rapply
 #hashmap like ->
 > x <- rnorm(4)
 > names(x) <- c("a", "b", "c", "d")
-> x
-         a          b          c          d
--1.4122868  1.3588267 -0.5499391 -0.3581889
 > x["d"]
-         d
--0.3581889
+
+
 
 #http://www.investuotojas.eu/
 #http://www.quanttrader.info/public/

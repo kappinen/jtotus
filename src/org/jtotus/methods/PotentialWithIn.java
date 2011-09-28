@@ -28,7 +28,7 @@ import java.util.Set;
 import com.espertech.esper.client.EventBean;
 import org.jtotus.common.Helper;
 import org.jtotus.common.MethodResults;
-import org.jtotus.common.StockType;
+import org.jtotus.network.StockType;
 import org.jtotus.config.ConfPortfolio;
 
 /**

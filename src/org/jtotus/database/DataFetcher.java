@@ -42,7 +42,7 @@ public class DataFetcher {
         listOfResources = new LinkedList<InterfaceDataBase>();
 
         //Supported resource
-        listOfResources.add(new FileSystemFromHex());
+        //listOfResources.add(new FileSystemFromHex());
         listOfResources.add(new NetworkOP());
 
         CacheFactory cFactory = CacheFactory.getInstance();
@@ -260,11 +260,13 @@ public class DataFetcher {
 
         return marketData;
     }
+
     public static void main(String[] arv) {
         DataFetcher data = new DataFetcher();
-        
+
+        data.setDebug(true);
         //double []vo = data.fetchPeriod("Pohjola Bank A", "01-01-2009","30-07-2011", "VOLUME");
-        double []vo = data.fetchPeriod("Pohjola Bank A", "01-01-2009","30-07-2011", "CLOSE");
+        double []vo = data.fetchPeriod("Wärtsilä Corporation", "01-01-2011","30-07-2011", "CLOSE");
 
         System.out.printf("The size is : %d\n", vo.length);
         for( int i =0; i < vo.length;i++) {
@@ -273,11 +275,6 @@ public class DataFetcher {
                 System.out.printf("\n"); 
             }
         }
-        
-        
-        
-        
-        
     }
 //        LocalJDBCFactory factory = LocalJDBCFactory.getInstance();
 //        LocalJDBC localJDBC = factory.jdbcFactory();
@@ -297,4 +294,5 @@ public class DataFetcher {
 //
 //
 //    }
+
 }

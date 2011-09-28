@@ -16,14 +16,15 @@
 */
 
 
-package org.jtotus.common;
+package org.jtotus.network;
 
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Calendar;
 import java.util.Date;
 import org.joda.time.DateTime;
+import org.jtotus.common.Helper;
+import org.jtotus.common.StockNames;
 import org.jtotus.database.DataFetcher;
 
 

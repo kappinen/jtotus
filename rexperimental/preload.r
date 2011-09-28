@@ -14,7 +14,8 @@ library(quantmod);
 library(gtools)
 require(ggplot2)
 #library(fGarch)
-
+source("~/Dropbox/jlucrum/rexperimental/external/itall.R")
+source("~/Dropbox/jlucrum/rexperimental/functions/network.r")
 .jinit(classpath=luc.pathToClasses, force.init=T)
 
 
@@ -37,5 +38,4 @@ jluc.stockNames <<- c("Cargotec Oyj", "Elisa Oyj",
 
 DataFetcher <- J("org.jtotus.database.DataFetcher");
 fetcher <<- new(DataFetcher);
-
 }

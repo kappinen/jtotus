@@ -26,7 +26,7 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.UpdateListener;
 import org.jtotus.common.MethodResults;
 import org.joda.time.DateTime;
-import org.jtotus.common.StockType;
+import org.jtotus.network.StockType;
 import org.jtotus.config.ConfigLoader;
 import org.jtotus.gui.graph.GraphSender;
 import org.jtotus.config.ConfPortfolio;

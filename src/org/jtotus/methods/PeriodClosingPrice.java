@@ -30,7 +30,7 @@ import java.util.HashMap;
 import org.joda.time.DateTime;
 import org.jtotus.common.DateIterator;
 import org.jtotus.common.Helper;
-import org.jtotus.common.StockType;
+import org.jtotus.network.StockType;
 
 /**
  *

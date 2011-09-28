@@ -22,7 +22,7 @@ package org.jtotus.methods;
 import java.math.BigDecimal;
 import org.jtotus.common.Helper;
 import org.jtotus.common.MethodResults;
-import org.jtotus.common.StockType;
+import org.jtotus.network.StockType;
 
 /**
  * @author Evgeni Kappinen

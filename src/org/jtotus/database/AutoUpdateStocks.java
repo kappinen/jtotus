@@ -19,7 +19,7 @@ package org.jtotus.database;
 import java.util.Calendar;
 import org.joda.time.DateTime;
 import org.jtotus.common.Helper;
-import org.jtotus.common.StockType;
+import org.jtotus.network.StockType;
 
 /**
  *

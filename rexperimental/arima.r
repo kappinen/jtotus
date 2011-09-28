@@ -118,10 +118,6 @@ jlu.testStocks <- function(names=NULL, from=as.Date("2011-01-01"), to=Sys.Date()
     } else {
       name.data <- getSymbols(name, from=format(from), to=format(to))
       stockData <- Cl(get(name))
-      #xreg <- as.ts(diff(log(Lo(get(name)))))
-      #xreg2 <- as.ts(diff(log(Lo(get(name)))))
-      #xreg <- cbind(xreg1, xreg2)
-      #xreg <- as.ts(Hi(get(name)))
     }
     fitData <- as.ts(stockData)
     

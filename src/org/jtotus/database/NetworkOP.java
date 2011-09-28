@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
-import org.jtotus.common.StockType;
+import org.jtotus.network.StockType;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,12 +49,13 @@ public class NetworkOP implements InterfaceDataBase {
     public String urlParam = "&id=32455&srcpl=3";
     public String patternString = "yyyy-MM-dd";
     private final DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd");
-    private boolean debug = false;
+    private boolean debug = true;
     
     public NetworkOP() {
         BasicConfigurator.configure();
     }
 
+    @Override
     public BigDecimal fetchClosingPrice(String stockName, DateTime calendar) {
         return this.fetchData(stockName, calendar, 1);
     }
@@ -63,6 +64,7 @@ public class NetworkOP implements InterfaceDataBase {
         return this.fetchData(stockName, calendar, 4);
     }
 
+    @Override
     public BigDecimal fetchVolume(String stockName, DateTime calendar) {
         return this.fetchData(stockName, calendar, 2);
     }
