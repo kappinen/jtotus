@@ -1,5 +1,5 @@
 #Converts Map to time series object
-rluc.convMapToTs <- function(map) {
+jluc.convMapToTs <- function(map) {
   data <- data.frame(row.names=c("date", "value"))
 
   entrySet <- map$entrySet()
@@ -15,9 +15,10 @@ rluc.convMapToTs <- function(map) {
   return(tsdata)
 }
 
-#wrapper for quantmod with jlucrum
-jluc.fetch <- function(name, from=as.Date("2011-01-01"), to=Sys.Date(), src="jtotus") {
 
+#wrapper for quantmod with jlucrum
+jluc.fetch <- function(name, from=as.Date(Sys.Date()-252), to=Sys.Date(), src="jlucrum")
+{
   if (!is.null(src) && src == "jlucrum") {
       tmpData <- fetcher$fetchPeriodData(name, format(from), format(to), "close")
       stockData<-rluc.convMapToTs(tmpData)
@@ -31,5 +32,24 @@ jluc.fetch <- function(name, from=as.Date("2011-01-01"), to=Sys.Date(), src="jto
       stockData <- get(newdata)
     }
   print(paste("Fetched:", length(stockData)))
+  colnames(stockData) <- c(name)
   return(stockData)
+}
+
+# Volatility
+# http://en.wikipedia.org/wiki/Volatility_(finance)
+jluc.volatility<-function(data, period=-1, norm=F) {
+  if (period > 0) {
+    len <- period
+  } else {
+    len <- length(data)
+  }
+  
+  if (norm) {
+    volatility <- sd(na.omit(diff(log(data))))*sqrt(1/len)
+  }else {
+    volatility <- sd(data)*sqrt(1/len)  
+  }
+  
+  return(volatility)
 }

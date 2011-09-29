@@ -191,7 +191,7 @@ public class FetcherOsuusPankki implements MarketFetcher {
             return null;
         }
 
-        System.out.printf("Fetched from OsuusPankki:%d\n", retMap.size());
+        System.out.printf("Fetched %s from OsuusPankki:%d\n", stockName, retMap.size());
         return retMap;
     }
 
