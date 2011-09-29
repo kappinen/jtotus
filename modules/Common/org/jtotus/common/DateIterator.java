@@ -81,9 +81,9 @@ public class DateIterator implements Iterator<Date>, Iterable<Date> {
         DateTime rangeCheck = current.toDateTime().plusDays(step);
 
         //Skip weekends
-        while (DayisHoliday.isHoliday(rangeCheck)) {
-            rangeCheck = rangeCheck.plusDays(1);
-        }
+//        while (DayisHoliday.isHoliday(rangeCheck)) {
+//            rangeCheck = rangeCheck.plusDays(1);
+//        }
         
         return rangeCheck.isBefore(toDate) || rangeCheck.isEqual(toDate);
     }
@@ -96,13 +96,13 @@ public class DateIterator implements Iterator<Date>, Iterable<Date> {
         first = false;
         
         //Skip weekends
-        while (DayisHoliday.isHoliday(current)) {
-            current = current.plusDays(1);
-        }
-
-        if (debug) {
-            System.out.printf("nextInCalendar:%s \n", current.toString());
-        }
+//        while (DayisHoliday.isHoliday(current)) {
+//            current = current.plusDays(1);
+//        }
+//
+//        if (debug) {
+//            System.out.printf("nextInCalendar:%s \n", current.toString());
+//        }
 
         return current.toDateTime();
     }

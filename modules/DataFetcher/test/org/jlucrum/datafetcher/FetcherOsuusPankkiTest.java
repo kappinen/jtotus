@@ -4,7 +4,6 @@
  */
 package org.jlucrum.datafetcher;
 
-import java.util.Map.Entry;
 import java.util.Map;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -36,9 +35,7 @@ public class FetcherOsuusPankkiTest {
     @Test
     public void testFetchData() {
         System.out.println("fetchData");
-        String stockName = "KNEBV.HSE";
-        
-        
+        String stockName = "KONE Oyj";
         int type = 0;
         
         FetcherOsuusPankki instance = new FetcherOsuusPankki();
@@ -58,7 +55,7 @@ public class FetcherOsuusPankkiTest {
     @Test
     public void testFetchDataPeriod() {
         System.out.println("fetchDataPeriod");
-        String name = "KNEBV.HSE";
+        String name = "KONE Oyj";
 
         DateTime fromDate = formatter.parseDateTime("2011-05-01");
         DateTime toDate = formatter.parseDateTime("2011-05-05");;

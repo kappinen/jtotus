@@ -1,7 +1,7 @@
 rluc.preload <- function(luc.pathToLibs, luc.pathToClasses, workingDir) {
   
-#luc.pathToLibs <- paste("/home/house/NetBeansProjects/JLucrum/dist/lib");
-#luc.pathToClasses <- paste("/home/house/NetBeansProjects/JLucrum/build/classes");
+#luc.pathToLibs <- paste("/home/home/Dropbox/jlucrum/lib");
+#luc.pathToClasses <- paste("/home/home/NetBeansProjects/JLucrum/build/classes");
 
 Sys.setenv(TZ="GMT")
 #Set working path
@@ -14,18 +14,29 @@ library(quantmod);
 library(gtools)
 require(ggplot2)
 #library(fGarch)
+
 source("~/Dropbox/jlucrum/rexperimental/external/itall.R")
-source("~/Dropbox/jlucrum/rexperimental/functions/network.r")
+
+
+#load all functions under functions directory
+list.of.funfiles <- system("ls functions", intern=T);
+for (file in list.of.funfiles) {
+  file.path <- paste(getwd(), "/functions", sep="")
+  print(paste("Loading functions from: ", file.path))
+  source(file.path)
+}
+
+
 .jinit(classpath=luc.pathToClasses, force.init=T)
 
-
+#Load jars from directory
 command <- paste("ls ", luc.pathToLibs, sep="");
-list.of.files <- system(command, intern=T);  
+list.of.files <- system(command, intern=T);
 
 for (file in list.of.files) {
    print(paste(luc.pathToLibs,file, sep="/"))
   .jaddClassPath(paste(luc.pathToLibs,file, sep="/"))
-}  
+}
 
 jluc.stockNames <<- c("Cargotec Oyj", "Elisa Oyj", 
 "Fortum Oyj", "Kemira Oyj", "KONE Oyj", 
@@ -36,6 +47,6 @@ jluc.stockNames <<- c("Cargotec Oyj", "Elisa Oyj",
 "Sampo Oyj A", "Sanoma Oyj", "Stora Enso Oyj A", "TeliaSonera AB", 
 "Tieto Oyj", "UPM-Kymmene Oyj", "Wärtsilä Corporation", "YIT Oyj");
 
-DataFetcher <- J("org.jtotus.database.DataFetcher");
+DataFetcher <- J("org.jlucrum.datafetcher.DataFetcher");
 fetcher <<- new(DataFetcher);
 }
