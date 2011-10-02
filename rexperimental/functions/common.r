@@ -17,10 +17,10 @@ jluc.convMapToTs <- function(map) {
 
 
 #wrapper for quantmod with jlucrum
-jluc.fetch <- function(name, from=as.Date(Sys.Date()-252), to=Sys.Date(), src="jlucrum")
+jluc.fetch <- function(name, from=as.Date(Sys.Date()-252), to=Sys.Date(), src="jlucrum", type="close")
 {
   if (!is.null(src) && src == "jlucrum") {
-      tmpData <- fetcher$fetchPeriodData(name, format(from), format(to), "close")
+      tmpData <- fetcher$fetchPeriodData(name, format(from), format(to), type)
       stockData<-rluc.convMapToTs(tmpData)
     } else {
       if (!is.null(src)) {

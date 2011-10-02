@@ -21,7 +21,7 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
+
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -55,7 +55,6 @@ public class FetcherOsuusPankki implements MarketFetcher {
         stockMap.put("Cargotec Oyj", "CGCBV.HSE");
         stockMap.put("Elisa Oyj", "ELI1V.HSE");
         stockMap.put("Fortum Oyj", "FUM1V.HE");
-        stockMap.put("Fortum Oyj", "FUM1V.HSE");
         stockMap.put("Kemira Oyj", "KRA1V.HSE");
         stockMap.put("KONE Oyj", "KNEBV.HSE");
         stockMap.put("Konecranes Oyj", "KCR1V.HSE");
@@ -68,7 +67,6 @@ public class FetcherOsuusPankki implements MarketFetcher {
         stockMap.put("Outotec Oyj", "OTE1V.HSE");
         stockMap.put("Pohjola Bank A", "POH1S.HSE");
         stockMap.put("Rautaruukki Oyj", "RTRKS.HSE");
-        stockMap.put("Pohjola Bank A", "POH1S.HSE");
         stockMap.put("Sampo Oyj A", "SAMAS.HSE");
         stockMap.put("Sanoma Oyj", "SAA1V.HSE");
         //FIXME:!! Stora Enso Oyj A -> Stora Enso Oyj R stock!
