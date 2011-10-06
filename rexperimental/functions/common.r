@@ -21,7 +21,7 @@ jluc.fetch <- function(name, from=as.Date(Sys.Date()-252), to=Sys.Date(), src="j
 {
   if (!is.null(src) && src == "jlucrum") {
       tmpData <- fetcher$fetchPeriodData(name, format(from), format(to), type)
-      stockData<-rluc.convMapToTs(tmpData)
+      stockData<-jluc.convMapToTs(tmpData)
     } else {
       if (!is.null(src)) {
         newdata <- getSymbols(name, from=format(from), to=format(to), src=src)  
@@ -52,4 +52,21 @@ jluc.volatility<-function(data, period=-1, norm=F) {
   }
   
   return(volatility)
+}
+
+jluc.detrend <- function(data, n=5, plot=T) {
+  sma <- SMA(data, n)
+  merged<-merge(data, sma)
+  names(merged) <- c("data", "sma")
+  final <- na.omit(merged$data-merged$sma)
+  if (plot) {
+    qqnorm(final)
+    qqline(final)
+    normTest<-shapiro.test(as.double(final))
+    wvalue=paste("W",round(normTest$statistic, digits=4), sep="=")
+    pvalue=paste("p-v",round(normTest$p.value, digits=4), sep="=")
+    legend("topleft", legend=wvalue, text.col ="blue", bg="white", x.intersp=0)
+    legend("bottomright", legend=pvalue, text.col ="blue", bg="white", x.intersp=0)
+  }
+  return(final)
 }

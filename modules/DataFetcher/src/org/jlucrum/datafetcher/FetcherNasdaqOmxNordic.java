@@ -162,6 +162,11 @@ public class FetcherNasdaqOmxNordic implements MarketFetcher {
                 */
                Element dateElem = dataElems.get(1);
                Element dataElem = dataElems.get(dataMap[type]);
+               if (dateElem.html() == null || dateElem.html().length() == 0||
+                   dataElem.html() == null || dataElem.html().length() == 0) {
+                   continue;
+               }
+
                retMap.put(dateElem.html(), Double.valueOf(dataElem.html().replaceAll(",", "")));
 
                if (debug) {
