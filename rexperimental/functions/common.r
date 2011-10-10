@@ -54,19 +54,36 @@ jluc.volatility<-function(data, period=-1, norm=F) {
   return(volatility)
 }
 
+
+# no unit-root -> stationary process
+# contains a unit-root -> non-stationary
+
 jluc.detrend <- function(data, n=5, plot=T) {
-  sma <- SMA(data, n)
-  merged<-merge(data, sma)
-  names(merged) <- c("data", "sma")
-  final <- na.omit(merged$data-merged$sma)
+  # shapiro.qqnorm
+  if (n==1) {
+    final <- na.omit(diff(data))
+  }else {
+    sma <- SMA(na.omit(data[!is.infinite(data)]), n)
+    merged<-merge(data, sma)
+    names(merged) <- c("data", "sma")
+    final <- na.omit(merged$data-merged$sma)
+  }
+  
   if (plot) {
     qqnorm(final)
     qqline(final)
     normTest<-shapiro.test(as.double(final))
     wvalue=paste("W",round(normTest$statistic, digits=4), sep="=")
-    pvalue=paste("p-v",round(normTest$p.value, digits=4), sep="=")
-    legend("topleft", legend=wvalue, text.col ="blue", bg="white", x.intersp=0)
-    legend("bottomright", legend=pvalue, text.col ="blue", bg="white", x.intersp=0)
+    pvalue=paste("p",round(normTest$p.value, digits=4), sep="=")
+    shapiroMesg=paste(wvalue, pvalue, sep=" ")
+    
+    stationaryTest<-adf.test(as.double(final))
+    dvalue=paste("DF",round(stationaryTest$statistic, digits=4), sep="=")
+    p2value=paste("p",round(stationaryTest$p.value, digits=4), sep="=")
+    statMesg=paste(dvalue, p2value, sep=" ")
+    
+    legend("topleft", legend=shapiroMesg, text.col ="blue", bg="white", x.intersp=0)
+    legend("bottomright", legend=statMesg, text.col ="blue", bg="white", x.intersp=0)
   }
   return(final)
 }
