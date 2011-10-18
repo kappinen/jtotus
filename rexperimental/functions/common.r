@@ -60,7 +60,9 @@ jluc.volatility<-function(data, period=-1, norm=F) {
 
 jluc.detrend <- function(data, n=5, plot=T) {
   # shapiro.qqnorm
-  if (n==1) {
+  if (n == 0) {
+    final <- na.omit(data)
+  } else if ( n==1 ) {
     final <- na.omit(diff(data))
   }else {
     sma <- SMA(na.omit(data[!is.infinite(data)]), n)
@@ -86,4 +88,42 @@ jluc.detrend <- function(data, n=5, plot=T) {
     legend("bottomright", legend=statMesg, text.col ="blue", bg="white", x.intersp=0)
   }
   return(final)
+}
+
+#Converts to time series and plot
+jluc.plag2 <- function(a,b) {
+  merged<-na.omit(merge(a,b))
+  names(merged) <- c("a", "b")
+  a_series <- as.ts(merged$a)
+  b_series <- as.ts(merged$b)
+  lag.plot2(a_series, b_series, max.lag=5, smooth=T)
+}
+
+#Attempts to find best lag for time series
+jluc.autoLag <- function(future, past, max.lag=5, plot=F) {
+  aa<-na.omit(merge(future,past))
+  names(aa)<-c("t","r")
+  
+  if (plot) {
+    par(mfrow=c(2,1))
+  }
+  
+  tseries<-as.double(aa$t)
+  rseries<-as.double(aa$r)
+  aa.ccf <- ccf(tseries,rseries, lag.max=max.lag, plot=plot)
+  aa.abs<-abs(aa.ccf$acf[I(max.lag+1):I(2*max.lag+1)])
+  best.lag<-which.max(aa.abs)-1
+  maximum<-aa.ccf$acf[max.lag+best.lag+1]
+  
+  print(paste("best lag:", best.lag, " acf:", maximum))
+  if (plot) {
+    lagged<-lag(aa$r, k=best.lag)
+    result<-na.omit(merge(future,lagged));
+    names(result) <- c("t","r")
+    future<-as.double(result$t)
+    series<-as.double(result$r)
+    ccf(future, series)
+  }
+
+  return(na.omit(lag(aa$r, k=best.lag)))
 }
