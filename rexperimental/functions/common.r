@@ -100,7 +100,7 @@ jluc.plag2 <- function(a,b) {
 }
 
 #Attempts to find best lag for time series
-jluc.autoLag <- function(future, past, max.lag=5, plot=F) {
+jluc.autoLag <- function(future, past, max.lag=3, plot=F) {
   aa<-na.omit(merge(future,past))
   names(aa)<-c("t","r")
   
@@ -122,8 +122,73 @@ jluc.autoLag <- function(future, past, max.lag=5, plot=F) {
     names(result) <- c("t","r")
     future<-as.double(result$t)
     series<-as.double(result$r)
-    ccf(future, series)
+    abline(v=(seq(-max.lag,max.lag,1)), col="gray", lty="dotted")
+    ccf(future, series, lag.max=max.lag)
+    abline(v=(seq(-max.lag,max.lag,1)), col="gray", lty="dotted")
   }
 
   return(na.omit(lag(aa$r, k=best.lag)))
+}
+
+jluc.autoPickModel <- function(model, target_name="target", debug=F, plot=F) {
+  newmodel<-jluc.autoModel(model,target_name, debug)
+  if (plot) {
+    variables <- names(model)
+    tnames <- variables[variables != target_name]
+    var_formula<-do.call("paste", c(as.list(tnames), sep = "+"))
+    formula <- paste(target_name, var_formula, sep="~")
+    mod.fitted<-glm(formula=formula, data=model)
+    
+    par(mfrow=c(1,1))
+    plot.ts(as.ts(model$target))
+    lines(fitted(mod.fitted), col="blue")
+    lines(fitted(newmodel), col="red")
+    lines(rep(0, times=length(model$target)), col="green")  
+  }
+
+  return(newmodel)
+}
+  
+
+jluc.autoModel <- function(model, target_name="target", debug=F) {
+  bestGOF <- 1000
+  bestModel <- ""
+  
+  if (debug) { print(paste(names(model))) }
+  variables <- names(model)
+  for(ignore in 1:length(variables)) {
+    
+    variables <- names(model)
+    if (variables[ignore]!=target_name) {
+      newmodel <- model[,!(names(model) %in% variables[ignore])]
+    } else {
+      newmodel <- model
+    }
+    
+    variables <- names(newmodel)
+    tnames <- variables[variables != target_name]
+    
+    var_formula<-do.call("paste", c(as.list(tnames), sep = "+"))
+    formula <- paste(target_name, var_formula, sep="~")
+    
+    if (debug) { print(formula) }
+    
+    mod.fitted<-glm(formula=formula, data=newmodel)
+
+    #FIXME:Better Goodness of fit - criteria
+    if (mod.fitted$aic < bestGOF) {
+      bestGOF <- mod.fitted$aic
+      bestModel <- mod.fitted
+      }
+  }
+  
+  #FIXME:Assumes that best model is found
+  if (ncol(model) != ncol(bestModel$data)) {
+    recModel <- Recall(bestModel$data, target_name, debug)
+    if (recModel$aic < bestModel$aic) {
+      bestModel <- recModel
+    }  
+  }
+  
+   return(bestModel);
 }
