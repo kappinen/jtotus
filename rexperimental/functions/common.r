@@ -1,18 +1,31 @@
 #Converts Map to time series object
 jluc.convMapToTs <- function(map) {
-  data <- data.frame(row.names=c("date", "value"))
-
-  entrySet <- map$entrySet()
-  iter<-entrySet$iterator()
-  while(.jsimplify(iter$hasNext())) {
-    nextEntry <- iter$"next"()
-    dayData<-data.frame(date=as.Date(nextEntry$getKey()), 
-                     value=nextEntry$getValue());
-    data <- rbind(data,dayData);
+  
+  simpleMap <- .jstrVal(map)
+  simpleMap2<-gsub("^\\{", "", simpleMap)
+  simpleMap3<-gsub("}$", "", simpleMap2)
+  dayAndValue<-unlist(strsplit(simpleMap3, split=","))
+  retTimeSeries<-NULL
+  for (i in dayAndValue) {
+    line<-unlist(strsplit(i,split="="))
+    newvalue<-xts(as.double(line[2]), as.Date(line[1]))
+    retTimeSeries<-rbind(retTimeSeries, newvalue)
   }
   
-  tsdata <- xts(data[,2], data[,1])
-  return(tsdata)
+  return(retTimeSeries)
+
+#  data <- data.frame(row.names=c("date", "value"))
+
+#  entrySet <- map$entrySet()
+#  iter<-entrySet$iterator()
+#  while(.jsimplify(iter$hasNext())) {
+#    nextEntry <- iter$"next"()
+#    dayData<-data.frame(date=as.Date(nextEntry$getKey()), 
+#                     value=nextEntry$getValue());
+#    data <- rbind(data,dayData);
+#  }
+#  tsdata <- xts(data[,2], data[,1])
+#  return(tsdata)
 }
 
 
@@ -21,7 +34,7 @@ jluc.fetch <- function(name, from=as.Date(Sys.Date()-252), to=Sys.Date(), src="j
 {
   if (!is.null(src) && src == "jlucrum") {
       tmpData <- fetcher$fetchPeriodData(name, format(from), format(to), type)
-      stockData<-jluc.convMapToTs(tmpData)
+      stockValue<-jluc.convMapToTs(tmpData)
     } else {
       if (!is.null(src)) {
         newdata <- getSymbols(name, from=format(from), to=format(to), src=src)  
@@ -29,11 +42,14 @@ jluc.fetch <- function(name, from=as.Date(Sys.Date()-252), to=Sys.Date(), src="j
         newdata <- getSymbols(name, from=format(from), to=format(to))
       }
       #stockData <- Cl(get(name))
-      stockData <- get(newdata)
+      stockValue <- get(newdata)
     }
-  print(paste("Fetched:", length(stockData)))
-  colnames(stockData) <- c(name)
-  return(stockData)
+
+  if (length(stockValue) != 0) {
+    colnames(stockValue) <- c(name)
+  }
+
+  return(stockValue)
 }
 
 # Volatility
@@ -58,7 +74,7 @@ jluc.volatility<-function(data, period=-1, norm=F) {
 # no unit-root -> stationary process
 # contains a unit-root -> non-stationary
 
-jluc.detrend <- function(data, n=5, plot=T) {
+jluc.detrend <- function(data, n=5, plot=F, name=NULL) {
   # shapiro.qqnorm
   if (n == 0) {
     final <- na.omit(data)
@@ -79,7 +95,7 @@ jluc.detrend <- function(data, n=5, plot=T) {
     pvalue=paste("p",round(normTest$p.value, digits=4), sep="=")
     shapiroMesg=paste(wvalue, pvalue, sep=" ")
     
-    stationaryTest<-adf.test(as.double(final))
+    stationaryTest<-SuppressWarnings(adf.test(as.double(final)))
     dvalue=paste("DF",round(stationaryTest$statistic, digits=4), sep="=")
     p2value=paste("p",round(stationaryTest$p.value, digits=4), sep="=")
     statMesg=paste(dvalue, p2value, sep=" ")
@@ -87,6 +103,11 @@ jluc.detrend <- function(data, n=5, plot=T) {
     legend("topleft", legend=shapiroMesg, text.col ="blue", bg="white", x.intersp=0)
     legend("bottomright", legend=statMesg, text.col ="blue", bg="white", x.intersp=0)
   }
+  
+  if (!is.null(name)) {
+    names(final) <- c(name)
+  }
+
   return(final)
 }
 
@@ -104,18 +125,25 @@ jluc.autoLag <- function(future, past, max.lag=3, plot=F) {
   aa<-na.omit(merge(future,past))
   names(aa)<-c("t","r")
   
-  if (plot) {
-    par(mfrow=c(2,1))
-  }
+  if (plot) { 
+    par(mfrow=c(2,1)) 
+    }
+
+  max.lag <- min(ifelse(length(future) - 1 >= 0,
+                        length(future) - 1,
+                        Inf),
+                 ifelse(length(past) - 1 >= 0,
+                        length(past) - 1,
+                        Inf),
+                        max.lag)
   
   tseries<-as.double(aa$t)
   rseries<-as.double(aa$r)
-  aa.ccf <- ccf(tseries,rseries, lag.max=max.lag, plot=plot)
-  aa.abs<-abs(aa.ccf$acf[I(max.lag+1):I(2*max.lag+1)])
-  best.lag<-which.max(aa.abs)-1
-  maximum<-aa.ccf$acf[max.lag+best.lag+1]
   
-  print(paste("best lag:", best.lag, " acf:", maximum))
+  aa.ccf <- ccf(tseries, rseries, lag.max=max.lag, plot=plot)
+  aa.abs<-abs(aa.ccf$acf[I(max.lag+1):I(2*max.lag+1)])
+  best.lag<-max(0, which.max(aa.abs)-1)
+
   if (plot) {
     lagged<-lag(aa$r, k=best.lag)
     result<-na.omit(merge(future,lagged));
@@ -127,11 +155,13 @@ jluc.autoLag <- function(future, past, max.lag=3, plot=F) {
     abline(v=(seq(-max.lag,max.lag,1)), col="gray", lty="dotted")
   }
 
+  na.omit(lag(aa$r, k=best.lag))
+  
   return(na.omit(lag(aa$r, k=best.lag)))
 }
 
 jluc.autoPickModel <- function(model, target_name="target", debug=F, plot=F) {
-  newmodel<-jluc.autoModel(model,target_name, debug)
+  newmodel<-jluc.autoModel(model=model,target_name=target_name, debug=debug)
   if (plot) {
     variables <- names(model)
     tnames <- variables[variables != target_name]
@@ -143,52 +173,98 @@ jluc.autoPickModel <- function(model, target_name="target", debug=F, plot=F) {
     plot.ts(as.ts(model$target))
     lines(fitted(mod.fitted), col="blue")
     lines(fitted(newmodel), col="red")
+    legend("topleft", legend=paste(mod.fitted$formula, mod.fitted$aic,sep="="), text.col ="blue", bg="white", x.intersp=0)
+    legend("bottomleft", legend=paste(newmodel$formula,newmodel$aic,sep="="), text.col ="red", bg="white", x.intersp=0)
     lines(rep(0, times=length(model$target)), col="green")  
   }
 
   return(newmodel)
 }
-  
 
-jluc.autoModel <- function(model, target_name="target", debug=F) {
-  bestGOF <- 1000
-  bestModel <- ""
-  
-  if (debug) { print(paste(names(model))) }
+jluc.autoModel <- function(model, target_name="target", fitfunc="glm", debug=F, maxsize=200) {
+
   variables <- names(model)
-  for(ignore in 1:length(variables)) {
-    
-    variables <- names(model)
-    if (variables[ignore]!=target_name) {
-      newmodel <- model[,!(names(model) %in% variables[ignore])]
-    } else {
-      newmodel <- model
-    }
-    
-    variables <- names(newmodel)
-    tnames <- variables[variables != target_name]
-    
-    var_formula<-do.call("paste", c(as.list(tnames), sep = "+"))
-    formula <- paste(target_name, var_formula, sep="~")
-    
-    if (debug) { print(formula) }
-    
-    mod.fitted<-glm(formula=formula, data=newmodel)
+  tnames <- variables[variables != target_name]
+  var_formula<-do.call("paste", c(as.list(tnames), sep = "+"))
+  formula <- paste(target_name, var_formula, sep="~")  
 
-    #FIXME:Better Goodness of fit - criteria
-    if (mod.fitted$aic < bestGOF) {
-      bestGOF <- mod.fitted$aic
-      bestModel <- mod.fitted
-      }
-  }
+  newformula<-do.call(what="glmulti", args=list(
+                      y=formula,data=model,
+                      method="g", crit="aicc",
+                      fitfunction=toString(fitfunc)))
+
+  call.formula<-summary(newformula)$bestmodel
   
-  #FIXME:Assumes that best model is found
-  if (ncol(model) != ncol(bestModel$data)) {
-    recModel <- Recall(bestModel$data, target_name, debug)
-    if (recModel$aic < bestModel$aic) {
-      bestModel <- recModel
-    }  
-  }
+  bestModel<-do.call(what=toString(fitfunc), args=list(formula=call.formula, data=model))
+  return(bestModel);
+}
+
+
+#Depricated / replaced by glmulti
+# jluc.autoModel <- function(model, target_name="target", debug=F) {
+#   bestGOF <- 1000
+#   bestModel <- ""
+#   
+#     if (debug) { 
+#       print(paste(names(model))) 
+#     }
+#     
+#     variables <- names(model)
+#     for(ignore in 1:length(variables)) {
+# 
+#       variables <- names(model)
+#       if (variables[ignore]!=target_name) {
+#         newmodel <- model[,!(names(model) %in% variables[ignore])]
+#       } else {
+#         newmodel <- model
+#       }
+# 
+#       if (ncol(newmodel) == 1) {
+#         next;
+#       }
+# 
+#       variables <- names(newmodel)
+#       tnames <- variables[variables != target_name]
+#     
+#       var_formula<-do.call("paste", c(as.list(tnames), sep = "+"))
+#       formula <- paste(target_name, var_formula, sep="~")
+#     
+#       if (debug) { print(formula) }
+#     
+#       mod.fitted<-glm(formula=formula, data=newmodel)
+# 
+#       #FIXME:Better Goodness of fit - criteria
+#       if (mod.fitted$aic < bestGOF) {
+#         if (debug) { print(paste("Best aic", mod.fitted$aic)) }
+#         bestGOF <- mod.fitted$aic
+#         bestModel <- mod.fitted
+#         }
+#     }
+#   
+#   #FIXME:Assumes that best model is found
+#   if (ncol(model) != ncol(bestModel$data)) {
+#     recModel <- Recall(bestModel$data, target_name, debug)
+#     if (recModel$aic < bestModel$aic) {
+#       bestModel <- recModel
+#     }
+#   }
+#   
+#    return(bestModel);
+# }
+
+
+jluc.modelComparePlot <- function(model, formula, newformula) {
+
+  mod.fitted<-glm(formula=formula, data=model)
+  newmodel<-glm(formula=newformula, data=model)
+
+  par(mfrow=c(1,1))
+  plot.ts(as.ts(model$target))
+  lines(fitted(mod.fitted), col="blue")
+  lines(fitted(newmodel), col="red")
+  legend("topleft", legend=paste(mod.fitted$formula, mod.fitted$aic,sep="="), text.col ="blue", bg="white", x.intersp=0)
+  legend("bottomleft", legend=paste(newmodel$formula,newmodel$aic,sep="="), text.col ="red", bg="white", x.intersp=0)
+  lines(rep(0, times=length(model$target)), col="green")  
   
-   return(bestModel);
+  return(newmodel)
 }

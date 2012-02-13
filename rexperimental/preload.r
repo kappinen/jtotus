@@ -14,7 +14,9 @@ library(tseries);
 library(quantmod);
 library(gtools)
 require(ggplot2)
+require(glmulti)
 library(TTR)
+library(MASS)
 #library(fGarch)
 
 source("~/Dropbox/jlucrum/rexperimental/external/itall.R")

@@ -26,7 +26,6 @@ jluc.corrList <- function(listOfStocks) {
   }
 }
 
-
 #Plots moving-correlation and crosscorrelation
 jluc.corr <- function(a, b, plot=T) {
     mergeresult <- merge.xts(a, b, join = "inner")
