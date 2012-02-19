@@ -190,15 +190,17 @@ jluc.autoModel <- function(model, target_name="target", fitfunc="glm", debug=F, 
 
   newformula<-do.call(what="glmulti", args=list(
                       y=formula,data=model,
-                      method="g", crit="aicc",
+                      method="g", crit="aicc", 
+                      plotty=F, report=F,
+                      confsetsize=20, minsize=4, popsize=7,
                       fitfunction=toString(fitfunc)))
 
   call.formula<-summary(newformula)$bestmodel
   
   bestModel<-do.call(what=toString(fitfunc), args=list(formula=call.formula, data=model))
+  cat("Best selected model:", call.formula, " aic:", bestModel$aic, "\n");
   return(bestModel);
 }
-
 
 #Depricated / replaced by glmulti
 # jluc.autoModel <- function(model, target_name="target", debug=F) {
@@ -267,4 +269,43 @@ jluc.modelComparePlot <- function(model, formula, newformula) {
   lines(rep(0, times=length(model$target)), col="green")  
   
   return(newmodel)
+}
+
+jluc.predict <- function(stockName = "Metso Oyj",
+                         fromDate=as.Date(Sys.Date()-150),
+                         toDate=Sys.Date(),
+                         modelfunc="jluc.createModel", debug=F) {
+  prediction<-NULL
+  ############# [DATA | FIT] #################
+  
+  if (debug) {
+    cat("Using model:", modelfunc,"\n")
+  }
+  
+  model<-do.call(what=toString(modelfunc), args=list(
+    asset=toString(stockName),
+    fromDate=fromDate, toDate=toDate, lag=1))
+
+  mod.fitted<-jluc.autoPickModel(model, "target", plot=F)
+  
+  ############# [DATA | APPLY] #################
+  #Fetch new data for asset
+  newdata<-do.call(what=toString(modelfunc), args=list(
+    asset=toString(stockName),
+    fromDate=toDate-15, toDate=toDate, lag=0))
+  
+  if (debug) {
+    print(paste("From date:", fromDate))
+    print(paste("To date:", toDate))
+    print(paste("newdata",last(newdata)))
+    print(paste("model", last(model)))
+    print(paste("formula:", mod.fitted$formula))
+  }
+  
+  if (!is.null(newdata)) {
+    newvalues <- last(newdata)
+    prediction<-predict(object=mod.fitted, newdata=newvalues, n.ahead=1)
+  }
+  
+  return(prediction)
 }
