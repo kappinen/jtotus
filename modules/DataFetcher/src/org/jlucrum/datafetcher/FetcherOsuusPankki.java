@@ -47,6 +47,7 @@ public class FetcherOsuusPankki implements MarketFetcher {
     private boolean debug = false;
     private static int dataMap[] = { 1, 2, -1, 4};
     private final Map<String, String> stockMap = new HashMap<String, String>();
+    private SourceCache cache = SourceCache.getInstance(100);
 
     
     
@@ -153,9 +154,15 @@ public class FetcherOsuusPankki implements MarketFetcher {
         }
 
         try {
-            url = new URL(this.buildRequest(fromDate, toDate, name));
+            Document doc = (Document) cache.getData(stockName, fromDate.toString(), toDate.toString());
+            
+            if (doc == null) {
+                url = new URL(this.buildRequest(fromDate, toDate, name));
+                doc = Jsoup.parse(url, 2 * 1000);
 
-            Document doc = Jsoup.parse(url, 2 * 1000);
+                cache.putData(stockName, fromDate.toString(), toDate.toString(), doc.clone());
+                System.out.printf("Fetched from network:%s\n", name);
+            }
 
             Elements elems = doc.select("td");
 

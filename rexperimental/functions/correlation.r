@@ -43,3 +43,14 @@ jluc.corr <- function(a, b, plot=T) {
 
     return(corr$estimate)
 }
+
+jluc.plot2 <- function(a, b, plot=T) {
+  mergeresult <- merge.xts(a, b, join = "inner")
+  mergeresult <- diff(log(mergeresult))
+  merge.r <- mergeresult[!apply(is.na(mergeresult), 1, any),]
+  names(merge.r) <- c("a", "b")  
+  
+  lag.plot2(as.ts(merge.r$a),as.ts(merge.r$b), max.lag=5,smooth=T)
+
+}
+

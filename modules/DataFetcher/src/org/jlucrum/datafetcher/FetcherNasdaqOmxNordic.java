@@ -55,6 +55,7 @@ public class FetcherNasdaqOmxNordic implements MarketFetcher {
     private final DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd");
     private boolean debug = false;
     private static int dataMap[] = { 4, 6, 2, 3, 5, 7, 8};
+    private SourceCache cache = null;
 
     public FetcherNasdaqOmxNordic() {
         //http://en.wikipedia.org/wiki/OMX_Helsinki_25
@@ -82,6 +83,8 @@ public class FetcherNasdaqOmxNordic implements MarketFetcher {
         stockMap.put("UPM-Kymmene Oyj", "HEX24386");
         stockMap.put("Wärtsilä Corporation", "HEX24394");
         stockMap.put("YIT Oyj", "HEX24397");
+        
+        cache = SourceCache.getInstance(stockMap.size());
     }
 
     
@@ -131,18 +134,24 @@ public class FetcherNasdaqOmxNordic implements MarketFetcher {
                 + "</post>"));
 
         try {
-            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
-            response = httpclient.execute(httpPost);
-            HttpEntity entity = response.getEntity();
-            String resString = EntityUtils.toString(entity, "UTF-8");
-            if (debug) {
-                System.out.printf("Respond:%s", resString);
+            
+            Document doc = (Document) cache.getData(fixedName, fromDate.toString(), toDate.toString());
+            if (doc == null) {
+                httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
+                response = httpclient.execute(httpPost);
+                HttpEntity entity = response.getEntity();
+                String resString = EntityUtils.toString(entity, "UTF-8");
+                if (debug) {
+                    System.out.printf("Respond:%s", resString);
+                }
+
+                doc = Jsoup.parse(resString);
+                cache.putData(fixedName, fromDate.toString(), toDate.toString(), doc);
+                System.out.printf("Fetched from network:%s\n", name);
             }
-            
-            
-            Document doc = Jsoup.parse(resString);
+
             Elements elems = doc.select("tr");
-            System.out.printf("tr size:%d\n", elems.size());
+
             Iterator<Element> iter = elems.iterator();
             iter.next(); //skip head
             while(iter.hasNext()) {
@@ -196,6 +205,6 @@ public class FetcherNasdaqOmxNordic implements MarketFetcher {
     
     public static void main(String av[]) {
         FetcherNasdaqOmxNordic fetcher = new FetcherNasdaqOmxNordic();
-        fetcher.getData("Metso Oyj", new DateTime().minusDays(20), new DateTime(), 0);
+        fetcher.getData("Metso Oyj", new DateTime().minusDays(120), new DateTime(), 4);
     }
 }

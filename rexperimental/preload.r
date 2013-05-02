@@ -20,6 +20,7 @@ library(MASS)
 #library(fGarch)
 
 source("~/Dropbox/jlucrum/rexperimental/external/itall.R")
+source("~/Dropbox/jlucrum/rexperimental/tests/testCosModel.r")
 
 
 #load all functions under functions directory

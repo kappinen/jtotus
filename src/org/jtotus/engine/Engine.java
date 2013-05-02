@@ -16,26 +16,27 @@ along with jTotus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jtotus.engine;
 
-import brokerwatcher.BrokerWatcher;
-import brokerwatcher.broker.MarketBrokerSimulator;
-import brokerwatcher.generators.AccdistGenerator;
-import brokerwatcher.generators.IndicatorIndexGenerator;
-import brokerwatcher.generators.RsiGenerator;
-import brokerwatcher.generators.TickInterface;
-import brokerwatcher.generators.VPTGenerator;
-import brokerwatcher.generators.VrocGenerator;
-import brokerwatcher.listeners.TicksToFile;
+import java.util.ArrayList;
+import org.jlucrum.realtime.BrokerWatcher;
+import org.jlucrum.realtime.broker.MarketBrokerSimulator;
+import org.jlucrum.realtime.generators.AccdistGenerator;
+import org.jlucrum.realtime.generators.IndicatorIndexGenerator;
+import org.jlucrum.realtime.generators.RsiGenerator;
+import org.jlucrum.realtime.generators.TickInterface;
+import org.jlucrum.realtime.generators.VPTGenerator;
+import org.jlucrum.realtime.generators.VrocGenerator;
+import org.jlucrum.realtime.listeners.TicksToFile;
 import java.util.HashMap;
 import org.jtotus.methods.MethodEntry;
 import org.jtotus.methods.DummyMethod;
 import java.util.LinkedList;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jtotus.config.ConfPortfolio;
 import org.jtotus.gui.JtotusView;
 import org.jtotus.database.AutoUpdateStocks;
 import org.jtotus.gui.MethodResultsPrinter;
-import org.jtotus.methods.GroovyScipts;
 import org.jtotus.methods.PotentialWithIn;
 import org.jtotus.methods.SpearmanCorrelation;
 import org.jtotus.methods.StatisticsFreqPeriod;
@@ -87,18 +88,19 @@ public class Engine {
         listOfLongTermIndicators.add(new SpearmanCorrelation());
         listOfLongTermIndicators.add(new StatisticsFreqPeriod());
 
-        try {
-            Class groovyClass = Class.forName("org.jtotus.methods.DecisionScript");
-            GroovyScipts scripts = (GroovyScipts) groovyClass.newInstance();
-            scripts.loadScripts(listOfLongTermIndicators);
-
-        } catch (InstantiationException ex) {
-            log.info("GroovyScipt is disabled : InstantiationException");
-        } catch (IllegalAccessException ex) {
-            log.info("GroovyScipt is disabled : IllegalAccessException");
-        } catch (ClassNotFoundException ex) {
-            log.info("GroovyScipt is disabled");
-        }
+//        FIXME: groovy interface
+//        try {
+//            Class groovyClass = Class.forName("org.jtotus.methods.DecisionScript");
+//            GroovyScipts scripts = (GroovyScipts) groovyClass.newInstance();
+//            scripts.loadScripts(listOfLongTermIndicators);
+//
+//        } catch (InstantiationException ex) {
+//            log.info("GroovyScipt is disabled : InstantiationException");
+//        } catch (IllegalAccessException ex) {
+//            log.info("GroovyScipt is disabled : IllegalAccessException");
+//        } catch (ClassNotFoundException ex) {
+//            log.info("GroovyScipt is disabled");
+//        }
 
         portfolioDecision = new PortfolioDecision(listOfLongTermIndicators);
     }
@@ -153,9 +155,10 @@ public class Engine {
         addGeneratorToList("select * from StockTick", new IndicatorIndexGenerator());
         watcher.addStatement("select * from StockTick", new TicksToFile());
         watcher.addStatement("select * from MarketSignal", new MarketBrokerSimulator());
-
+        List<String> array = new ArrayList<String>();
+        
         mainWindow.fetchGeneratorList();
-        watcher.call();
+       // watcher.call();
     }
 
     public void train() {
